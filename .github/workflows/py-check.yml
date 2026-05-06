@@ -1,0 +1,54 @@
+name: Code Check
+
+# run only on python edits
+
+on:
+  push:
+    branches: [main]
+    paths: backend/**
+  pull_request:
+    branches: [main]
+    paths: backend/**
+
+jobs:
+  py_check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev --frozen
+
+      - name: Run Ruff check
+        run: uv run ruff check .
+
+      - name: Run Ruff format check
+        run: uv run ruff format . --check
+
+      - name: Type Checking (ty)
+        run: uv run ty check
+
+      - name: Security Scan (Semgrep)
+        run: |
+          uv run semgrep --config p/python --error --skip-unknown-extensions --config p/owasp-top-10 .
+
+      - name: Secret Detection
+        run: |
+          uv run detect-secrets scan --baseline .secrets.baseline
+
+      - name: Security Audit (pip-audit)
+        continue-on-error: true
+        run: uv run pip-audit --local

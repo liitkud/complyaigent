@@ -1,0 +1,71 @@
+# works after install: `prek install` or `pre-commit install`
+# or as standalone: `prek` or `pre-commit`
+# triggers before commits. if any here fails, you won't be able to commit it
+# `git add .` then try to do the commit again
+# before you commit, stash changes you don't want to be included yet.
+# handling both pre-commit changes alongside local changes is a pain.
+
+# checks for type, formatting errors
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: "(status\\.json|\\.min\\.js)$"
+      - id: trailing-whitespace
+        exclude: "stress_phystoken|\\.py|cover$"
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline", "scan"]
+        exclude: ^(migrations/|tests/|.*\.lock)
+        # exclude migrations and tests: too messy to add granular exclusions
+        # and lockfiles: file too large to work on
+
+  # python tests
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      - id: ruff
+        args: [--fix, --config, backend/pyproject.toml]
+        files: ^backend
+      - id: ruff-format
+        args: [--config, backend/pyproject.toml]
+        files: ^backend
+
+  # web-related tests
+  - repo: https://github.com/allganize/ty-pre-commit
+    rev: v0.0.25
+    hooks:
+      - id: ty-check
+        args: [--project=backend]
+        language: system
+        files: ^backend
+  # - repo: https://github.com/pypa/pip-audit
+  #   rev: v2.7.3
+  #   hooks:
+  #     - id: pip-audit
+  #       args: [ '--local' ] # Security stuff, find a way for this to not yell. for now this goes to actions/
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier
+        entry: pnpm --dir frontend exec prettier -w --cache --ignore-unknown
+        language: system
+        types_or:
+          [javascript, jsx, ts, tsx, css, scss, html, json, yaml, markdown]
+        pass_filenames: true
+        files: ^frontend/
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        stages: [commit-msg]
