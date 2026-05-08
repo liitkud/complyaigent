@@ -1,7 +1,7 @@
 # 🛡️ ComplyAIgent
 
 **"From Periodic Audit to Continuous Certainty."**  
-*Agentic DevSecOps compliance platform — policies to guardrails, powered by AMD MI300X.*
+*Agentic DevSecOps compliance platform — policies to guardrails.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![AMD Hackathon 2026](https://img.shields.io/badge/AMD-Developer%20Hackathon%202026-ED1C24)](https://www.amd.com/en/corporate/hackathon.html)
@@ -46,7 +46,7 @@ flowchart TB
     LOKI --> NEXT
 ```
 
-1. **RegIntel** ingests policies (manual upload or scraper), runs a RAG pipeline on AMD MI300X, and stores structured controls in PostgreSQL.  
+1. **RegIntel** ingests policies (manual upload or scraper), runs a RAG pipeline, and stores structured controls in PostgreSQL.  
 2. **PolicyGate** reads those policies, scans every `git push` for secrets and PII, and blocks or warns accordingly.  
 3. **Human‑in‑the‑Loop** pauses medium‑risk actions for manager approval via LangGraph – fully logged to Loki.
 
@@ -69,14 +69,13 @@ flowchart TB
 
 | Layer             | Technology                                  |
 | :---------------- | :------------------------------------------ |
-| AI Hardware       | AMD MI300X (192 GB HBM3), ROCm, vLLM        |
-| AI Model          | Llama‑3.1‑70B (BF16, full precision)        |
+| AI Model          | Qwen3.5-397B-A17B-FP8        |
 | Agent Framework   | LangGraph (Python)                          |
 | Backend           | FastAPI, Docker                             |
 | Database          | PostgreSQL, DuckDB (analytics)              |
 | Observability     | Grafana, Prometheus, Loki                   |
 | Frontend          | Next.js, TailwindCSS                        |
-| CLI Hook          | Python (`policygate`)                       |
+| CLI Hook          | Go (`policygate`)                           |
 | CI/CD             | GitHub Actions, Docker Compose              |
 
 ---
@@ -117,12 +116,6 @@ open http://localhost:3000                # Grafana
 open http://localhost:3001                # Next.js dashboard
 ```
 
-To switch to AMD GPU inference once credits are active:
-```bash
-export LLM_ENDPOINT=http://your-amd-instance:8000/v1
-docker compose -f docker/docker-compose.yml up -d --force-recreate
-```
-
 ---
 
 ## Team
@@ -149,7 +142,7 @@ docker compose -f docker/docker-compose.yml up -d --force-recreate
 
 - [ ] **AuditGen** – auto‑generate framework‑mapped evidence packs  
 - [ ] **Insider threat guardrails** – ephemeral credentials, access anomaly detection  
-- [ ] **Enterprise SaaS** – SSO, dedicated MI300X tenants  
+- [ ] **Enterprise SaaS** – SSO, dedicated tenants
 
 ---
 
