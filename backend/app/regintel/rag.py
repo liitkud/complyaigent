@@ -4,10 +4,8 @@ from llama_index.core.schema import BaseNode, NodeWithScore
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from openai import OpenAI
 from pathlib import Path
-from pymilvus import MilvusClient
-import os
-
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -23,6 +21,7 @@ class SettingsEnv(BaseSettings):
     MILVUS_URI: str = ""
     MILVUS_TOKEN: str = ""
     COHERE_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
 
 settings = SettingsEnv()
 
@@ -110,7 +109,30 @@ class VectorStoreConnection:
 
         return "\n".join(final_parts)
 
+
+client = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=settings.GROQ_API_KEY
 )
 
+vsc = VectorStoreConnection()
+sys_pr, usr_pr = vsc.user_query_to_prompts("What is complyaigent?")
+
+
+completion = client.chat.completions.create(
+    model="meta-llama/llama-4-scout-17b-16e-instruct",
+    messages=[
+        {"role":"system", "content":sys_pr},
+        {"role": "user", "content": usr_pr
+      }
+    ],
+    temperature=.5,
+    max_completion_tokens=8000,
+    top_p=1,
+    stop=None
+)
+
+semi_completions = completion.choices[0].message
+print(semi_completions.content)
 
 
