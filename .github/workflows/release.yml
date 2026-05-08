@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+    branches: [dev, main]
+    workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -44,4 +46,4 @@ jobs:
             ${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
-          platforms: linux/amd64,linux/arm64 # Multi-arch builds
+          platforms: linux/amd64,linux/arm64
