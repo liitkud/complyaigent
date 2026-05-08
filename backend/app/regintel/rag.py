@@ -1,6 +1,6 @@
-from llama_index.core import Document, StorageContext, SimpleDirectoryReader, Settings, VectorStoreIndex
-from llama_index.core.ingestion import IngestionPipeline
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.schema import BaseNode, NodeWithScore
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,59 +27,90 @@ class SettingsEnv(BaseSettings):
 settings = SettingsEnv()
 
 
-vector_store = MilvusVectorStore(
-    uri=settings.MILVUS_URI,
-    token=settings.MILVUS_TOKEN,
-    collection_name="complyaigent_collection",
-    dim=1024,
-    embedding_field="embeddings",
-    overwrite=False,
-    # overwrite=True,
-    search_config={"nprobe": 60},
-    similarity_metric="COSINE",
-    consistency_level="Session",
+class VectorStoreConnection:
+    def __init__(self, use_async: bool = False):
+        self.splitter = SentenceSplitter(chunk_size=300, chunk_overlap=40)
+        self._index = None
+        self.use_async = use_async
+
+    @property
+    def vector_store(self):
+        return MilvusVectorStore(
+            uri=settings.MILVUS_URI,
+            token=settings.MILVUS_TOKEN,
+            collection_name="complyaigent_collection",
+            dim=1024,
+            embedding_field="embeddings",
+            overwrite=False,
+            search_config={"nprobe": 60},
+            similarity_metric="COSINE",
+            consistency_level="Session",
+        )
+
+    @property
+    def embedding_model(self):
+        return CohereEmbedding(
+            model_name="embed-multilingual-v3.0",
+            api_key=settings.COHERE_API_KEY
+        )
+
+    @property
+    def index(self):
+        if self._index is None:
+            self._index = VectorStoreIndex.from_vector_store(
+                vector_store=self.vector_store,
+                embed_model=self.embedding_model
+            )
+            if self.use_async:
+                self._index._use_async = True
+        return self._index
+
+    def retrieve_data_from_vector_database(self, user_query: str):
+        retriever_engine = self.index.as_retriever(similarity_top_k=3)
+        raw_results = retriever_engine.retrieve(user_query)
+        return self.list_nodes_to_str(raw_results)
+
+    def user_query_to_prompts(self, user_query: str):
+        context = self.retrieve_data_from_vector_database(user_query)
+        system_prompt=("<System>\n"
+            "You are a precise and reliable assistant. Answer the user's question "
+            "using ONLY the provided context below. If the context lacks sufficient "
+            "information, politely state that you cannot answer based on the given data.\n"
+            "</System>\n\n")
+        user_prompt = (
+            "<Context>\n"
+            f"{context}\n"
+            "</Context>\n\n"
+            "<Instruction>\n"
+            "Maintain a professional tone. Reference metadata when citing sources. "
+            "Do not fabricate information outside the provided context.\n"
+            "</Instruction>\n\n"
+            f"<UserQuery>\n{user_query}\n</UserQuery>"
+        )
+        return system_prompt, user_prompt
+
+    @staticmethod
+    def list_nodes_to_str(input_list: list[NodeWithScore]):
+        keys_to_remove = {"file_path", "file_name"}
+
+        final_parts = []
+
+        for i in input_list:
+
+            for key in keys_to_remove:
+                i.metadata.pop(key, None)
+
+            formatted_entry = (
+                f"<Content>{i.text}</Content>\n"
+                f"<Score>{i.score}</Score>\n"
+                f"<Metadata>{i.metadata}</Metadata>\n"
+                f"{'-' * 30}"
+            )
+            final_parts.append(formatted_entry)
+
+        return "\n".join(final_parts)
+
 )
 
-# vector_store = MilvusVectorStore(
-#     uri=settings.MILVUS_URI,
-#     token=settings.MILVUS_TOKEN,
-#     collection_name="complyaigent_collection",
-#     embedding_field="embeddings",
-#
-# )
 
-Settings.embed_model = CohereEmbedding(
-    model_name="embed-multilingual-v3.0",
-    api_key=settings.COHERE_API_KEY
-)
-
-sample_document = SimpleDirectoryReader(
-    input_files=[str(BASE_DIR / "README.md")]
-).load_data()
-
-ingestion_pipeline = IngestionPipeline(
-    transformations=[
-        SentenceSplitter(chunk_size=300, chunk_overlap=40),
-    ],vector_store=vector_store
-)
-
-# ingestion_pipeline.run(documents=sample_document)
-
-index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-
-
-retriever_engine = index.as_retriever(
-    similarity_top_k=3,
-)
-
-query = retriever_engine.retrieve(
-    "Alfeo"
-)
-
-
-for p in query:
-    print(f"NODE ID: {p.node_id}\n---\n")
-    print(f"TEXT/CONTENT: {p.text}\n---\n")
-    print(f"SCORE: {p.score}\n---\n")
-    print(f"METADATA: {p.metadata}\n---\n")
 
