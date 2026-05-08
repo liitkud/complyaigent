@@ -125,6 +125,20 @@ docker compose -f docker/docker-compose.yml up -d --force-recreate
 
 ---
 
+## Frontend Development
+
+To start the frontend locally:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app will be available at http://localhost:3001 (or the port specified in your config).
+
+---
+
 ## Team
 
 | Name | Role |
