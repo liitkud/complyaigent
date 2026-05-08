@@ -1,5 +1,9 @@
 name: Release Pipeline
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     tags:
@@ -25,13 +29,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      # https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
+
       - name: Determine tags
         id: tags
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION=${{ github.ref_name }}
           else
-            VERSION=${{ github.sha }}
+            VERSION=${{ steps.vars.outputs.sha_short }}
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
