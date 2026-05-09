@@ -1,12 +1,8 @@
-[project]
-name = "complyaigent"
-version = "0.1.0"
-description = "AI‑powered DevSecOps compliance engine"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "fastapi[standard]>=0.136.1",
-]
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
 
-[tool.fastapi]
-entrypoint = "main:app"
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
