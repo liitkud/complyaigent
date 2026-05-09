@@ -158,7 +158,10 @@ Assembles the final Governance Manifest JSON and stores it in PostgreSQL linked 
 - **Storage**: Assumes Supabase (PostgreSQL with pgvector) is available for persisting rules, logs, and task states.
 - **Data Models**: Use Pydantic for all data validation and model definitions.
 - **Retention**: Data is persisted indefinitely to support future version history and freshness checks.
-- **MinHash Deduplication**: Documented in pipeline but deferred to post-hackathon; MVP uses Tier 1 (Anchors) and Tier 3 (LLM) only.
+- **Retention**: Data is persisted indefinitely to support future version history and freshness checks.
+### 4. Deduplication Logic
+- **Decision**: Implement full three-tier system (Anchors, MinHash, LLM) for MVP.
+- **Rationale**: Ensures maximum accuracy and efficiency by filtering near-duplicates before expensive LLM calls.
 - **Embedding Pipeline**: Documented in pipeline but deferred to post-hackathon.
 - **PDF Extraction**: Assumes standard text extraction libraries can handle the provided PDF layouts.
 - **Auth**: Unauthenticated for Hackathon phase; assumes deployment within a trusted network.

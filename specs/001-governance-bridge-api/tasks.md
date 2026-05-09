@@ -50,7 +50,10 @@
 - [ ] T013 [US1] Implement SHA-256 hashing utility in backend/app/core/hashing.py
 - [ ] T014 [US1] Implement Text Extraction service (PyMuPDF) in backend/app/services/extractor.py
 - [ ] T015 [US1] Implement Ingest endpoint (POST /ingest) in backend/app/api/ingest.py
-- [ ] T016 [US1] Implement Background Pipeline orchestration (Comparator, Compactor) in backend/app/services/pipeline.py
+- [ ] T016a [US1] Implement Entity Anchor Extraction (Tier 1 regex) in backend/app/services/comparator.py
+- [ ] T016b [US1] Implement MinHash LSH deduplication (Tier 2) in backend/app/services/comparator.py
+- [ ] T016c [US1] Implement Semantic LLM deduplication fallback (Tier 3) in backend/app/services/comparator.py
+- [ ] T016d [US1] Implement Compactor with inline context preservation in backend/app/services/compactor.py
 - [ ] T017 [US1] Implement Categorizer service (Gemini 3 Flash via LangChain) in backend/app/services/categorizer.py
 - [ ] T018 [US1] Add integration test for Story 1 (ingest -> check status) in backend/tests/integration/test_story1.py
 
