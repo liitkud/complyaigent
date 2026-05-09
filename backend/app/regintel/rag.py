@@ -14,21 +14,19 @@ ENV_PATH = BASE_DIR / ".env"
 
 class SettingsEnv(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=ENV_PATH,
-        env_file_encoding="utf-8",
-        extra='ignore'
+        env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
     )
     MILVUS_URI: str = ""
     MILVUS_TOKEN: str = ""
     COHERE_API_KEY: str = ""
     GROQ_API_KEY: str = ""
 
+
 settings = SettingsEnv()
 
 
 OPENAI_CLIENT = AsyncOpenAI(
-    base_url="https://api.groq.com/openai/v1",
-    api_key=settings.GROQ_API_KEY
+    base_url="https://api.groq.com/openai/v1", api_key=settings.GROQ_API_KEY
 )
 
 
@@ -55,8 +53,7 @@ class VectorStoreConnection:
     @property
     def embedding_model(self):
         return CohereEmbedding(
-            model_name="embed-multilingual-v3.0",
-            api_key=settings.COHERE_API_KEY
+            model_name="embed-multilingual-v3.0", api_key=settings.COHERE_API_KEY
         )
 
     @property
@@ -65,7 +62,7 @@ class VectorStoreConnection:
             self._index = VectorStoreIndex.from_vector_store(
                 vector_store=self.vector_store,
                 embed_model=self.embedding_model,
-                use_async=True
+                use_async=True,
             )
         return self._index
 
@@ -82,7 +79,7 @@ class VectorStoreConnection:
     async def vector_chat_async(self, query: str):
         user_context = await self.aretrieve_data_from_vector_database(query)
 
-        system_prompt =f"""
+        system_prompt = """
         ## SYSTEM:
         You are a precise and reliable assistant. Answer the user's question 
         using ONLY the provided context below. If the context lacks sufficient 
@@ -105,23 +102,25 @@ class VectorStoreConnection:
             model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                {"role": "user", "content": user_prompt},
             ],
-            temperature=.3,
+            temperature=0.3,
             max_completion_tokens=8000,
             top_p=1,
-            stop=None
+            stop=None,
         )
         assistant_message = completion.choices[0].message
         return assistant_message.content
 
     def user_query_to_prompts(self, user_query: str):
         context = self.retrieve_data_from_vector_database(user_query)
-        system_prompt=("<System>\n"
+        system_prompt = (
+            "<System>\n"
             "You are a precise and reliable assistant. Answer the user's question "
             "using ONLY the provided context below. If the context lacks sufficient "
             "information, politely state that you cannot answer based on the given data.\n"
-            "</System>\n\n")
+            "</System>\n\n"
+        )
         user_prompt = (
             "<Context>\n"
             f"{context}\n"
@@ -141,7 +140,6 @@ class VectorStoreConnection:
         final_parts = []
 
         for i in input_list:
-
             for key in keys_to_remove:
                 i.metadata.pop(key, None)
 
@@ -167,7 +165,7 @@ class VectorStoreConnection:
 
         try:
             inside_docs = SimpleDirectoryReader(
-                input_dir= BASE_DIR / "docs", exclude=[".env"]
+                input_dir=BASE_DIR / "docs", exclude=[".env"]
             ).load_data()
             all_docs.extend(inside_docs)
         except ValueError:

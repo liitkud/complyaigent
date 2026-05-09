@@ -1,6 +1,6 @@
 # 🛡️ ComplyAIgent
 
-**"From Periodic Audit to Continuous Certainty."**  
+**"From Periodic Audit to Continuous Certainty."**
 *Agentic DevSecOps compliance platform — policies to guardrails.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -10,7 +10,7 @@
 
 ## Overview
 
-ComplyAIgent ingests internal policies and external regulations, normalises them into machine‑readable guardrails, and enforces them automatically across your delivery pipeline.  
+ComplyAIgent ingests internal policies and external regulations, normalises them into machine‑readable guardrails, and enforces them automatically across your delivery pipeline.
 *Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point‑in‑time panic to always‑on certainty.*
 
 ---
@@ -46,20 +46,20 @@ flowchart TB
     LOKI --> NEXT
 ```
 
-1. **RegIntel** ingests policies (manual upload or scraper), runs a RAG pipeline, and stores structured controls in PostgreSQL.  
-2. **PolicyGate** reads those policies, scans every `git push` for secrets and PII, and blocks or warns accordingly.  
+1. **RegIntel** ingests policies (manual upload or scraper), runs a RAG pipeline, and stores structured controls in PostgreSQL.
+2. **PolicyGate** reads those policies, scans every `git push` for secrets and PII, and blocks or warns accordingly.
 3. **Human‑in‑the‑Loop** pauses medium‑risk actions for manager approval via LangGraph – fully logged to Loki.
 
 ---
 
 ## Features
 
-- 🔍 **Pre‑push secret & PII detection** (Gitleaks + Microsoft Presidio)  
-- 📥 **Policy intake** from PDF / Markdown uploads and regulatory website scraping  
-- 🧠 **AI‑powered normalisation** – LLM extracts actionable controls into JSON  
-- 🛡️ **Automatic enforcement** – policies become guardrails in Git and CI/CD  
-- 🧑‍⚖️ **Human‑in‑the‑loop approval** with full audit trail  
-- 📊 **Real‑time dashboards** – compliance health, violations, drift alerts  
+- 🔍 **Pre‑push secret & PII detection** (Gitleaks + Microsoft Presidio)
+- 📥 **Policy intake** from PDF / Markdown uploads and regulatory website scraping
+- 🧠 **AI‑powered normalisation** – LLM extracts actionable controls into JSON
+- 🛡️ **Automatic enforcement** – policies become guardrails in Git and CI/CD
+- 🧑‍⚖️ **Human‑in‑the‑loop approval** with full audit trail
+- 📊 **Real‑time dashboards** – compliance health, violations, drift alerts
 
 > **Coming next:** AuditGen (one‑click SOC2/GDPR evidence packs), insider threat guardrails, enterprise multi‑tenancy.
 
@@ -147,15 +147,15 @@ The app will be available at http://localhost:3001 (or the port specified in you
 
 ## Hackathon Context
 
-**AMD Developer Hackathon – May 4–10, 2026**  
+**AMD Developer Hackathon – May 4–10, 2026**
 *Submission deadline: May 10, 5:00 AM PHT*
 
 ---
 
 ## Roadmap
 
-- [ ] **AuditGen** – auto‑generate framework‑mapped evidence packs  
-- [ ] **Insider threat guardrails** – ephemeral credentials, access anomaly detection  
+- [ ] **AuditGen** – auto‑generate framework‑mapped evidence packs
+- [ ] **Insider threat guardrails** – ephemeral credentials, access anomaly detection
 - [ ] **Enterprise SaaS** – SSO, dedicated tenants
 
 ---
