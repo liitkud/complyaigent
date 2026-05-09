@@ -1,9 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { api, type Policy, type LegacyIngestResponse } from '@/services/api';
-import StatusBadge from '@/components/ui/StatusBadge';
-import { Upload, FileText, Globe, Database, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { api, type Policy, type IngestResponse } from "@/services/api";
+import StatusBadge from "@/components/ui/StatusBadge";
+import {
+  Upload,
+  FileText,
+  Globe,
+  Database,
+  X,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 
 export default function PolicyDragAndDrop() {
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -30,7 +38,7 @@ export default function PolicyDragAndDrop() {
       {
         id: result.id,
         name: result.name,
-        source: 'upload',
+        source: "upload",
         framework: result.framework,
         controlsExtracted: result.controlsExtracted,
         status: result.status,
@@ -41,32 +49,43 @@ export default function PolicyDragAndDrop() {
     setUploading(false);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  }, [handleFile]);
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile],
+  );
 
   const handleBrowse = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
-    e.target.value = '';
-  }, [handleFile]);
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+      e.target.value = "";
+    },
+    [handleFile],
+  );
 
-  const sourceIcon = (source: string) => (source === 'upload' ? <Upload size={13} /> : <Globe size={13} />);
-  const statusVariant = (s: string) => (s === 'active' ? 'success' : s === 'processing' ? 'processing' : 'danger');
+  const sourceIcon = (source: string) =>
+    source === "upload" ? <Upload size={13} /> : <Globe size={13} />;
+  const statusVariant = (s: string) =>
+    s === "active" ? "success" : s === "processing" ? "processing" : "danger";
 
   if (loading) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
         <div className="animate-pulse space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-14 rounded bg-slate-100 dark:bg-slate-800" />
+            <div
+              key={i}
+              className="h-14 rounded bg-slate-100 dark:bg-slate-800"
+            />
           ))}
         </div>
       </div>
@@ -79,12 +98,20 @@ export default function PolicyDragAndDrop() {
         <div className="flex items-center gap-2">
           <Database size={16} className="text-blue-500" />
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Policy Repository</h3>
-            <p className="text-xs text-slate-400">RegIntel ingestion via <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px] font-mono dark:bg-slate-800">/ingest</code></p>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              Policy Repository
+            </h3>
+            <p className="text-xs text-slate-400">
+              RegIntel ingestion via{" "}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px] font-mono dark:bg-slate-800">
+                /ingest
+              </code>
+            </p>
           </div>
         </div>
         <span className="text-xs text-slate-400">
-          {policies.reduce((a, p) => a + p.controlsExtracted, 0)} controls extracted
+          {policies.reduce((a, p) => a + p.controlsExtracted, 0)} controls
+          extracted
         </span>
       </div>
 
@@ -101,19 +128,27 @@ export default function PolicyDragAndDrop() {
       <button
         type="button"
         onClick={handleBrowse}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         disabled={uploading}
         className={`mx-5 mt-4 flex w-[calc(100%-2.5rem)] cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
           dragOver
-            ? 'border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10'
-            : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5'
+            ? "border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10"
+            : "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5"
         }`}
       >
-        <Upload size={24} className={`${dragOver ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'}`} />
+        <Upload
+          size={24}
+          className={`${dragOver ? "text-blue-500" : "text-slate-300 dark:text-slate-600"}`}
+        />
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          {uploading ? 'Calling /ingest...' : 'Drag & drop policy files (PDF, Markdown)'}
+          {uploading
+            ? "Calling /ingest..."
+            : "Drag & drop policy files (PDF, Markdown)"}
         </p>
         <p className="text-[10px] text-slate-400">or click to browse</p>
       </button>
@@ -126,8 +161,13 @@ export default function PolicyDragAndDrop() {
               onClick={() => setJsonExpanded((v) => !v)}
               className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
             >
-              {jsonExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              /ingest response — {ingestResult.controlsExtracted} controls extracted
+              {jsonExpanded ? (
+                <ChevronDown size={14} />
+              ) : (
+                <ChevronRight size={14} />
+              )}
+              /ingest response — {ingestResult.controlsExtracted} controls
+              extracted
             </button>
             <button
               onClick={() => setIngestResult(null)}
@@ -147,15 +187,22 @@ export default function PolicyDragAndDrop() {
       {/* Policy list */}
       <div className="divide-y divide-slate-100 p-5 dark:divide-slate-800">
         {policies.map((p) => (
-          <div key={p.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div
+            key={p.id}
+            className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+          >
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-slate-100 p-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                 <FileText size={16} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.name}</p>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {p.name}
+                </p>
                 <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                  <span className="inline-flex items-center gap-1">{sourceIcon(p.source)} {p.source}</span>
+                  <span className="inline-flex items-center gap-1">
+                    {sourceIcon(p.source)} {p.source}
+                  </span>
                   <span>•</span>
                   <span>{p.framework}</span>
                   <span>•</span>
@@ -163,7 +210,11 @@ export default function PolicyDragAndDrop() {
                 </div>
               </div>
             </div>
-            <StatusBadge label={p.status} variant={statusVariant(p.status)} dot />
+            <StatusBadge
+              label={p.status}
+              variant={statusVariant(p.status)}
+              dot
+            />
           </div>
         ))}
       </div>

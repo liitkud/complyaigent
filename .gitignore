@@ -55,3 +55,6 @@ coverage_report.txt
 
 # testing cache
 .pytest_cache
+
+# spec-kit
+.agents/

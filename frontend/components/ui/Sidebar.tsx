@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   LayoutDashboard,
@@ -27,7 +27,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`flex flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-slate-700 dark:bg-slate-950 ${
-        collapsed ? 'w-16' : 'w-60'
+        collapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Logo */}
@@ -37,7 +37,9 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">ComplyAIgent</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">
+              ComplyAIgent
+            </p>
             <p className="text-[10px] text-slate-400">Compliance Platform</p>
           </div>
         )}
