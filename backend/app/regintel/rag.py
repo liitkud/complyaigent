@@ -1,6 +1,6 @@
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
-from llama_index.core.schema import BaseNode, NodeWithScore
+from llama_index.core.schema import NodeWithScore
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -43,7 +43,7 @@ class VectorStoreConnection:
         return MilvusVectorStore(
             uri=settings.MILVUS_URI,
             token=settings.MILVUS_TOKEN,
-            collection_name="complyaigent_collection",
+            collection_name="regulations_collection",
             dim=1024,
             embedding_field="embeddings",
             overwrite=self.should_reset,
