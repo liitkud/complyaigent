@@ -99,14 +99,21 @@ export const api = {
   getViolations: async (): Promise<Violation[]> => {
     await delay(300);
     return [
-      { id: 'v-005', timestamp: '2026-05-09T10:30:00Z', developer: 'glenn', repo: 'frontend-app', type: 'pii', severity: 'high', description: 'Philippine national IDs in test fixtures', status: 'warned', scanner: 'Presidio' },
+      { id: 'v-001', timestamp: '2026-05-09T14:32:00Z', developer: 'karlo.santos', repo: 'payments-api', type: 'secret', severity: 'critical', description: 'AWS Access Key exposed in config.yaml', status: 'blocked', scanner: 'Gitleaks' },
+      { id: 'v-002', timestamp: '2026-05-09T13:45:00Z', developer: 'alfeo.nana', repo: 'user-service', type: 'pii', severity: 'high', description: 'Email addresses found in debug logs', status: 'blocked', scanner: 'Presidio' },
+      { id: 'v-003', timestamp: '2026-05-09T12:10:00Z', developer: 'jepoy.cruz', repo: 'auth-gateway', type: 'secret', severity: 'critical', description: 'Private RSA key committed to repo', status: 'blocked', scanner: 'Gitleaks' },
+      { id: 'v-004', timestamp: '2026-05-09T11:55:00Z', developer: 'ellah.reyes', repo: 'ml-pipeline', type: 'policy', severity: 'medium', description: 'Encryption-at-rest not enforced for data store', status: 'pending', scanner: 'PolicyGate' },
+      { id: 'v-005', timestamp: '2026-05-09T10:30:00Z', developer: 'glenn.tolentino', repo: 'frontend-app', type: 'pii', severity: 'high', description: 'Philippine national IDs in test fixtures', status: 'warned', scanner: 'Presidio' },
+      { id: 'v-006', timestamp: '2026-05-09T09:15:00Z', developer: 'leofer.garcia', repo: 'docs-site', type: 'secret', severity: 'low', description: 'Expired API token in example code', status: 'approved', scanner: 'Gitleaks' },
     ];
   },
 
   getHITLRequests: async (): Promise<HITLRequest[]> => {
     await delay(250);
     return [
-      { id: 'hitl-001', timestamp: '2026-05-09T14:35:00Z', developer: 'glenn', repo: 'payments-api', risk: 'high', description: 'Push contains potential AWS credentials in environment config', findings: ['AWS_ACCESS_KEY_ID pattern detected', 'Key appears in 2 files', 'No .gitignore entry for config.yaml'], status: 'pending' },
+      { id: 'hitl-001', timestamp: '2026-05-09T14:35:00Z', developer: 'karlo.santos', repo: 'payments-api', risk: 'high', description: 'Push contains potential AWS credentials in environment config', findings: ['AWS_ACCESS_KEY_ID pattern detected', 'Key appears in 2 files', 'No .gitignore entry for config.yaml'], status: 'pending' },
+      { id: 'hitl-002', timestamp: '2026-05-09T13:50:00Z', developer: 'ellah.reyes', repo: 'ml-pipeline', risk: 'medium', description: 'New data store created without encryption policy mapping', findings: ['No encryption-at-rest tag', 'Policy CP-7 requires AES-256'], status: 'pending' },
+      { id: 'hitl-003', timestamp: '2026-05-09T12:20:00Z', developer: 'jepoy.cruz', repo: 'auth-gateway', risk: 'high', description: 'RSA private key detected in committed files', findings: ['PEM header detected', 'File: keys/private.pem', 'Key size: 2048-bit'], status: 'pending' },
     ];
   },
 
