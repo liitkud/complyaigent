@@ -26,6 +26,12 @@ class SettingsEnv(BaseSettings):
 settings = SettingsEnv()
 
 
+OPENAI_CLIENT = AsyncOpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=settings.GROQ_API_KEY
+)
+
+
 class VectorStoreConnection:
     def __init__(self, use_async: bool = False):
         self.splitter = SentenceSplitter(chunk_size=300, chunk_overlap=40)
@@ -132,31 +138,3 @@ class VectorStoreConnection:
         if self.should_reset:
             self.index.insert_nodes(nodes=nodes)
         return nodes
-
-
-client = OpenAI(
-    base_url="https://api.groq.com/openai/v1",
-    api_key=settings.GROQ_API_KEY
-)
-
-vsc = VectorStoreConnection()
-sys_pr, usr_pr = vsc.user_query_to_prompts("What is complyaigent?")
-
-
-completion = client.chat.completions.create(
-    model="meta-llama/llama-4-scout-17b-16e-instruct",
-    messages=[
-        {"role":"system", "content":sys_pr},
-        {"role": "user", "content": usr_pr
-      }
-    ],
-    temperature=.5,
-    max_completion_tokens=8000,
-    top_p=1,
-    stop=None
-)
-
-semi_completions = completion.choices[0].message
-print(semi_completions.content)
-
-
