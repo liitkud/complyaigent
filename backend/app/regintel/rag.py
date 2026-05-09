@@ -109,6 +109,29 @@ class VectorStoreConnection:
 
         return "\n".join(final_parts)
 
+    def reset_learnings(self):
+        all_docs = []
+        try:
+            base_docs = SimpleDirectoryReader(
+                input_dir=BASE_DIR, exclude=[".env"]
+            ).load_data()
+            all_docs.extend(base_docs)
+        except ValueError:
+            pass
+
+        try:
+            inside_docs = SimpleDirectoryReader(
+                input_dir= BASE_DIR / "docs", exclude=[".env"]
+            ).load_data()
+            all_docs.extend(inside_docs)
+        except ValueError:
+            pass
+
+        nodes = self.splitter.get_nodes_from_documents(all_docs)
+        if self.should_reset:
+            self.index.insert_nodes(nodes=nodes)
+        return nodes
+
 
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
