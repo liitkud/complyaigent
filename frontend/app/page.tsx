@@ -1,64 +1,88 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { api, type ComplianceMetrics } from '@/services/api';
+import MetricCard from '@/components/ui/MetricCard';
+import ViolationsTable from '@/components/violations/ViolationsTable';
+import HITLApprovalCard from '@/components/hitl/HITLApprovalCard';
+import PolicyDragAndDrop from '@/components/policy/PolicyDragandDrop';
+import PipelineActivity from '@/components/pipeline/PipelineActivity';
+import {
+  ScanSearch,
+  ShieldCheck,
+  AlertTriangle,
+  UserCheck,
+  FileText,
+  Zap,
+  RefreshCw,
+} from 'lucide-react';
 
 export default function Home() {
+  const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = async () => {
+    setRefreshing(true);
+    const m = await api.getMetrics();
+    setMetrics(m);
+    setRefreshing(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex-1 overflow-y-auto">
+      {/* Header */}
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
+        <div>
+          <h1 className="text-lg font-bold text-slate-900 dark:text-white">Compliance Dashboard</h1>
+          <p className="text-xs text-slate-400">Real-time DevSecOps compliance monitoring</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+            System Online
+          </span>
+          <button
+            onClick={load}
+            disabled={refreshing}
+            className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
+          </button>
         </div>
+      </header>
+
+      <main className="space-y-6 p-6">
+        {/* KPI Cards */}
+        {metrics ? (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+            <MetricCard title="Total Scans" value={metrics.totalScans.toLocaleString()} icon={ScanSearch} variant="default" trend={{ value: 12, label: 'vs yesterday' }} />
+            <MetricCard title="Pass Rate" value={`${metrics.passRate}%`} icon={ShieldCheck} variant="success" trend={{ value: 1.3, label: 'vs last week' }} />
+            <MetricCard title="Violations Today" value={metrics.violationsToday} icon={AlertTriangle} variant="danger" trend={{ value: -8, label: 'vs yesterday' }} />
+            <MetricCard title="Pending Approvals" value={metrics.pendingApprovals} icon={UserCheck} variant="warning" />
+            <MetricCard title="Policies Ingested" value={metrics.policiesIngested} icon={FileText} variant="default" />
+            <MetricCard title="Avg Scan Time" value={metrics.avgScanTime} icon={Zap} variant="success" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800" />
+            ))}
+          </div>
+        )}
+
+        {/* Violations table */}
+        <ViolationsTable />
+
+        {/* Two-column: HITL + Pipeline */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <HITLApprovalCard />
+          <PipelineActivity />
+        </div>
+
+        {/* Policy Repository */}
+        <PolicyDragAndDrop />
       </main>
     </div>
   );
