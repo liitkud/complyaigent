@@ -37,8 +37,8 @@ auto_commit:
     enabled: true
     message: "docs: establish startup constitution v1.0.0 and sync templates"
   after_specify:
-    enabled: false
-    message: "[Spec Kit] Add specification"
+    enabled: true
+    message: "docs: add initial specification for Governance Bridge API"
   after_clarify:
     enabled: false
     message: "[Spec Kit] Clarify specification"
