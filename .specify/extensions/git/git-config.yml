@@ -40,8 +40,8 @@ auto_commit:
     enabled: true
     message: "docs: add initial specification for Governance Bridge API"
   after_clarify:
-    enabled: false
-    message: "[Spec Kit] Clarify specification"
+    enabled: true
+    message: "docs: clarify internal pipeline and risk validation for Governance Bridge API"
   after_plan:
     enabled: false
     message: "[Spec Kit] Add implementation plan"

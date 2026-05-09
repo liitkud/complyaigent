@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -30,5 +30,9 @@
 - [x] No implementation details leak into specification
 
 ## Notes
-
-- [NEEDS CLARIFICATION] marker exists regarding authentication requirements.
+- Initial clarifications resolved in session 2026-05-10.
+- Refinement session 2026-05-10-B completed (JSON format, Tiered CLI enforcement, Async validation, Hash-based versioning).
+- Session 2026-05-10-C completed (Pipeline details: A2 format, Compactor inlining, Hybrid anchors, Per-stage ETA, Goal-based tagging).
+- Internal Pipeline architecture (Comparator/Categorizer) added to spec.
+- MVP scope clearly bounded (MinHash/Embedding deferred).
+- Spec ready for planning phase.

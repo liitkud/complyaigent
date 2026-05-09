@@ -45,7 +45,11 @@ Default: `hackathon`.
 **5. Log scrub warning**
 * Before push: `grep -l "password\|token\|secret" *.log` → print warning if found.
 
-**6. README (one paragraph)**
+**6. Error Visibility & Resilience**
+* Errors MUST NOT go unnoticed; they should be logged and reported to the requesting system.
+* Systems MUST implement internal retry loops for transient failures (e.g., LLM timeouts).
+
+**7. README (one paragraph)**
 * What the project does (1 sentence)
 * How to run integration test (1 command)
 * How to set up pre‑push hook (1 command)
