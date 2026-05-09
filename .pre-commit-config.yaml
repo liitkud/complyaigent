@@ -57,7 +57,7 @@ repos:
     hooks:
       - id: prettier
         name: Prettier
-        entry: pnpm --dir frontend exec prettier -w --cache --ignore-unknown
+        entry: bash -c 'cd frontend && pnpm exec prettier -w --cache --ignore-unknown "${@#frontend/}"' --
         language: system
         types_or:
           [javascript, jsx, ts, tsx, css, scss, html, json, yaml, markdown]

@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/usr/local/share/.cache/yarn \
     --mount=type=cache,target=/root/.local/share/pnpm/store \
     corepack enable pnpm && pnpm install --frozen-lockfile;
-  
+
 
 # ============================================
 # Stage 2: Build Next.js application in standalone mode
