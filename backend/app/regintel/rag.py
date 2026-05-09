@@ -31,6 +31,7 @@ class VectorStoreConnection:
         self.splitter = SentenceSplitter(chunk_size=300, chunk_overlap=40)
         self._index = None
         self.use_async = use_async
+        self.should_reset = False
 
     @property
     def vector_store(self):
@@ -40,7 +41,7 @@ class VectorStoreConnection:
             collection_name="complyaigent_collection",
             dim=1024,
             embedding_field="embeddings",
-            overwrite=False,
+            overwrite=self.should_reset,
             search_config={"nprobe": 60},
             similarity_metric="COSINE",
             consistency_level="Session",
@@ -90,7 +91,7 @@ class VectorStoreConnection:
 
     @staticmethod
     def list_nodes_to_str(input_list: list[NodeWithScore]):
-        keys_to_remove = {"file_path", "file_name"}
+        keys_to_remove = {"file_name"}
 
         final_parts = []
 
