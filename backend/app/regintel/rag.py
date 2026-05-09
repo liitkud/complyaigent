@@ -91,7 +91,7 @@ class VectorStoreConnection:
 
     @staticmethod
     def list_nodes_to_str(input_list: list[NodeWithScore]):
-        keys_to_remove = {"file_name"}
+        keys_to_remove = {"file_path"}
 
         final_parts = []
 
