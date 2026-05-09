@@ -20,11 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [backend]
+        service: [backend, frontend]
         include:
           - service: backend
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
+          - service: frontend
+            dockerfile: ./frontend/Dockerfile
+            image_name: liitkud/complyaigent-frontend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
