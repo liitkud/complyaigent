@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api, type ComplianceMetrics } from '@/services/api';
+import { api, type ComplianceMetrics, type ValidationResult, type RegulationSummary } from '@/services/api';
 import MetricCard from '@/components/ui/MetricCard';
 import ViolationsTable from '@/components/violations/ViolationsTable';
 import HITLApprovalCard from '@/components/hitl/HITLApprovalCard';
@@ -15,20 +15,107 @@ import {
   FileText,
   Zap,
   RefreshCw,
+  WifiOff,
 } from 'lucide-react';
+
+function computeMetrics(
+  validations: ValidationResult[],
+  regulations: RegulationSummary[],
+): ComplianceMetrics {
+  const total = validations.length;
+  const lowCount = validations.filter((v) => v.verdict === 'LOW').length;
+  const passRate = total > 0 ? Math.round((lowCount / total) * 1000) / 10 : 0;
+
+  // "Today" filter
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayViolations = validations.filter(
+    (v) => v.verdict === 'HIGH' && v.created_at.startsWith(todayStr),
+  );
+  const pendingApprovals = validations.filter(
+    (v) => v.verdict === 'MID',
+  );
+
+  return {
+    totalScans: total,
+    passRate,
+    violationsToday: todayViolations.length,
+    pendingApprovals: pendingApprovals.length,
+    policiesIngested: regulations.length,
+    avgScanTime: '1.2s', // Not available in API — hardcoded for MVP
+  };
+}
 
 export default function Home() {
   const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [usingMock, setUsingMock] = useState(false);
 
   const load = async () => {
     setRefreshing(true);
-    const m = await api.getMetrics();
-    setMetrics(m);
+    try {
+      const [validations, regulations] = await Promise.all([
+        api.getValidations(),
+        api.getRegulations(),
+      ]);
+      setMetrics(computeMetrics(validations, regulations));
+      setUsingMock(false);
+    } catch {
+      // If getRegulations also fails, we're fully offline — use mock fallback
+      try {
+        const validations = await api.getValidations(); // has its own mock
+        setMetrics(computeMetrics(validations, []));
+      } catch {
+        setMetrics({
+          totalScans: 1_247,
+          passRate: 94.2,
+          violationsToday: 12,
+          pendingApprovals: 3,
+          policiesIngested: 28,
+          avgScanTime: '1.2s',
+        });
+      }
+      setUsingMock(true);
+    }
     setRefreshing(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    const init = async () => {
+      setRefreshing(true);
+      try {
+        const [validations, regulations] = await Promise.all([
+          api.getValidations(),
+          api.getRegulations(),
+        ]);
+        if (cancelled) return;
+        setMetrics(computeMetrics(validations, regulations));
+        setUsingMock(false);
+      } catch {
+        if (cancelled) return;
+        try {
+          const validations = await api.getValidations();
+          if (cancelled) return;
+          setMetrics(computeMetrics(validations, []));
+        } catch {
+          if (cancelled) return;
+          setMetrics({
+            totalScans: 1_247,
+            passRate: 94.2,
+            violationsToday: 12,
+            pendingApprovals: 3,
+            policiesIngested: 28,
+            avgScanTime: '1.2s',
+          });
+        }
+        setUsingMock(true);
+      } finally {
+        if (!cancelled) setRefreshing(false);
+      }
+    };
+    init();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -54,6 +141,18 @@ export default function Home() {
       </header>
 
       <main className="space-y-6 p-6">
+        {usingMock && (
+          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
+            <WifiOff size={18} className="shrink-0 text-amber-500" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Backend unavailable — showing mock data</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                Metrics derived from mock <code className="font-mono">GET /validate</code> + <code className="font-mono">GET /regulation</code> fallback.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* KPI Cards */}
         {metrics ? (
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { api, type Policy, type IngestResponse } from '@/services/api';
+import { api, type Policy, type LegacyIngestResponse } from '@/services/api';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Upload, FileText, Globe, Database, X, ChevronDown, ChevronRight } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export default function PolicyDragAndDrop() {
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [ingestResult, setIngestResult] = useState<IngestResponse | null>(null);
+  const [ingestResult, setIngestResult] = useState<LegacyIngestResponse | null>(null);
   const [jsonExpanded, setJsonExpanded] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
