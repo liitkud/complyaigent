@@ -33,10 +33,9 @@ OPENAI_CLIENT = AsyncOpenAI(
 
 
 class VectorStoreConnection:
-    def __init__(self, use_async: bool = False):
         self.splitter = SentenceSplitter(chunk_size=300, chunk_overlap=40)
+    def __init__(self):
         self._index = None
-        self.use_async = use_async
         self.should_reset = False
 
     @property
@@ -65,10 +64,9 @@ class VectorStoreConnection:
         if self._index is None:
             self._index = VectorStoreIndex.from_vector_store(
                 vector_store=self.vector_store,
-                embed_model=self.embedding_model
+                embed_model=self.embedding_model,
+                use_async=True
             )
-            if self.use_async:
-                self._index._use_async = True
         return self._index
 
     def retrieve_data_from_vector_database(self, user_query: str):
