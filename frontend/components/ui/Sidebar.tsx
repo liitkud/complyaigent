@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   LayoutDashboard,
@@ -10,17 +10,17 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react';
-import { useState } from 'react';
+} from "lucide-react";
+import { useState } from "react";
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '#', active: true },
-  { icon: Shield, label: 'PolicyGate', href: '#', active: false },
-  { icon: AlertTriangle, label: 'Violations', href: '#', active: false },
-  { icon: FileText, label: 'Policies', href: '#', active: false },
-  { icon: UserCheck, label: 'Approvals', href: '#', active: false },
-  { icon: Activity, label: 'Pipeline', href: '#', active: false },
-  { icon: Settings, label: 'Settings', href: '#', active: false },
+  { icon: LayoutDashboard, label: "Dashboard", href: "#", active: true },
+  { icon: Shield, label: "PolicyGate", href: "#", active: false },
+  { icon: AlertTriangle, label: "Violations", href: "#", active: false },
+  { icon: FileText, label: "Policies", href: "#", active: false },
+  { icon: UserCheck, label: "Approvals", href: "#", active: false },
+  { icon: Activity, label: "Pipeline", href: "#", active: false },
+  { icon: Settings, label: "Settings", href: "#", active: false },
 ];
 
 export default function Sidebar() {
@@ -29,7 +29,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`flex flex-col border-r border-slate-200 bg-white transition-all duration-300 dark:border-slate-700 dark:bg-slate-950 ${
-        collapsed ? 'w-16' : 'w-60'
+        collapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Logo */}
@@ -39,7 +39,9 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">ComplyAIgent</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white">
+              ComplyAIgent
+            </p>
             <p className="text-[10px] text-slate-400">Compliance Platform</p>
           </div>
         )}
@@ -53,8 +55,8 @@ export default function Sidebar() {
             href={item.href}
             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               item.active
-                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
             }`}
             title={collapsed ? item.label : undefined}
           >
