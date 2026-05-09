@@ -1,4 +1,120 @@
-// ── Types ──────────────────────────────────────────────
+// ── Backend API Types (from spec) ──────────────────────
+
+// GET /health
+export interface HealthResponse {
+  status: 'healthy';
+}
+
+// POST /ingest → response
+export interface IngestResponse {
+  task_id: string;
+  status: 'processing' | 'complete';
+}
+
+// GET /ingest/{task_id}
+export interface IngestStatus {
+  task_id: string;
+  status: 'extracting' | 'comparing' | 'compacting' | 'categorizing' | 'complete';
+  progress_pct: number;
+  current_stage: string;
+  eta_seconds: number | null;
+}
+
+// GET /regulation
+export interface RegulationSummary {
+  id: string;
+  source_name: string;
+  source_type: 'government_law' | 'org_guideline' | 'org_constitution';
+  ingested_at: string;
+  version: string;
+}
+
+// Rule types
+export interface ScannableRule {
+  id: string;
+  type: 'SCANNABLE';
+  logic: 'REGEX' | 'FUZZY_MATCH';
+  pattern: string;
+  test_pass: string;
+  test_fail: string;
+  rule_name: string;
+  remediation: string;
+  impact_radius: 'global' | 'service_specific' | 'network_transport';
+  source_category: string;
+}
+
+export interface ActionableRule {
+  id: string;
+  type: 'ACTIONABLE';
+  verification_question: string;
+  instructions: string;
+  rule_name: string;
+  remediation: string;
+  impact_radius: 'global' | 'service_specific' | 'network_transport';
+  source_category: string;
+}
+
+export interface InfraRule {
+  id: string;
+  type: 'INFRA_METADATA';
+  key: string;
+  value: unknown;
+  rule_name: string;
+  impact_radius: 'global' | 'service_specific' | 'network_transport';
+  source_category: string;
+}
+
+export interface SemanticRule {
+  id: string;
+  type: 'SEMANTIC_GUIDANCE';
+  summary: string;
+  rule_name: string;
+  impact_radius: 'global' | 'service_specific' | 'network_transport';
+  source_category: string;
+}
+
+// GET /regulation/{id} or GET /reg
+export interface GovernanceManifest {
+  meta: {
+    source_uuid: string;
+    source_name: string;
+    source_type: string;
+    ingested_at: string;
+    version: string;
+    total_rules: number;
+  };
+  buckets: {
+    A1: ScannableRule[];
+    A2: ActionableRule[];
+    B: InfraRule[];
+    C: SemanticRule[];
+  };
+}
+
+// POST /validate → request
+export interface ValidateRequest {
+  code_snippet: string;
+  rule_id: string;
+  context?: string;
+}
+
+// POST /validate → response
+export interface ValidateResponse {
+  validation_id: string;
+  status: 'pending' | 'processing';
+}
+
+// GET /validate/{id}
+export interface ValidationResult {
+  validation_id: string;
+  verdict: 'LOW' | 'MID' | 'HIGH';
+  reasoning: string;
+  activity_logged: boolean;
+  created_at: string;
+}
+
+// ── Legacy UI Types (used by existing components) ──────
+
 export interface ComplianceMetrics {
   totalScans: number;
   passRate: number;
@@ -39,7 +155,7 @@ export interface PolicyControl {
   severity: 'critical' | 'high' | 'medium' | 'low';
 }
 
-export interface IngestResponse {
+export interface LegacyIngestResponse {
   id: string;
   name: string;
   framework: string;
@@ -74,14 +190,100 @@ export interface SystemHealth {
   uptime: string;
 }
 
-// ── Mock Data ──────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────
+
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+async function fetchJSON<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, init);
+  if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+// ── API Client ─────────────────────────────────────────
+
 export const api = {
+  // ── Real backend endpoints ───────────────────────────
+
+  /** GET /health */
+  healthCheck: () => fetchJSON<HealthResponse>('/health'),
+
+  /** POST /ingest — upload PDF/markdown file */
+  ingest: (file: File): Promise<IngestResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchJSON<IngestResponse>('/ingest', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  /** GET /ingest/{task_id} — poll ingestion progress */
+  getIngestStatus: (taskId: string) =>
+    fetchJSON<IngestStatus>(`/ingest/${encodeURIComponent(taskId)}`),
+
+  /** GET /regulation — list all ingested regulations */
+  getRegulations: () => fetchJSON<RegulationSummary[]>('/regulation'),
+
+  /** GET /regulation/{id} — full manifest for one regulation */
+  getRegulation: (id: string) =>
+    fetchJSON<GovernanceManifest>(`/regulation/${encodeURIComponent(id)}`),
+
+  /** GET /reg — all active rules grouped by bucket */
+  getRules: () => fetchJSON<GovernanceManifest>('/reg'),
+
+  /** GET /corp — org_constitution rules only */
+  getCorpRules: () => fetchJSON<GovernanceManifest>('/corp'),
+
+  /** POST /validate — submit code for risk validation */
+  validate: (req: ValidateRequest) =>
+    fetchJSON<ValidateResponse>('/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    }),
+
+  /** GET /validate/{id} — get validation result */
+  getValidation: (id: string) =>
+    fetchJSON<ValidationResult>(`/validate/${encodeURIComponent(id)}`),
+
+  /** GET /validate — list all validation results (with mock fallback) */
+  getValidations: async (): Promise<ValidationResult[]> => {
+    try {
+      return await fetchJSON<ValidationResult[]>('/validate');
+    } catch {
+      // Mock fallback — realistic scan history for dashboard
+      await delay(300);
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      return [
+        { validation_id: 'val-001', verdict: 'HIGH', reasoning: 'AWS Access Key (AKIA...) detected in config.yaml', activity_logged: true, created_at: `${today}T14:32:00Z` },
+        { validation_id: 'val-002', verdict: 'HIGH', reasoning: 'Private RSA key committed to repository', activity_logged: true, created_at: `${today}T12:10:00Z` },
+        { validation_id: 'val-003', verdict: 'MID', reasoning: 'Encryption-at-rest not enforced for new data store', activity_logged: true, created_at: `${today}T11:55:00Z` },
+        { validation_id: 'val-004', verdict: 'HIGH', reasoning: 'Email addresses found in debug log output', activity_logged: true, created_at: `${today}T13:45:00Z` },
+        { validation_id: 'val-005', verdict: 'LOW', reasoning: 'Code follows secure patterns — no violations detected', activity_logged: true, created_at: `${today}T10:00:00Z` },
+        { validation_id: 'val-006', verdict: 'LOW', reasoning: 'API authentication correctly enforced on all routes', activity_logged: true, created_at: `${today}T09:30:00Z` },
+        { validation_id: 'val-007', verdict: 'MID', reasoning: 'Philippine national IDs found in test fixtures — PII risk', activity_logged: true, created_at: `${today}T10:30:00Z` },
+        { validation_id: 'val-008', verdict: 'LOW', reasoning: 'No hardcoded credentials — environment variables used correctly', activity_logged: true, created_at: `${today}T08:15:00Z` },
+        { validation_id: 'val-009', verdict: 'HIGH', reasoning: 'Database connection string contains plaintext password', activity_logged: true, created_at: `${today}T14:00:00Z` },
+        { validation_id: 'val-010', verdict: 'LOW', reasoning: 'TLS 1.2 minimum enforced — transport encryption compliant', activity_logged: true, created_at: `${today}T07:45:00Z` },
+        { validation_id: 'val-011', verdict: 'MID', reasoning: 'New S3 bucket created without encryption policy tag', activity_logged: true, created_at: `${today}T13:50:00Z` },
+        { validation_id: 'val-012', verdict: 'LOW', reasoning: 'Audit logging correctly configured for all admin actions', activity_logged: true, created_at: `${today}T06:30:00Z` },
+      ];
+    }
+  },
+
+  // ── Mock / legacy endpoints (used by existing UI) ────
+
   getStatus: async (): Promise<{ status: string }> => {
-    await delay(300);
-    return { status: 'ok' };
+    try {
+      const h = await fetchJSON<HealthResponse>('/health');
+      return { status: h.status };
+    } catch {
+      await delay(300);
+      return { status: 'ok' };
+    }
   },
 
   getMetrics: async (): Promise<ComplianceMetrics> => {
@@ -152,20 +354,21 @@ export const api = {
     ];
   },
 
-  approveHITL: async (id: string): Promise<{ success: boolean }> => {
+  approveHITL: async (_id: string): Promise<{ success: boolean }> => {
     await delay(500);
     return { success: true };
   },
 
-  rejectHITL: async (id: string): Promise<{ success: boolean }> => {
+  rejectHITL: async (_id: string): Promise<{ success: boolean }> => {
     await delay(500);
     return { success: true };
   },
 
-  ingestPolicy: async (file: File): Promise<IngestResponse> => {
-    const formData = new FormData();
-    formData.append('file', file);
+  /** @deprecated Use api.ingest() instead — kept for PolicyDragandDrop compatibility */
+  ingestPolicy: async (file: File): Promise<LegacyIngestResponse> => {
     try {
+      const formData = new FormData();
+      formData.append('file', file);
       const res = await fetch(`${API_BASE}/ingest`, {
         method: 'POST',
         body: formData,
@@ -174,7 +377,7 @@ export const api = {
     } catch {
       // Backend unavailable — fall through to mock
     }
-    // Mock response when backend is not running
+    // Mock fallback when backend is not running
     await delay(1500);
     return {
       id: `p-${Date.now()}`,
