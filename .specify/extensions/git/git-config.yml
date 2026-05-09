@@ -43,8 +43,8 @@ auto_commit:
     enabled: true
     message: "docs: clarify internal pipeline and risk validation for Governance Bridge API"
   after_plan:
-    enabled: false
-    message: "[Spec Kit] Add implementation plan"
+    enabled: true
+    message: "docs: add implementation plan and research for Governance Bridge API"
   after_tasks:
     enabled: false
     message: "[Spec Kit] Add tasks"
