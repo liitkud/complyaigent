@@ -4,7 +4,7 @@ from llama_index.core.schema import BaseNode, NodeWithScore
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from openai import OpenAI
+from openai import AsyncOpenAI
 from pathlib import Path
 
 
@@ -33,8 +33,8 @@ OPENAI_CLIENT = AsyncOpenAI(
 
 
 class VectorStoreConnection:
-        self.splitter = SentenceSplitter(chunk_size=300, chunk_overlap=40)
     def __init__(self):
+        self.splitter = SentenceSplitter(chunk_size=512, chunk_overlap=60)
         self._index = None
         self.should_reset = False
 
@@ -73,6 +73,47 @@ class VectorStoreConnection:
         retriever_engine = self.index.as_retriever(similarity_top_k=3)
         raw_results = retriever_engine.retrieve(user_query)
         return self.list_nodes_to_str(raw_results)
+
+    async def aretrieve_data_from_vector_database(self, user_query):
+        retriever_engine = self.index.as_retriever(similarity_top_k=3)
+        raw_results = await retriever_engine.aretrieve(user_query)
+        return self.list_nodes_to_str(raw_results)
+
+    async def vector_chat_async(self, query: str):
+        user_context = await self.aretrieve_data_from_vector_database(query)
+
+        system_prompt =f"""
+        ## SYSTEM:
+        You are a precise and reliable assistant. Answer the user's question 
+        using ONLY the provided context below. If the context lacks sufficient 
+        information, politely state that you cannot answer based on the given data.
+        
+        ## INSTRUCTIONS:
+        Maintain a professional tone. Reference metadata when citing sources. 
+        Do not fabricate information outside the provided context."""
+
+        user_prompt = f"""
+        ## CONTEXT:
+        {user_context}
+            
+        ## USER QUERY:
+        {query}
+        """
+        print(user_prompt)
+
+        completion = await OPENAI_CLIENT.chat.completions.create(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=.3,
+            max_completion_tokens=8000,
+            top_p=1,
+            stop=None
+        )
+        assistant_message = completion.choices[0].message
+        return assistant_message.content
 
     def user_query_to_prompts(self, user_query: str):
         context = self.retrieve_data_from_vector_database(user_query)
