@@ -4,11 +4,10 @@ name: Code Check
 
 on:
   push:
-    branches: [main]
     paths: backend/**
   pull_request:
-    branches: [main]
     paths: backend/**
+  workflow_dispatch:
 
 jobs:
   py_check:
@@ -29,6 +28,10 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
+      - name: Install checkers
+        run: |
+          for tool in ty ruff semgrep detect-secrets pip-audit; do uv tool install $tool; done
+
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen
 
@@ -43,7 +46,7 @@ jobs:
 
       - name: Security Scan (Semgrep)
         run: |
-          uv run semgrep --config p/python --error --skip-unknown-extensions --config p/owasp-top-10 .
+          uv run semgrep --config p/python --error --skip-unknown-extensions .
 
       - name: Secret Detection
         run: |

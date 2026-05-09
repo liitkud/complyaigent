@@ -1,0 +1,37 @@
+name: Test Builc
+
+on:
+  pull_request:
+    workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend]
+        include:
+          - service: backend
+            dockerfile: ./backend/Dockerfile
+            image_name: liitkud/complyaigent-backend
+          - service: frontend
+            dockerfile: ./frontend/Dockerfile
+            image_name: liitkud/complyaigent-frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: ${{ matrix.image_name }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          platforms: linux/amd64, linux/arm64
