@@ -157,7 +157,7 @@ $ErrorActionPreference = 'Continue'
 try {
     $out = git add . 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) { throw "git add failed: $out" }
-    $out = git commit -q -m $commitMsg 2>&1 | Out-String
+    $out = git commit -S -q -m $commitMsg 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) { throw "git commit failed: $out" }
 } catch {
     Write-Warning "[specify] Error: $_"
