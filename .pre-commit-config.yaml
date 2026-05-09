@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline", "scan"]
-        exclude: (migrations/|tests/|.*\.lock|pnpm-lock\.yaml|package-lock\.json)$
+        exclude: (migrations/|tests/|.*\.lock|pnpm-lock\.yaml|package-lock\.json|\.specify/.*)$
         # exclude migrations and tests: too messy to add granular exclusions
         # and lockfiles: file too large to work on
 
