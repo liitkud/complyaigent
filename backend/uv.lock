@@ -422,6 +422,7 @@ dependencies = [
     { name = "datasketch" },
     { name = "fastapi", extra = ["standard"] },
     { name = "langchain-google-genai" },
+    { name = "langchain-openai" },
     { name = "llama-index" },
     { name = "llama-index-embeddings-cohere" },
     { name = "llama-index-vector-stores-milvus" },
@@ -442,6 +443,7 @@ requires-dist = [
     { name = "datasketch", specifier = ">=1.10.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.136.1" },
     { name = "langchain-google-genai", specifier = ">=4.2.2" },
+    { name = "langchain-openai", specifier = ">=0.3.0" },
     { name = "llama-index", specifier = ">=0.14.20" },
     { name = "llama-index-embeddings-cohere", specifier = ">=0.8.0" },
     { name = "llama-index-vector-stores-milvus", specifier = ">=1.1.0" },
@@ -1329,6 +1331,20 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-openai"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain-core" },
+    { name = "openai" },
+    { name = "tiktoken" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9a/0e/d8e16c28aa67106d285e63b8ffc04c5af68341e345ce24a0751dbf2e167e/langchain_openai-1.2.1.tar.gz", hash = "sha256:ee4480b787706361b7125fad46930589a624df87aa158c6986ef1fad10d10675", size = 1146092, upload-time = "2026-04-24T19:46:43.328Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dc/55/2865b18ee3a3dd11160b8c4b2cf37e75bf2a4a8d1d38868ffffc7b7cc180/langchain_openai-1.2.1-py3-none-any.whl", hash = "sha256:a80732185030d4f453dda6c25feef46f645f665423fdffe38ae3edf1ac3c6c4d", size = 98626, upload-time = "2026-04-24T19:46:41.971Z" },
+]
+
+[[package]]
 name = "langchain-protocol"
 version = "0.0.15"
 source = { registry = "https://pypi.org/simple" }
@@ -1625,7 +1641,7 @@ name = "milvus-lite"
 version = "2.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "tqdm" },
+    { name = "tqdm", marker = "sys_platform != 'win32'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/b2/acc5024c8e8b6a0b034670b8e8af306ebd633ede777dcbf557eac4785937/milvus_lite-2.5.1-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:6b014453200ba977be37ba660cb2d021030375fa6a35bc53c2e1d92980a0c512", size = 27934713, upload-time = "2025-06-30T04:23:37.028Z" },
