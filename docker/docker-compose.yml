@@ -36,7 +36,7 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    
+
   frontend:
     image: ghcr.io/liitkud/complyaigent-frontend:canary
     ports:

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { api, type HITLRequest } from '@/services/api';
-import StatusBadge from '@/components/ui/StatusBadge';
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { api, type HITLRequest } from "@/services/api";
+import StatusBadge from "@/components/ui/StatusBadge";
+import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 
 export default function HITLApprovalCard() {
   const [requests, setRequests] = useState<HITLRequest[]>([]);

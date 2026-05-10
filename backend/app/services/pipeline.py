@@ -100,7 +100,7 @@ async def _run_pipeline(task_id: str, file_path: str):
                         task.version_chain = [existing_rule.task_id, task.id]
                     session.add(task)
                     session.commit()
-            
+
             # Stage 3: Compactor
             await update_task_progress(session, task, "Compacting Requirements", 50)
             compacted_text = await compactor.compact_document(cleaned_text)
@@ -130,7 +130,9 @@ async def _run_pipeline(task_id: str, file_path: str):
                     stored_rules.append(rule)
                 except Exception as rule_err:
                     session.rollback()
-                    logger.warning(f"Skipping malformed rule for task {task_id}: {rule_err}")
+                    logger.warning(
+                        f"Skipping malformed rule for task {task_id}: {rule_err}"
+                    )
 
             # Stage 5: Vector Indexing (RAG)
             await update_task_progress(session, task, "Indexing rules for RAG", 95)
@@ -150,7 +152,9 @@ async def _run_pipeline(task_id: str, file_path: str):
             session.commit()
 
         except Exception as e:
-            logger.error(f"Pipeline failed at stage {task.current_stage} for task {task_id}: {str(e)}")
+            logger.error(
+                f"Pipeline failed at stage {task.current_stage} for task {task_id}: {str(e)}"
+            )
             task.status = TaskStatus.FAILED
             task.current_stage = f"Error in {task.current_stage}: {str(e)}"
             session.add(task)

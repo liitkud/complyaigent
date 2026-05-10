@@ -12,7 +12,8 @@ class CategorizerService:
             model=settings.CHAT_MODEL,
             openai_api_key=settings.LLM_API_KEY,
             base_url=settings.LLM_ENDPOINT,
-            timeout=5.0,  # 5s timeout per LLM call
+            timeout=5.0,
+            # 5s timeout per LLM call
         )
 
     async def categorize_rules(self, compacted_text: str) -> List[Dict]:
@@ -57,7 +58,7 @@ class CategorizerService:
                     rules = json.loads(raw_content)
                 except json.JSONDecodeError:
                     logger.warning(
-                        f"Categorizer received truncated JSON, attempting recovery"
+                        "Categorizer received truncated JSON, attempting recovery"
                     )
                     trimmed = raw_content.rstrip()
                     if trimmed.endswith(","):
@@ -88,7 +89,12 @@ class CategorizerService:
                 for rule in rules:
                     # Fix type enum mismatch
                     raw_type = rule.get("type", "")
-                    if raw_type not in ["A1_SCANNABLE", "A2_ACTIONABLE", "B_INFRA_METADATA", "C_SEMANTIC_GUIDANCE"]:
+                    if raw_type not in [
+                        "A1_SCANNABLE",
+                        "A2_ACTIONABLE",
+                        "B_INFRA_METADATA",
+                        "C_SEMANTIC_GUIDANCE",
+                    ]:
                         rule["type"] = TYPE_MAP.get(raw_type, "C_SEMANTIC_GUIDANCE")
 
                     # Fix source_category enum mismatch
