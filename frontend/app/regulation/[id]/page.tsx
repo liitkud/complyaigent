@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { api, type GovernanceManifest } from "@/services/api";
+import { apiClient, type GovernanceManifest } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import {
   ArrowLeft,
@@ -127,7 +127,7 @@ export default function RegulationDetailPage() {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    api
+    apiClient
       .getRegulation(id)
       .then((m) => {
         if (!cancelled) setManifest(m);

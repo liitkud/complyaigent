@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  api,
+  apiClient,
   type ComplianceMetrics,
   type ValidationResult,
   type RegulationSummary,
@@ -52,20 +52,21 @@ export default function Home() {
   const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [usingMock, setUsingMock] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState<string | undefined>();
 
   const load = async () => {
     setRefreshing(true);
     try {
       const [validations, regulations] = await Promise.all([
-        api.getValidations(),
-        api.getRegulations(),
+        apiClient.getValidations().catch(() => []),
+        apiClient.getRegulations().catch(() => []),
       ]);
       setMetrics(computeMetrics(validations, regulations));
-      setUsingMock(false);
+      setUsingMock(validations.length === 0 && regulations.length === 0);
     } catch {
       // If getRegulations also fails, we're fully offline — use mock fallback
       try {
-        const validations = await api.getValidations(); // has its own mock
+        const validations = await apiClient.getValidations(); // has its own mock
         setMetrics(computeMetrics(validations, []));
       } catch {
         setMetrics({
@@ -88,8 +89,8 @@ export default function Home() {
       setRefreshing(true);
       try {
         const [validations, regulations] = await Promise.all([
-          api.getValidations(),
-          api.getRegulations(),
+          apiClient.getValidations(),
+          apiClient.getRegulations(),
         ]);
         if (cancelled) return;
         setMetrics(computeMetrics(validations, regulations));
@@ -97,7 +98,7 @@ export default function Home() {
       } catch {
         if (cancelled) return;
         try {
-          const validations = await api.getValidations();
+          const validations = await apiClient.getValidations();
           if (cancelled) return;
           setMetrics(computeMetrics(validations, []));
         } catch {
@@ -226,11 +227,11 @@ export default function Home() {
         {/* Two-column: HITL + Pipeline */}
         <div className="grid gap-6 lg:grid-cols-2">
           <HITLApprovalCard />
-          <PipelineActivity />
+          <PipelineActivity taskId={activeTaskId} />
         </div>
 
         {/* Policy Repository */}
-        <PolicyDragAndDrop />
+        <PolicyDragAndDrop onIngestStart={setActiveTaskId} />
       </main>
     </div>
   );

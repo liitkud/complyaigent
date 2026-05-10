@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import {
-  api,
+  apiClient,
   type ValidateResponse,
   type ValidationResult,
 } from "@/services/api";
@@ -64,7 +64,7 @@ export default function ValidatePage() {
   const pollResult = useCallback((validationId: string) => {
     intervalRef.current = setInterval(async () => {
       try {
-        const r = await api.getValidation(validationId);
+        const r = await apiClient.getValidation(validationId);
         setResult(r);
         clearPoll();
       } catch {
@@ -84,7 +84,7 @@ export default function ValidatePage() {
     clearPoll();
 
     try {
-      const res = await api.validate({
+      const res = await apiClient.validate({
         code_snippet: codeSnippet,
         rule_id: ruleId,
         context: context || undefined,

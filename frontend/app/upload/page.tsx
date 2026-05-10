@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { api, type IngestResponse } from "@/services/api";
+import { apiClient, type IngestResponse } from "@/services/api";
 import {
   Upload,
   FileText,
@@ -26,7 +26,7 @@ export default function UploadPage() {
     setError(null);
     setUsingMock(false);
     try {
-      const res = await api.ingest(file);
+      const res = await apiClient.ingest(file);
       setResult(res);
     } catch {
       // Fallback to mock response

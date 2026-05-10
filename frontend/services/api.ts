@@ -195,30 +195,42 @@ export interface SystemHealth {
   uptime: string;
 }
 
+// ── API Wrapper ─────────────────────────────────────────
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export const apiFetch = async <T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> => {
+  const res = await fetch(`${API_BASE}${path}`, init);
+  if (!res.ok) throw new Error(res.statusText);
+  return res.json();
+};
+
+// Legacy compatibility for the user's specific snippet request
+export const api = async (path: string) => {
+  const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) throw new Error(res.statusText);
+  return res.json();
+};
+
 // ── Helpers ────────────────────────────────────────────
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-async function fetchJSON<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, init);
-  if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
-  return res.json();
-}
 
 // ── API Client ─────────────────────────────────────────
 
-export const api = {
+export const apiClient = {
   // ── Real backend endpoints ───────────────────────────
 
   /** GET /health */
-  healthCheck: () => fetchJSON<HealthResponse>("/health"),
+  healthCheck: () => apiFetch<HealthResponse>("/health"),
 
   /** POST /ingest — upload PDF/markdown file */
   ingest: (file: File): Promise<IngestResponse> => {
     const formData = new FormData();
     formData.append("file", file);
-    return fetchJSON<IngestResponse>("/ingest", {
+    return apiFetch<IngestResponse>("/ingest", {
       method: "POST",
       body: formData,
     });
@@ -226,24 +238,24 @@ export const api = {
 
   /** GET /ingest/{task_id} — poll ingestion progress */
   getIngestStatus: (taskId: string) =>
-    fetchJSON<IngestStatus>(`/ingest/${encodeURIComponent(taskId)}`),
+    apiFetch<IngestStatus>(`/ingest/${encodeURIComponent(taskId)}`),
 
   /** GET /regulation — list all ingested regulations */
-  getRegulations: () => fetchJSON<RegulationSummary[]>("/regulation"),
+  getRegulations: () => apiFetch<RegulationSummary[]>("/regulation"),
 
   /** GET /regulation/{id} — full manifest for one regulation */
   getRegulation: (id: string) =>
-    fetchJSON<GovernanceManifest>(`/regulation/${encodeURIComponent(id)}`),
+    apiFetch<GovernanceManifest>(`/regulation/${encodeURIComponent(id)}`),
 
   /** GET /reg — all active rules grouped by bucket */
-  getRules: () => fetchJSON<GovernanceManifest>("/reg"),
+  getRules: () => apiFetch<GovernanceManifest>("/reg"),
 
   /** GET /corp — org_constitution rules only */
-  getCorpRules: () => fetchJSON<GovernanceManifest>("/corp"),
+  getCorpRules: () => apiFetch<GovernanceManifest>("/corp"),
 
   /** POST /validate — submit code for risk validation */
   validate: (req: ValidateRequest) =>
-    fetchJSON<ValidateResponse>("/validate", {
+    apiFetch<ValidateResponse>("/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
@@ -251,12 +263,12 @@ export const api = {
 
   /** GET /validate/{id} — get validation result */
   getValidation: (id: string) =>
-    fetchJSON<ValidationResult>(`/validate/${encodeURIComponent(id)}`),
+    apiFetch<ValidationResult>(`/validate/${encodeURIComponent(id)}`),
 
   /** GET /validate — list all validation results (with mock fallback) */
   getValidations: async (): Promise<ValidationResult[]> => {
     try {
-      return await fetchJSON<ValidationResult[]>("/validate");
+      return await apiFetch<ValidationResult[]>("/validate");
     } catch {
       // Mock fallback — realistic scan history for dashboard
       await delay(300);
@@ -358,7 +370,7 @@ export const api = {
 
   getStatus: async (): Promise<{ status: string }> => {
     try {
-      const h = await fetchJSON<HealthResponse>("/health");
+      const h = await apiFetch<HealthResponse>("/health");
       return { status: h.status };
     } catch {
       await delay(300);

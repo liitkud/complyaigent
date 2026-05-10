@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  api,
+  apiClient,
   type GovernanceManifest,
   type RegulationSummary,
 } from "@/services/api";
@@ -219,7 +219,10 @@ export default function DashboardPage() {
     setRefreshing(true);
     setError(null);
     try {
-      const [m, r] = await Promise.all([api.getRules(), api.getRegulations()]);
+      const [m, r] = await Promise.all([
+        apiClient.getRules(),
+        apiClient.getRegulations(),
+      ]);
       setManifest(m);
       setRegulations(r);
       setUsingMock(false);
@@ -240,8 +243,8 @@ export default function DashboardPage() {
       setRefreshing(true);
       try {
         const [m, r] = await Promise.all([
-          api.getRules(),
-          api.getRegulations(),
+          apiClient.getRules(),
+          apiClient.getRegulations(),
         ]);
         if (cancelled) return;
         setManifest(m);

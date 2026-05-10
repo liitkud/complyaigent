@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { api, type IngestStatus } from "@/services/api";
+import { apiClient, type IngestStatus } from "@/services/api";
 import { Loader2, CheckCircle2, ArrowLeft, WifiOff } from "lucide-react";
 import Link from "next/link";
 
@@ -91,7 +91,7 @@ export default function IngestStatusPage() {
         return;
       }
       try {
-        const s = await api.getIngestStatus(id);
+        const s = await apiClient.getIngestStatus(id);
         if (cancelled) return;
         setStatus(s);
         if (s.status === "complete" && intervalRef.current) {

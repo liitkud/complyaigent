@@ -1,29 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type PipelineEvent } from "@/services/api";
+import { api, type IngestStatus } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { Workflow } from "lucide-react";
+import { Workflow, Loader2 } from "lucide-react";
 
-const statusVariant = (s: string) =>
-  s === "success"
-    ? "success"
-    : s === "running"
-      ? "processing"
-      : s === "failed"
-        ? "danger"
-        : "warning";
+const mockData: IngestStatus[] = [
+  {
+    task_id: "demo-task",
+    status: "complete",
+    progress_pct: 100,
+    current_stage: "LLM Normalization",
+    eta_seconds: 0,
+  },
+];
 
-export default function PipelineActivity() {
-  const [events, setEvents] = useState<PipelineEvent[]>([]);
+export default function PipelineActivity({ taskId }: { taskId?: string }) {
+  const [status, setStatus] = useState<IngestStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getPipelineEvents().then((e) => {
-      setEvents(e);
+    if (!taskId) {
       setLoading(false);
-    });
-  }, []);
+      return;
+    }
+
+    const poll = async () => {
+      try {
+        const s: IngestStatus = await api(`/ingest/${taskId}`);
+        setStatus(s);
+        if (s.status !== "complete" && s.status !== "failed") {
+          setTimeout(poll, 3000);
+        }
+      } catch {
+        // Fallback to mock on error
+        setStatus(mockData[0]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    poll();
+  }, [taskId]);
 
   if (loading) {
     return (
@@ -52,21 +70,19 @@ export default function PipelineActivity() {
         </div>
       </div>
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {events.map((e) => (
-          <div key={e.id} className="flex items-start gap-3 px-5 py-3">
+        {status ? (
+          <div className="flex items-start gap-3 px-5 py-3">
             <div
               className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
               style={{
                 background:
-                  e.status === "success"
+                  status.status === "complete"
                     ? "#10b981"
-                    : e.status === "running"
-                      ? "#8b5cf6"
-                      : e.status === "failed"
-                        ? "#ef4444"
-                        : "#f59e0b",
+                    : status.status === "failed"
+                      ? "#ef4444"
+                      : "#8b5cf6",
                 boxShadow:
-                  e.status === "running"
+                  status.status !== "complete" && status.status !== "failed"
                     ? "0 0 6px rgba(139,92,246,0.5)"
                     : undefined,
               }}
@@ -74,25 +90,46 @@ export default function PipelineActivity() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {e.stage}
+                  {status.current_stage}
                 </span>
                 <StatusBadge
-                  label={e.status}
-                  variant={statusVariant(e.status)}
+                  label={status.status}
+                  variant={
+                    status.status === "complete"
+                      ? "success"
+                      : status.status === "failed"
+                        ? "danger"
+                        : "processing"
+                  }
                 />
               </div>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
-                {e.message}
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div
+                  className="h-full bg-indigo-500 transition-all duration-500"
+                  style={{ width: `${status.progress_pct}%` }}
+                />
+              </div>
+              <p className="mt-1 text-[10px] text-slate-400">
+                Task ID: {status.task_id} • {status.progress_pct}% complete
               </p>
             </div>
-            <span className="shrink-0 text-[11px] text-slate-400">
-              {new Date(e.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
           </div>
-        ))}
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="rounded-full bg-slate-50 p-3 dark:bg-slate-800/50">
+              <Workflow
+                size={24}
+                className="text-slate-300 dark:text-slate-600"
+              />
+            </div>
+            <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+              System Idle
+            </p>
+            <p className="text-xs text-slate-400">
+              No active ingestion pipeline
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

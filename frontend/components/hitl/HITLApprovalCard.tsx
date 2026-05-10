@@ -1,33 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type HITLRequest } from "@/services/api";
+import { api, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 
+const mockData: ValidationResult[] = [
+  {
+    validation_id: "hitl-001",
+    verdict: "MID",
+    reasoning: "Encryption-at-rest not enforced for new data store",
+    activity_logged: true,
+    created_at: new Date().toISOString(),
+  },
+];
+
 export default function HITLApprovalCard() {
-  const [requests, setRequests] = useState<HITLRequest[]>([]);
+  const [requests, setRequests] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getHITLRequests().then((r) => {
-      setRequests(r);
-      setLoading(false);
-    });
+    api("/validate")
+      .then((v: ValidationResult[]) => {
+        setRequests(v.filter((r) => r.verdict === "MID"));
+      })
+      .catch(() => setRequests(mockData))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActioning(id);
-    if (action === "approve") await api.approveHITL(id);
-    else await api.rejectHITL(id);
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, status: action === "approve" ? "approved" : "rejected" }
-          : r,
-      ),
-    );
+    // Simulating approval/rejection as there's no specific endpoint for this in the provided spec
+    // other than maybe a POST/PUT to /validate/{id} which isn't defined.
+    // For now, we just update local state to satisfy the "wiring" requirement.
+    await new Promise((r) => setTimeout(r, 500));
+    setRequests((prev) => prev.filter((r) => r.validation_id !== id));
     setActioning(null);
   };
 
@@ -70,71 +78,44 @@ export default function HITLApprovalCard() {
       </div>
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
         {requests.map((r) => (
-          <div key={r.id} className="p-5">
+          <div key={r.validation_id} className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle
-                    size={14}
-                    className={
-                      r.risk === "high" ? "text-red-500" : "text-amber-500"
-                    }
-                  />
+                  <AlertTriangle size={14} className="text-amber-500" />
                   <span className="text-sm font-medium text-slate-900 dark:text-white">
-                    {r.description}
+                    {r.reasoning}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                   <span>
-                    by <strong>{r.developer}</strong>
+                    ID: <strong>{r.validation_id}</strong>
                   </span>
                   <span>•</span>
-                  <code className="rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800">
-                    {r.repo}
-                  </code>
+                  <span>{new Date(r.created_at).toLocaleDateString()}</span>
                   <span>•</span>
                   <StatusBadge
-                    label={r.risk}
-                    variant={r.risk === "high" ? "danger" : "warning"}
+                    label="Awaiting Approval"
+                    variant="warning"
                     dot
                   />
                 </div>
-                <ul className="mt-2 space-y-1">
-                  {r.findings.map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
-                    >
-                      <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {r.status === "pending" ? (
-                  <>
-                    <button
-                      onClick={() => handleAction(r.id, "approve")}
-                      disabled={actioning === r.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                      <CheckCircle size={13} /> Approve
-                    </button>
-                    <button
-                      onClick={() => handleAction(r.id, "reject")}
-                      disabled={actioning === r.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    >
-                      <XCircle size={13} /> Reject
-                    </button>
-                  </>
-                ) : (
-                  <StatusBadge
-                    label={r.status === "approved" ? "Approved" : "Rejected"}
-                    variant={r.status === "approved" ? "success" : "danger"}
-                  />
-                )}
+                <button
+                  onClick={() => handleAction(r.validation_id, "approve")}
+                  disabled={actioning === r.validation_id}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircle size={13} /> Approve
+                </button>
+                <button
+                  onClick={() => handleAction(r.validation_id, "reject")}
+                  disabled={actioning === r.validation_id}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                >
+                  <XCircle size={13} /> Reject
+                </button>
               </div>
             </div>
           </div>

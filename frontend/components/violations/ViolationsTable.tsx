@@ -1,38 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type Violation } from "@/services/api";
+import { api, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 
+const mockData: ValidationResult[] = [
+  {
+    validation_id: "val-001",
+    verdict: "HIGH",
+    reasoning: "AWS Access Key (AKIA...) detected in config.yaml",
+    activity_logged: true,
+    created_at: new Date().toISOString(),
+  },
+];
+
 const severityMap = {
-  critical: "danger",
-  high: "warning",
-  medium: "info",
-  low: "neutral",
+  HIGH: "danger",
+  MID: "warning",
+  LOW: "success",
 } as const;
-
-const statusMap = {
-  blocked: "danger",
-  warned: "warning",
-  approved: "success",
-  pending: "processing",
-} as const;
-
-const scannerIcons: Record<string, string> = {
-  Gitleaks: "🔑",
-  Presidio: "👤",
-  PolicyGate: "🛡️",
-};
 
 export default function ViolationsTable() {
-  const [violations, setViolations] = useState<Violation[]>([]);
+  const [violations, setViolations] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getViolations().then((v) => {
-      setViolations(v);
-      setLoading(false);
-    });
+    api("/validate")
+      .then((v: ValidationResult[]) => setViolations(v))
+      .catch(() => setViolations(mockData))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -71,60 +67,49 @@ export default function ViolationsTable() {
                 Time
               </th>
               <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Developer
+                Validation ID
               </th>
               <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Repository
+                Description / Reasoning
               </th>
               <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Scanner
+                Verdict
               </th>
               <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Description
-              </th>
-              <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Severity
-              </th>
-              <th className="px-5 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                Status
+                Logged
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {violations.map((v) => (
               <tr
-                key={v.id}
+                key={v.validation_id}
                 className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
               >
                 <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-500 dark:text-slate-400">
-                  {new Date(v.timestamp).toLocaleTimeString([], {
+                  {new Date(v.created_at).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </td>
                 <td className="whitespace-nowrap px-5 py-3 font-medium text-slate-700 dark:text-slate-300">
-                  {v.developer}
-                </td>
-                <td className="whitespace-nowrap px-5 py-3">
-                  <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                    {v.repo}
-                  </code>
-                </td>
-                <td className="whitespace-nowrap px-5 py-3 text-xs">
-                  {v.scanner}
+                  <code className="text-[10px]">{v.validation_id}</code>
                 </td>
                 <td className="max-w-xs truncate px-5 py-3 text-xs text-slate-600 dark:text-slate-400">
-                  {v.description}
+                  {v.reasoning}
                 </td>
                 <td className="whitespace-nowrap px-5 py-3">
                   <StatusBadge
-                    label={v.severity}
-                    variant={severityMap[v.severity]}
+                    label={v.verdict}
+                    variant={severityMap[v.verdict]}
                     dot
                   />
                 </td>
                 <td className="whitespace-nowrap px-5 py-3">
-                  <StatusBadge label={v.status} variant={statusMap[v.status]} />
+                  <StatusBadge
+                    label={v.activity_logged ? "Logged" : "Local Only"}
+                    variant={v.activity_logged ? "success" : "neutral"}
+                  />
                 </td>
               </tr>
             ))}

@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   api,
-  type Policy,
+  apiFetch,
+  type RegulationSummary,
   type IngestResponse,
-  type LegacyIngestResponse,
+  type IngestStatus,
 } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import {
@@ -16,44 +17,73 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 
-export default function PolicyDragAndDrop() {
-  const [policies, setPolicies] = useState<Policy[]>([]);
+const mockData: RegulationSummary[] = [
+  {
+    id: "p-001",
+    source_name: "SOC2 Type II Controls",
+    source_type: "org_guideline",
+    ingested_at: "2026-05-08T09:00:00Z",
+    version: "1.0",
+  },
+];
+
+export default function PolicyDragAndDrop({
+  onIngestStart,
+}: {
+  onIngestStart?: (taskId: string) => void;
+}) {
+  const [policies, setPolicies] = useState<RegulationSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [ingestResult, setIngestResult] = useState<LegacyIngestResponse | null>(
-    null,
-  );
+  const [ingestStatus, setIngestStatus] = useState<IngestStatus | null>(null);
   const [jsonExpanded, setJsonExpanded] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.getPolicies().then((p) => {
-      setPolicies(p);
-      setLoading(false);
-    });
+    api("/regulation")
+      .then((p: RegulationSummary[]) => setPolicies(p))
+      .catch(() => setPolicies(mockData))
+      .finally(() => setLoading(false));
   }, []);
+
+  const pollStatus = async (taskId: string) => {
+    try {
+      const status: IngestStatus = await api(`/ingest/${taskId}`);
+      setIngestStatus(status);
+      if (status.status !== "complete" && status.status !== "failed") {
+        setTimeout(() => pollStatus(taskId), 2000);
+      } else if (status.status === "complete") {
+        // Refresh list
+        const updated = await api("/regulation");
+        setPolicies(updated);
+      }
+    } catch (err) {
+      console.error("Polling failed", err);
+    }
+  };
 
   const handleFile = useCallback(async (file: File) => {
     setUploading(true);
-    setIngestResult(null);
-    const result = await api.ingestPolicy(file);
-    setIngestResult(result);
-    setPolicies((prev) => [
-      {
-        id: result.id,
-        name: result.name,
-        source: "upload",
-        framework: result.framework,
-        controlsExtracted: result.controlsExtracted,
-        status: result.status,
-        ingestedAt: result.ingestedAt,
-      },
-      ...prev,
-    ]);
-    setUploading(false);
+    setIngestStatus(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      // Use apiFetch directly for POST as the wrapper is GET only
+      const res: IngestResponse = await apiFetch("/ingest", {
+        method: "POST",
+        body: formData,
+      });
+      if (onIngestStart) onIngestStart(res.task_id);
+      pollStatus(res.task_id);
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploading(false);
+    }
   }, []);
 
   const handleDrop = useCallback(
@@ -109,16 +139,12 @@ export default function PolicyDragAndDrop() {
               Policy Repository
             </h3>
             <p className="text-xs text-slate-400">
-              RegIntel ingestion via{" "}
-              <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px] font-mono dark:bg-slate-800">
-                /ingest
-              </code>
+              Active regulations in manifest
             </p>
           </div>
         </div>
         <span className="text-xs text-slate-400">
-          {policies.reduce((a, p) => a + p.controlsExtracted, 0)} controls
-          extracted
+          {policies.length} sources
         </span>
       </div>
 
@@ -141,7 +167,12 @@ export default function PolicyDragAndDrop() {
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        disabled={uploading}
+        disabled={
+          uploading ||
+          (ingestStatus !== null &&
+            ingestStatus.status !== "complete" &&
+            ingestStatus.status !== "failed")
+        }
         className={`mx-5 mt-4 flex w-[calc(100%-2.5rem)] cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
           dragOver
             ? "border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10"
@@ -154,14 +185,41 @@ export default function PolicyDragAndDrop() {
         />
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {uploading
-            ? "Calling /ingest..."
-            : "Drag & drop policy files (PDF, Markdown)"}
+            ? "Uploading..."
+            : ingestStatus &&
+                ingestStatus.status !== "complete" &&
+                ingestStatus.status !== "failed"
+              ? `Processing: ${ingestStatus.current_stage}`
+              : "Drag & drop policy files (PDF, Markdown)"}
         </p>
         <p className="text-[10px] text-slate-400">or click to browse</p>
       </button>
 
+      {/* Progress Stepper */}
+      {ingestStatus &&
+        ingestStatus.status !== "complete" &&
+        ingestStatus.status !== "failed" && (
+          <div className="mx-5 mt-3 space-y-2 rounded-lg border border-blue-100 bg-blue-50/30 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400">
+                <Loader2 size={14} className="animate-spin" />
+                {ingestStatus.current_stage}
+              </span>
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                {ingestStatus.progress_pct}%
+              </span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <div
+                className="h-full bg-blue-500 transition-all duration-500"
+                style={{ width: `${ingestStatus.progress_pct}%` }}
+              />
+            </div>
+          </div>
+        )}
+
       {/* Ingest result JSON panel */}
-      {ingestResult && (
+      {ingestStatus && ingestStatus.status === "complete" && (
         <div className="mx-5 mt-3 rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/10">
           <div className="flex items-center justify-between px-3 py-2">
             <button
@@ -173,20 +231,19 @@ export default function PolicyDragAndDrop() {
               ) : (
                 <ChevronRight size={14} />
               )}
-              /ingest response — {ingestResult.controlsExtracted} controls
-              extracted
+              Ingestion Complete
             </button>
             <button
-              onClick={() => setIngestResult(null)}
+              onClick={() => setIngestStatus(null)}
               className="rounded p-0.5 text-emerald-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-300"
             >
               <X size={14} />
             </button>
           </div>
           {jsonExpanded && (
-            <pre className="max-h-64 overflow-auto border-t border-emerald-200 px-3 py-2 font-mono text-[11px] leading-relaxed text-emerald-800 dark:border-emerald-800 dark:text-emerald-300">
-              {JSON.stringify(ingestResult, null, 2)}
-            </pre>
+            <div className="border-t border-emerald-200 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-800 dark:text-emerald-300">
+              Policy has been processed and is now active in the repository.
+            </div>
           )}
         </div>
       )}
@@ -204,24 +261,22 @@ export default function PolicyDragAndDrop() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {p.name}
+                  {p.source_name}
                 </p>
                 <div className="flex items-center gap-2 text-[11px] text-slate-400">
                   <span className="inline-flex items-center gap-1">
-                    {sourceIcon(p.source)} {p.source}
+                    <Globe size={11} /> {p.source_type}
                   </span>
                   <span>•</span>
-                  <span>{p.framework}</span>
+                  <span>v{p.version}</span>
                   <span>•</span>
-                  <span>{p.controlsExtracted} controls</span>
+                  <span>
+                    Ingested {new Date(p.ingested_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
-            <StatusBadge
-              label={p.status}
-              variant={statusVariant(p.status)}
-              dot
-            />
+            <StatusBadge label="Active" variant="success" dot />
           </div>
         ))}
       </div>
