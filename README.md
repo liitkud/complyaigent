@@ -1,7 +1,7 @@
 # 🛡️ ComplyAIgent
 
 **"From Periodic Audit to Continuous Certainty."**
-*Agentic DevSecOps compliance platform — policies to guardrails.*
+*Agentic DevSecOps compliance platform — policies to guardrails, built on AMD.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![AMD Hackathon 2026](https://img.shields.io/badge/AMD-Developer%20Hackathon%202026-ED1C24)](https://www.amd.com/en/corporate/hackathon.html)
@@ -10,8 +10,9 @@
 
 ## Overview
 
-ComplyAIgent ingests internal policies and external regulations, normalises them into machine‑readable guardrails, and enforces them automatically across your delivery pipeline.
-*Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point‑in‑time panic to always‑on certainty.*
+ComplyAIgent ingests internal policies and external regulations, normalises them into machine‑readable guardrails, and enforces them automatically across your delivery pipeline. *Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point‑in‑time panic to always‑on certainty.*
+
+**Built in 5 days for the AMD Developer Hackathon 2026.**
 
 ---
 
@@ -19,49 +20,48 @@ ComplyAIgent ingests internal policies and external regulations, normalises them
 
 ```mermaid
 flowchart TB
-    DEV["👤 Developer\n(git push)"] --> HOOK["🖥️ CLI Pre‑Push Hook"]
-    HOOK --> SCAN["/scan"]
+    DEV["👤 Developer\n(git push)"] --> CLI["🖥️ pg CLI\n(pre‑push hook)"]
+    CLI --> VALIDATE["/validate"]
 
     CO["👤 Compliance Officer\n(upload policy)"] --> INGEST["/ingest"]
     SCRAPE["🌐 Regulatory Scraper\n(daily cron)"] --> INGEST
 
     subgraph RegIntel ["📥 RegIntel Agent"]
-        INGEST --> RAG["RAG Pipeline\n(chunk → embed → retrieve)"]
-        RAG --> NORM["LLM Normalization\n(control extraction)"]
+        INGEST --> COMPARATOR["Comparator\n(dedup: anchors → MinHash → LLM)"]
+        COMPARATOR --> COMPACTOR["Compactor\n(strip preamble, inline context)"]
+        COMPACTOR --> CATEGORIZER["Categorizer\n(A1/A2/B/C buckets)"]
     end
 
     subgraph PolicyGate ["🛡️ PolicyGate Agent"]
-        SCAN --> GITLEAKS["Gitleaks\n(secrets)"]
-        SCAN --> PRESIDIO["Presidio\n(PII)"]
-        SCAN --> HITL["LangGraph HITL\n(interrupt)"]
-        HITL --> APPROVE["/approve\n(manager resume)"]
+        VALIDATE --> SCAN["Pattern Scanner\n(Gitleaks + regex)"]
+        SCAN --> HITL["LangGraph HITL\n(interrupt → approve)"]
     end
 
-    GPU["🧠 AMD MI300X\nvLLM + Llama-3.1-70B BF16"] --- NORM
-    PG["🗄️ PostgreSQL\n(policies, config)"] --- RegIntel
+    LLM["🧠 LLM\nGroq API + Qwen"] --- CATEGORIZER
+    PG["🗄️ PostgreSQL\n(policies, rules, logs)"] --- RegIntel
     PG --- PolicyGate
-    LOKI["📜 Loki\n(immutable logs)"] --- PolicyGate
-    LOKI --> GRAFANA["📊 Grafana\n(metrics dashboard)"]
-    PG --> NEXT["🖥️ Next.js Dashboard"]
-    LOKI --> NEXT
+    PG --> DASHBOARD["🖥️ Next.js Dashboard"]
+    DASHBOARD --> CO
+    CLI --> DEV
 ```
 
-1. **RegIntel** ingests policies (manual upload or scraper), runs a RAG pipeline, and stores structured controls in PostgreSQL.
-2. **PolicyGate** reads those policies, scans every `git push` for secrets and PII, and blocks or warns accordingly.
-3. **Human‑in‑the‑Loop** pauses medium‑risk actions for manager approval via LangGraph – fully logged to Loki.
+1. **RegIntel** ingests policies (PDF/Markdown upload or scraper), deduplicates via three‑tier Comparator, compacts via LLM, and categorizes rules into A1 (Scannable), A2 (Actionable), B (Infra), C (Semantic) buckets — stored in PostgreSQL.
+2. **PolicyGate** serves rules to the CLI and validates flagged code via the `/validate` endpoint with LLM‑backed reasoning.
+3. **The `pg` CLI** fetches A1 regex rules, scans staged diffs locally with Gitleaks + built‑in patterns + entropy scoring, and blocks high‑risk pushes before they reach remote.
+4. **Human‑in‑the‑Loop** pauses medium‑risk validations for manager approval via LangGraph interrupts — fully logged.
 
 ---
 
 ## Features
 
-- 🔍 **Pre‑push secret & PII detection** (Gitleaks + Microsoft Presidio)
-- 📥 **Policy intake** from PDF / Markdown uploads and regulatory website scraping
-- 🧠 **AI‑powered normalisation** – LLM extracts actionable controls into JSON
-- 🛡️ **Automatic enforcement** – policies become guardrails in Git and CI/CD
-- 🧑‍⚖️ **Human‑in‑the‑loop approval** with full audit trail
-- 📊 **Real‑time dashboards** – compliance health, violations, drift alerts
+- 🔍 **Pre‑push secret & pattern detection** — Gitleaks + custom regex + entropy scoring
+- 📥 **Policy intake** — PDF / Markdown upload and regulatory website scraping
+- 🧠 **AI‑powered classification** — LLM extracts rules into A1/A2/B/C buckets with regex generation
+- 🛡️ **Automatic enforcement** — CLI blocks high‑risk commits before push; backend validates uncertain cases
+- 🧑‍⚖️ **Human‑in‑the‑loop approval** — LangGraph interrupts for medium‑risk decisions with full audit trail
+- 📊 **Real‑time dashboard** — compliance health, violation history, pending approvals, policy inventory
 
-> **Coming next:** AuditGen (one‑click SOC2/GDPR evidence packs), insider threat guardrails, enterprise multi‑tenancy.
+> **Roadmap:** AuditGen (one‑click SOC2/GDPR evidence packs), insider threat guardrails, enterprise multi‑tenancy.
 
 ---
 
@@ -69,13 +69,12 @@ flowchart TB
 
 | Layer             | Technology                                  |
 | :---------------- | :------------------------------------------ |
-| AI Model          | Qwen3.5-397B-A17B-FP8        |
+| AI Model          | Qwen 3.5 (via Groq API)                     |
 | Agent Framework   | LangGraph (Python)                          |
 | Backend           | FastAPI, Docker                             |
-| Database          | PostgreSQL, DuckDB (analytics)              |
-| Observability     | Grafana, Prometheus, Loki                   |
+| Database          | PostgreSQL                                  |
 | Frontend          | Next.js, TailwindCSS                        |
-| CLI Hook          | Go (`policygate`)                           |
+| CLI               | Go (`pg`)                                   |
 | CI/CD             | GitHub Actions, Docker Compose              |
 
 ---
@@ -86,14 +85,19 @@ flowchart TB
 complyaigent/
 ├── backend/
 │   ├── app/
-│   │   ├── regintel/          # Ingestion, RAG, policy normalisation
-│   │   └── policygate/        # Scanning, HITL, enforcement API
+│   │   ├── api/               # REST endpoints (ingest, manifest, validate)
+│   │   ├── models/            # SQLModel entities
+│   │   ├── services/          # Comparator, Compactor, Categorizer, Validator
+│   │   ├── core/              # Config, DB, logging
+│   │   └── worker/            # Background task orchestration
 │   └── tests/
-├── cli/                       # Pre‑push CLI hook
+├── cli/                       # Go CLI (pg) — pre‑push hook
 ├── frontend/                  # Next.js dashboard
 ├── docker/
-│   └── docker-compose.yml     # One‑command local stack
+│   ├── docker-compose.yml     # Development stack
+│   └── docker-compose.prod.yml # Production‑like stack
 ├── docs/                      # PRD, architecture diagrams, pitch deck
+├── specs/                     # spec‑kit artifacts (spec, plan, tasks)
 ├── .github/workflows/         # CI
 ├── README.md
 └── LICENSE
@@ -101,34 +105,41 @@ complyaigent/
 
 ---
 
-## Getting Started (Local MVP)
+## Getting Started
 
 ```bash
 # 1. Clone and enter the repo
 git clone https://github.com/kuya-carlo/complyaigent.git && cd complyaigent
 
 # 2. Start all services
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml up --build -d
 
-# 3. Verify health
-curl http://localhost:8000/health         # → {"status":"ok"}
-open http://localhost:3000                # Grafana
-open http://localhost:3001                # Next.js dashboard
+# 3. Verify
+curl http://localhost:8000/health          # → {"status":"healthy"}
+curl http://localhost:8000/reg             # → {"buckets": {"A1": [...], ...}}
+
+# 4. Ingest a policy
+curl -X POST http://localhost:8000/ingest \
+  -F "file=@docs/constitution.md"
+
+# 5. Poll until complete
+curl http://localhost:8000/ingest/{task_id}
+
+# 6. Fetch rules with the CLI
+cd cli && go build -o pg . && ./pg fetch
+
+# 7. Scan a commit
+./pg scan
 ```
 
----
-
-## Frontend Development
-
-To start the frontend locally:
+### Frontend Development
 
 ```bash
 cd frontend
 npm install
 npm run dev
+# → http://localhost:3001
 ```
-
-The app will be available at http://localhost:3001 (or the port specified in your config).
 
 ---
 
@@ -136,30 +147,35 @@ The app will be available at http://localhost:3001 (or the port specified in you
 
 | Name | Role |
 | :--- | :--- |
-| Karlo Santos | Infra/DevOps Lead, system glue |
-| Alfeo (Nana) | RegIntel backend (FastAPI, RAG, LangGraph) |
-| Ellah | AI & data engineering, prompt design |
-| Glenn | Frontend lead (Next.js, TailwindCSS) |
-| Jepoy | PolicyGate backend (scanning, HITL) |
-| Leofer | Design, slide deck, demo video |
+| @kuya-carlo | Infra/DevOps Lead, CLI, system glue |
+| @NanaMein | RegIntel backend (FastAPI, RAG, LangGraph) |
+| @donutellah | AI & data engineering, prompt design |
+| @itsm3Glenn | Frontend lead (Next.js, TailwindCSS) |
+| @Polqt | PolicyGate backend (scanning, validation) |
 
 ---
 
 ## Hackathon Context
 
-**AMD Developer Hackathon – May 4–10, 2026**
+**AMD Developer Hackathon — May 4–10, 2026**
 *Submission deadline: May 10, 5:00 AM PHT*
+
+Built with AMD-ready architecture. LLM workloads run via API (Groq) during the hackathon; the stack is containerized and deployable to AMD MI300X instances for full‑precision inference with ROCm and vLLM.
 
 ---
 
 ## Roadmap
 
-- [ ] **AuditGen** – auto‑generate framework‑mapped evidence packs
-- [ ] **Insider threat guardrails** – ephemeral credentials, access anomaly detection
-- [ ] **Enterprise SaaS** – SSO, dedicated tenants
+- [ ] **AuditGen** — auto‑generate framework‑mapped evidence packs (SOC2, GDPR, PCI‑DSS)
+- [ ] **Insider threat guardrails** — ephemeral credentials, access anomaly detection
+- [ ] **Enterprise SaaS** — SSO, dedicated tenants, on‑premise deployment
 
 ---
 
 ## License
 
-MIT – see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
+
+---
+
+*Built with ❤️, caffeine, and a lot of `--no-verify`.*
