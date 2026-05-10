@@ -50,7 +50,7 @@ export default function PolicyDragAndDrop({
       .finally(() => setLoading(false));
   }, []);
 
-  const pollStatus = async (taskId: string) => {
+  const pollStatus = useCallback(async (taskId: string) => {
     try {
       const status: IngestStatus = await api(`/ingest/${taskId}`);
       setIngestStatus(status);
@@ -64,27 +64,30 @@ export default function PolicyDragAndDrop({
     } catch (err) {
       console.error("Polling failed", err);
     }
-  };
-
-  const handleFile = useCallback(async (file: File) => {
-    setUploading(true);
-    setIngestStatus(null);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      // Use apiFetch directly for POST as the wrapper is GET only
-      const res: IngestResponse = await apiFetch("/ingest", {
-        method: "POST",
-        body: formData,
-      });
-      if (onIngestStart) onIngestStart(res.task_id);
-      pollStatus(res.task_id);
-    } catch (err) {
-      console.error("Upload failed", err);
-    } finally {
-      setUploading(false);
-    }
   }, []);
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      setIngestStatus(null);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        // Use apiFetch directly for POST as the wrapper is GET only
+        const res: IngestResponse = await apiFetch("/ingest", {
+          method: "POST",
+          body: formData,
+        });
+        if (onIngestStart) onIngestStart(res.task_id);
+        pollStatus(res.task_id);
+      } catch (err) {
+        console.error("Upload failed", err);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onIngestStart, pollStatus],
+  );
 
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {
@@ -108,11 +111,6 @@ export default function PolicyDragAndDrop({
     },
     [handleFile],
   );
-
-  const sourceIcon = (source: string) =>
-    source === "upload" ? <Upload size={13} /> : <Globe size={13} />;
-  const statusVariant = (s: string) =>
-    s === "active" ? "success" : s === "processing" ? "processing" : "danger";
 
   if (loading) {
     return (

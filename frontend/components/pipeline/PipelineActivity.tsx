@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiClient, type IngestStatus } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { Workflow, Loader2 } from "lucide-react";
+import { Workflow } from "lucide-react";
 
 const mockData: IngestStatus[] = [
   {

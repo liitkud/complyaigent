@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Upload,
   Shield,
-  FileText,
   ShieldCheck,
   ChevronLeft,
   ChevronRight,

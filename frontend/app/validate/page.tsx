@@ -5,6 +5,10 @@ import {
   apiClient,
   type ValidateResponse,
   type ValidationResult,
+  type ScannableRule,
+  type ActionableRule,
+  type InfraRule,
+  type SemanticRule,
 } from "@/services/api";
 import { ShieldCheck, Loader2, Send, WifiOff } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -54,7 +58,9 @@ export default function ValidatePage() {
     null,
   );
   const [result, setResult] = useState<ValidationResult | null>(null);
-  const [availableRules, setAvailableRules] = useState<any[]>([]);
+  const [availableRules, setAvailableRules] = useState<
+    (ScannableRule | ActionableRule | InfraRule | SemanticRule)[]
+  >([]);
   const [usingMock, setUsingMock] = useState(false);
   const [loadingRules, setLoadingRules] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
