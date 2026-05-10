@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type ValidationResult } from "@/services/api";
+import { apiClient, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 
 const mockData: ValidationResult[] = [
@@ -11,6 +11,7 @@ const mockData: ValidationResult[] = [
     reasoning: "AWS Access Key (AKIA...) detected in config.yaml",
     activity_logged: true,
     created_at: new Date().toISOString(),
+    status: "complete",
   },
 ];
 
@@ -25,7 +26,8 @@ export default function ViolationsTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api("/validate")
+    apiClient
+      .getValidations()
       .then((v: ValidationResult[]) => setViolations(v))
       .catch(() => setViolations(mockData))
       .finally(() => setLoading(false));

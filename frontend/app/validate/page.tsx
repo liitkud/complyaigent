@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   apiClient,
   type ValidateResponse,
@@ -23,6 +23,7 @@ const mockVerdicts: ValidationResult[] = [
       "Hardcoded AWS access key detected in source. This matches scannable rule A1-001. The key pattern AKIA[A-Z0-9]{16} was found in the submitted snippet, which poses a critical credential-leak risk.",
     activity_logged: true,
     created_at: "2026-05-09T14:40:00Z",
+    status: "complete",
   },
   {
     validation_id: "",
@@ -31,6 +32,7 @@ const mockVerdicts: ValidationResult[] = [
       "The code uses a plaintext database connection string with embedded credentials. While not an AWS key, this violates the no-hardcoded-passwords policy (A1-003). Consider using environment variables or a secrets manager.",
     activity_logged: true,
     created_at: "2026-05-09T14:40:00Z",
+    status: "complete",
   },
   {
     validation_id: "",
@@ -39,6 +41,7 @@ const mockVerdicts: ValidationResult[] = [
       "No policy violations detected in the submitted code snippet. The code follows secure patterns and does not contain secrets, PII, or policy-violating constructs.",
     activity_logged: true,
     created_at: "2026-05-09T14:40:00Z",
+    status: "complete",
   },
 ];
 

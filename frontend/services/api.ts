@@ -19,7 +19,8 @@ export interface IngestStatus {
     | "comparing"
     | "compacting"
     | "categorizing"
-    | "complete";
+    | "complete"
+    | "failed";
   progress_pct: number;
   current_stage: string;
   eta_seconds: number | null;
@@ -116,6 +117,7 @@ export interface ValidationResult {
   reasoning: string;
   activity_logged: boolean;
   created_at: string;
+  status: "pending" | "approved" | "rejected" | "complete";
 }
 
 // ── Legacy UI Types (used by existing components) ──────
@@ -281,6 +283,7 @@ export const apiClient = {
           reasoning: "AWS Access Key (AKIA...) detected in config.yaml",
           activity_logged: true,
           created_at: `${today}T14:32:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-002",
@@ -288,6 +291,7 @@ export const apiClient = {
           reasoning: "Private RSA key committed to repository",
           activity_logged: true,
           created_at: `${today}T12:10:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-003",
@@ -295,6 +299,7 @@ export const apiClient = {
           reasoning: "Encryption-at-rest not enforced for new data store",
           activity_logged: true,
           created_at: `${today}T11:55:00Z`,
+          status: "pending",
         },
         {
           validation_id: "val-004",
@@ -302,6 +307,7 @@ export const apiClient = {
           reasoning: "Email addresses found in debug log output",
           activity_logged: true,
           created_at: `${today}T13:45:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-005",
@@ -309,6 +315,7 @@ export const apiClient = {
           reasoning: "Code follows secure patterns — no violations detected",
           activity_logged: true,
           created_at: `${today}T10:00:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-006",
@@ -316,6 +323,7 @@ export const apiClient = {
           reasoning: "API authentication correctly enforced on all routes",
           activity_logged: true,
           created_at: `${today}T09:30:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-007",
@@ -324,6 +332,7 @@ export const apiClient = {
             "Philippine national IDs found in test fixtures — PII risk",
           activity_logged: true,
           created_at: `${today}T10:30:00Z`,
+          status: "pending",
         },
         {
           validation_id: "val-008",
@@ -332,6 +341,7 @@ export const apiClient = {
             "No hardcoded credentials — environment variables used correctly",
           activity_logged: true,
           created_at: `${today}T08:15:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-009",
@@ -339,6 +349,7 @@ export const apiClient = {
           reasoning: "Database connection string contains plaintext password",
           activity_logged: true,
           created_at: `${today}T14:00:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-010",
@@ -347,6 +358,7 @@ export const apiClient = {
             "TLS 1.2 minimum enforced — transport encryption compliant",
           activity_logged: true,
           created_at: `${today}T07:45:00Z`,
+          status: "complete",
         },
         {
           validation_id: "val-011",
@@ -354,6 +366,7 @@ export const apiClient = {
           reasoning: "New S3 bucket created without encryption policy tag",
           activity_logged: true,
           created_at: `${today}T13:50:00Z`,
+          status: "pending",
         },
         {
           validation_id: "val-012",
@@ -361,6 +374,7 @@ export const apiClient = {
           reasoning: "Audit logging correctly configured for all admin actions",
           activity_logged: true,
           created_at: `${today}T06:30:00Z`,
+          status: "complete",
         },
       ];
     }

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
+from sqlmodel import Session, select, col
 from ..core.db import get_session
 from ..models.task import IngestionTask
 from ..models.rule import GovernanceRule, SourceCategory
@@ -8,25 +8,83 @@ from typing import Optional
 router = APIRouter()
 
 
+@router.get("/regulation")
+async def list_regulations(session: Session = Depends(get_session)):
+    """
+    List all ingested regulations.
+    """
+    tasks = session.exec(
+        select(IngestionTask).order_by(col(IngestionTask.created_at).desc())
+    ).all()
+
+    results = []
+    for task in tasks:
+        # Try to find rule category for source_type
+        first_rule = session.exec(
+            select(GovernanceRule).where(GovernanceRule.task_id == task.id)
+        ).first()
+
+        results.append(
+            {
+                "id": str(task.id),
+                "source_name": f"Regulation {str(task.id)[:8]}",
+                "source_type": first_rule.source_category
+                if first_rule
+                else "org_guideline",
+                "ingested_at": task.created_at.isoformat(),
+                "version": task.source_hash[:7],
+            }
+        )
+    return results
+
+
 @router.get("/regulation/{id}")
 async def get_manifest(id: str, session: Session = Depends(get_session)):
-    task = session.get(IngestionTask, id)
-    if not task:
+    from uuid import UUID
+
+    try:
+        task_id = UUID(id)
+    except ValueError:
         # Check if it's a rule ID instead
-        rule = session.get(GovernanceRule, id)
-        if rule:
-            return rule
+        try:
+            rule = session.get(GovernanceRule, UUID(id))
+            if rule:
+                return rule
+        except Exception:
+            pass
         raise HTTPException(status_code=404, detail="Manifest or Rule not found")
+
+    task = session.get(IngestionTask, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Manifest not found")
 
     rules = session.exec(
         select(GovernanceRule).where(GovernanceRule.task_id == task.id)
     ).all()
 
+    buckets = {"A1": [], "A2": [], "B": [], "C": []}
+    bucket_map = {
+        "A1_SCANNABLE": "A1",
+        "A2_ACTIONABLE": "A2",
+        "B_INFRA_METADATA": "B",
+        "C_SEMANTIC_GUIDANCE": "C",
+    }
+
+    for rule in rules:
+        b_key = bucket_map.get(rule.type)
+        if b_key:
+            buckets[b_key].append(rule)
+
     return {
-        "manifest_id": task.id,
-        "source_hash": task.source_hash,
-        "version_chain": task.version_chain,
-        "rules": rules,
+        "meta": {
+            "source_uuid": str(task.id),
+            "source_name": f"Regulation {str(task.id)[:8]}",
+            "source_type": rules[0].source_category if rules else "org_guideline",
+            "ingested_at": task.created_at.isoformat(),
+            "version": task.source_hash[:7],
+            "total_rules": len(rules),
+        },
+        "buckets": buckets,
     }
 
 

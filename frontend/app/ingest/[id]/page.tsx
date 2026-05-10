@@ -12,6 +12,7 @@ const stageOrder = [
   "compacting",
   "categorizing",
   "complete",
+  "failed",
 ] as const;
 
 const stageLabels: Record<string, string> = {
@@ -20,6 +21,7 @@ const stageLabels: Record<string, string> = {
   compacting: "Compacting & deduplicating",
   categorizing: "Categorizing into rule buckets",
   complete: "Ingestion complete",
+  failed: "Ingestion failed",
 };
 
 // Mock: simulate progressing through stages
