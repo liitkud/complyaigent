@@ -15,15 +15,18 @@ ENV UV_CACHE_DIR=/app/.uv_cache
 ENV UV_PYTHON_INSTALL_DIR=/app/.uv_python
 
 RUN addgroup --system aigent && adduser --system --group aigent \
-    && chown aigent:aigent /app
+    && chown -R aigent:aigent /app
 
 # Copy project files
 COPY pyproject.toml uv.lock ./
 COPY --chown=aigent:aigent . /app/
 
-# Create fresh venv with correct paths
-RUN uv sync --frozen --no-dev --no-cache --python /usr/local/bin/python
+USER aigent
+
+# Create fresh venv as the non-root user
+# We explicitly use the system python to prevent uv from downloading another one
+ENV UV_PYTHON=/usr/local/bin/python
+RUN uv sync --frozen --no-dev --no-cache
 
 ENV PATH="/app/.venv/bin:$PATH"
-USER aigent
 CMD ["uv", "run", "uvicorn", "main:app", "--port", "80", "--host", "0.0.0.0"]

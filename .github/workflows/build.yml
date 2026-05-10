@@ -18,9 +18,11 @@ jobs:
           - service: backend
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
+            test_cmd: uv --version
           - service: frontend
             dockerfile: ./frontend/Dockerfile
             image_name: liitkud/complyaigent-frontend
+            test_cmd: node -v
 
     steps:
       - name: Checkout code
@@ -43,7 +45,8 @@ jobs:
       - name: Test built containers
         run: |
           docker run --rm \
-          ${{ matrix.image_name }}:latest
+          ${{ matrix.image_name }}:latest \
+          ${{ matrix.test_cmd }}
 
   golang:
     name: Golang Check & Build
