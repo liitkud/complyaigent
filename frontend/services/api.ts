@@ -198,7 +198,10 @@ export interface SystemHealth {
 }
 
 // ── API Wrapper ─────────────────────────────────────────
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE =
+  typeof window !== "undefined"
+    ? process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+    : "https://aigent.kuyacarlo.dev";
 
 export const apiFetch = async <T>(
   path: string,
