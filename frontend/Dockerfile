@@ -62,4 +62,4 @@ USER node
 
 EXPOSE 3000
 
-CMD ["node", "node_modules/.bin/next", "start"]
+CMD ["/app/node_modules/.bin/next", "start"]

@@ -74,6 +74,12 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           platforms: linux/amd64, linux/arm64
 
+      - name: Test container
+        if: matrix.service == 'frontend'
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
+          docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
+
 
   cli:
     name: Build CLI (${{ matrix.os }})

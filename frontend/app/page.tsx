@@ -119,7 +119,7 @@ export default function Home() {
       </header>
 
       <main className="space-y-6 p-6">
-        {usingMock && (
+        {/* {usingMock && (
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
             <WifiOff size={18} className="shrink-0 text-amber-500" />
             <div>
@@ -133,7 +133,7 @@ export default function Home() {
               </p>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* KPI Cards */}
         {metrics ? (

@@ -134,7 +134,7 @@ func runGitleaks(diff string, jsonOutput bool) ([]internal.LocalViolation, bool,
 		return nil, false, nil // Silent fail if gitleaks missing
 	}
 
-	cmd := exec.Command("gitleaks", "detect", "--source", "diff", "--json", "--exit-code", "0")
+	cmd := exec.Command("gitleaks", "detect", "--source", ".", "--exit-code", "0")
 	cmd.Stdin = strings.NewReader(diff)
 
 	var stdout, stderr bytes.Buffer
