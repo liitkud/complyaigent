@@ -62,4 +62,4 @@ USER node
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["node", "node_modules/.bin/next", "start"]
