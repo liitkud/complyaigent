@@ -115,7 +115,8 @@ jobs:
 
       - name: Test Binary
         run: |
-          ./${{ matrix.binary }} --help
+          ./${{ matrix.binary }} --version
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:

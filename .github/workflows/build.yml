@@ -39,6 +39,11 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
+      - name: Test built containers
+        run: |
+          docker run --rm \
+          ${{ matrix.image_name }}:latest
+
   golang:
     name: Golang Check & Build
     runs-on: ubuntu-latest
@@ -66,6 +71,10 @@ jobs:
 
       - name: Build Binary
         run: go build -v -o pg ./main.go
+
+      - name: Test Binary
+        run: |
+          ./${{ matrix.binary }} --version
 
   frontend:
     name: Frontend Check & Build
