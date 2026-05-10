@@ -3,30 +3,18 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
 from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from app.core.config import settings
 from openai import AsyncOpenAI
 from pathlib import Path
 
 
+# Detect project root (where .env lives)
+# rag.py is in backend/app/regintel/
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-ENV_PATH = BASE_DIR / ".env"
-
-
-class SettingsEnv(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
-    )
-    MILVUS_URI: str = ""
-    MILVUS_TOKEN: str = ""
-    COHERE_API_KEY: str = ""
-    GROQ_API_KEY: str = ""
-
-
-settings = SettingsEnv()
 
 
 OPENAI_CLIENT = AsyncOpenAI(
-    base_url="https://api.groq.com/openai/v1", api_key=settings.GROQ_API_KEY
+    base_url=settings.LLM_ENDPOINT, api_key=settings.GROQ_API_KEY
 )
 
 
@@ -53,7 +41,7 @@ class VectorStoreConnection:
     @property
     def embedding_model(self):
         return CohereEmbedding(
-            model_name="embed-multilingual-v3.0", api_key=settings.COHERE_API_KEY
+            model_name=settings.EMBEDDING_MODEL, api_key=settings.COHERE_API_KEY
         )
 
     @property
@@ -99,7 +87,7 @@ class VectorStoreConnection:
         print(user_prompt)
 
         completion = await OPENAI_CLIENT.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            model=settings.CHAT_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

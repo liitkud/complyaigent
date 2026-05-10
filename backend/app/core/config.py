@@ -1,12 +1,42 @@
-from pydantic_settings import BaseSettings
+from functools import lru_cache
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# Detect project root (where .env lives)
+# config.py is in backend/app/core/
+ROOT = Path(__file__).resolve().parent.parent.parent.parent
+ENV_PATH = ROOT / ".env"
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Governance Bridge API"
+    PROJECT_NAME: str = "ComplyAIgent"
+    ENVIRONMENT: str = "development"
+    LOG_LEVEL: str = "DEBUG"
+
+    # Database
     DATABASE_URL: str = ""
+
+    # Supabase
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
+
+    # LLMs (Gemini)
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+
+    # External LLM Providers (Groq, etc.)
+    GROQ_API_KEY: str = ""
+    LLM_ENDPOINT: str = "https://api.groq.com/openai/v1"
+    CHAT_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+
+    # Embeddings (Cohere, etc.)
+    COHERE_API_KEY: str = ""
+    EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
+
+    # Vector DB (Milvus)
+    MILVUS_URI: str = "http://localhost:19530"
+    MILVUS_TOKEN: str = ""
 
     # Rate Limiting
     POST_RATE_LIMIT: str = "5/30 seconds"
@@ -15,8 +45,14 @@ class Settings(BaseSettings):
     # Pipeline
     MAX_RETRIES: int = 3
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
+    )
 
 
-settings = Settings()
+@lru_cache()
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()

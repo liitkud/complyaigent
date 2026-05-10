@@ -8,7 +8,7 @@ import json
 class CategorizerService:
     def __init__(self):
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", google_api_key=settings.GEMINI_API_KEY
+            model=settings.GEMINI_MODEL, google_api_key=settings.GEMINI_API_KEY
         )
 
     async def categorize_rules(self, compacted_text: str) -> List[Dict]:
