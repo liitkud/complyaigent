@@ -15,12 +15,11 @@ services:
       timeout: 5s
       retries: 3
     restart: unless-stopped
+    networks:
+      - shared_apps
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    image: localhost/backend
+    image: ghcr.io/liitkud/complyaigent-backend:canary
     ports:
       - "8000:8000"
     user: root
@@ -36,6 +35,30 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - shared_apps
+
+  frontend:
+    image: ghcr.io/liitkud/complyaigent-frontend:canary
+    ports:
+    - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: https://aigent.kuyacarlo.dev
+      NODE_ENV: production
+      # debug option
+      DEBUG: next:*,fetch:*
+      NODE_OPTIONS: --inspect
+      NEXT_PUBLIC_DEBUG: true
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - shared_apps
 
 volumes:
   pgdata_prod:
+
+networks:
+  shared_apps:
+    external: true
+    name: shared_apps

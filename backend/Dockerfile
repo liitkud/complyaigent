@@ -21,4 +21,4 @@ RUN uv sync --frozen --no-dev --no-cache --python /usr/local/bin/python
 
 ENV PATH="/app/.venv/bin:$PATH"
 USER aigent
-CMD ["uvicorn", "main:app", "--port", "80", "--host", "0.0.0.0"]
+CMD ["uv", "run", "uvicorn", "main:app", "--port", "80", "--host", "0.0.0.0"]
