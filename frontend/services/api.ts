@@ -223,7 +223,7 @@ export const api = async (path: string) => {
 // ── Helpers ────────────────────────────────────────────
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // ── API Client ─────────────────────────────────────────
 

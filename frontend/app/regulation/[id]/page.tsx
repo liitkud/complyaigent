@@ -351,11 +351,11 @@ export default function RegulationDetailPage() {
               </RuleSection>
 
               {/* Raw JSON */}
-              <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
                 <summary className="cursor-pointer px-5 py-3 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400">
                   Raw API Response
                 </summary>
-                <pre className="max-h-96 overflow-auto border-t border-slate-100 px-5 py-3 font-mono text-[11px] text-slate-600 dark:border-slate-800 dark:text-slate-400">
+                <pre className="max-h-96 overflow-auto border-t border-slate-100 px-5 py-3 font-mono text-[11px] whitespace-pre-wrap break-all text-slate-600 dark:border-slate-800 dark:text-slate-400">
                   {JSON.stringify(manifest, null, 2)}
                 </pre>
               </details>

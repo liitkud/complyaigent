@@ -47,33 +47,6 @@ function computeMetrics(
   };
 }
 
-function computeMetrics(
-  validations: ValidationResult[],
-  regulations: RegulationSummary[],
-): ComplianceMetrics {
-  const total = validations.length;
-  const lowCount = validations.filter((v) => v.verdict === 'LOW').length;
-  const passRate = total > 0 ? Math.round((lowCount / total) * 1000) / 10 : 0;
-
-  // "Today" filter
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayViolations = validations.filter(
-    (v) => v.verdict === 'HIGH' && v.created_at.startsWith(todayStr),
-  );
-  const pendingApprovals = validations.filter(
-    (v) => v.verdict === 'MID',
-  );
-
-  return {
-    totalScans: total,
-    passRate,
-    violationsToday: todayViolations.length,
-    pendingApprovals: pendingApprovals.length,
-    policiesIngested: regulations.length,
-    avgScanTime: '1.2s', // Not available in API — hardcoded for MVP
-  };
-}
-
 export default function Home() {
   const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,9 +56,9 @@ export default function Home() {
   const load = async () => {
     setRefreshing(true);
     try {
-<<<<<<< HEAD
-      const [validations, regulations] = await Promise.all([
-        api.getValidations(),
+      // Use raw fetch to ensure we see the calls in the network tab
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const [vRes, rRes] = await Promise.all([
         fetch(`${apiUrl}/validate`),
         fetch(`${apiUrl}/regulation`),
       ]);
@@ -116,9 +89,9 @@ export default function Home() {
 
   useEffect(() => {
     load();
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
   }, []);
 
+  return (
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">

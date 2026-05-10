@@ -3,7 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { apiClient, type IngestStatus } from "@/services/api";
-import { Loader2, CheckCircle2, ArrowLeft, WifiOff } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle2,
+  ArrowLeft,
+  WifiOff,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 
 const stageOrder = [
@@ -96,7 +102,10 @@ export default function IngestStatusPage() {
         const s = await apiClient.getIngestStatus(id);
         if (cancelled) return;
         setStatus(s);
-        if (s.status === "complete" && intervalRef.current) {
+        if (
+          (s.status === "complete" || s.status === "failed") &&
+          intervalRef.current
+        ) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
@@ -119,6 +128,7 @@ export default function IngestStatusPage() {
   }, [id]);
 
   const currentIdx = status ? stageOrder.indexOf(status.status) : -1;
+  const isFailed = status?.status === "failed";
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -195,22 +205,31 @@ export default function IngestStatusPage() {
           </h3>
           <div className="space-y-0">
             {stageOrder.map((stage, i) => {
-              const isDone = currentIdx > i;
-              const isCurrent = currentIdx === i;
+              if (stage === "failed") return null;
+              const isDone = currentIdx > i && !isFailed;
+              const isCurrent = currentIdx === i && !isFailed;
+              const isFailedHere = isFailed && stageLabels[stage] === status?.current_stage;
               return (
                 <div key={stage} className="flex items-start gap-3">
                   {/* Vertical line + icon */}
                   <div className="flex flex-col items-center">
                     <div
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 ${
-                        isDone
+                        isFailedHere
+                          ? "border-red-500 bg-red-50 dark:bg-red-900/30"
+                          : isDone
                           ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30"
                           : isCurrent
                             ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
                             : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
                       }`}
                     >
-                      {isDone ? (
+                      {isFailedHere ? (
+                        <XCircle
+                          size={14}
+                          className="text-red-600 dark:text-red-400"
+                        />
+                      ) : isDone ? (
                         <CheckCircle2
                           size={14}
                           className="text-emerald-600 dark:text-emerald-400"
@@ -226,7 +245,7 @@ export default function IngestStatusPage() {
                         </span>
                       )}
                     </div>
-                    {i < stageOrder.length - 1 && (
+                    {i < stageOrder.length - 2 && (
                       <div
                         className={`h-8 w-0.5 ${isDone ? "bg-emerald-300 dark:bg-emerald-700" : "bg-slate-200 dark:bg-slate-700"}`}
                       />
@@ -236,7 +255,9 @@ export default function IngestStatusPage() {
                   <div className="pt-1">
                     <p
                       className={`text-sm font-medium ${
-                        isDone
+                        isFailedHere
+                          ? "text-red-700 dark:text-red-400"
+                          : isDone
                           ? "text-emerald-700 dark:text-emerald-400"
                           : isCurrent
                             ? "text-blue-700 dark:text-blue-400"
@@ -247,6 +268,9 @@ export default function IngestStatusPage() {
                     </p>
                     {isCurrent && status?.status !== "complete" && (
                       <p className="text-xs text-slate-400">In progress…</p>
+                    )}
+                    {isFailedHere && (
+                      <p className="text-xs text-red-500">Failed at this stage</p>
                     )}
                   </div>
                 </div>
@@ -279,13 +303,37 @@ export default function IngestStatusPage() {
           </div>
         )}
 
+        {/* Failed CTA */}
+        {isFailed && (
+          <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50/50 p-5 dark:border-red-800 dark:bg-red-900/10">
+            <XCircle
+              size={24}
+              className="text-red-600 dark:text-red-400"
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+                Ingestion failed
+              </p>
+              <p className="truncate text-xs text-red-600 dark:text-red-400">
+                Last stage: {status?.current_stage ?? "unknown"}
+              </p>
+            </div>
+            <Link
+              href="/upload"
+              className="ml-auto rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+            >
+              Try Again
+            </Link>
+          </div>
+        )}
+
         {/* Raw JSON */}
         {status && (
-          <details className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <summary className="cursor-pointer px-5 py-3 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400">
               Raw API Response
             </summary>
-            <pre className="border-t border-slate-100 px-5 py-3 font-mono text-[11px] text-slate-600 dark:border-slate-800 dark:text-slate-400">
+            <pre className="max-h-96 overflow-auto border-t border-slate-100 px-5 py-3 font-mono text-[11px] whitespace-pre-wrap break-all text-slate-600 dark:border-slate-800 dark:text-slate-400">
               {JSON.stringify(status, null, 2)}
             </pre>
           </details>
