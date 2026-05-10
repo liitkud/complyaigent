@@ -648,15 +648,19 @@ export const apiClient = {
     ];
   },
 
-  approveHITL: async (_id: string): Promise<{ success: boolean }> => {
-    await delay(500);
-    return { success: true };
-  },
+  approveHITL: (id: string): Promise<{ success: boolean }> =>
+    apiFetch<{ success: boolean }>(`/validate/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "approve" }),
+    }),
 
-  rejectHITL: async (_id: string): Promise<{ success: boolean }> => {
-    await delay(500);
-    return { success: true };
-  },
+  rejectHITL: (id: string): Promise<{ success: boolean }> =>
+    apiFetch<{ success: boolean }>(`/validate/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reject" }),
+    }),
 
   /** @deprecated Use api.ingest() instead — kept for PolicyDragandDrop compatibility */
   ingestPolicy: async (file: File): Promise<LegacyIngestResponse> => {

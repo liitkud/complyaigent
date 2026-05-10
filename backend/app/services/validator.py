@@ -23,8 +23,12 @@ class ValidatorService:
         Rule: {rule_context}
         Code: {code}
         
-        Provide a safety decision and reasoning.
-        Return JSON: {{"decision": "safe|unsafe", "reasoning": "...", "remediation": "..."}}
+        Provide a safety verdict and reasoning.
+        Verdict LOW: Safe to merge.
+        Verdict MID: Needs human review (ambiguous or minor policy concern).
+        Verdict HIGH: Critical violation, must block.
+
+        Return JSON: {{"verdict": "LOW|MID|HIGH", "reasoning": "...", "remediation": "..."}}
         """
         try:
             response = await self.llm.ainvoke(prompt)
@@ -37,7 +41,7 @@ class ValidatorService:
         except Exception as e:
             logger.error(f"Risk validation failed: {str(e)}")
             return {
-                "decision": "unsafe",
+                "verdict": "HIGH",
                 "reasoning": f"Validation system error: {str(e)}",
                 "remediation": "Review manually.",
             }

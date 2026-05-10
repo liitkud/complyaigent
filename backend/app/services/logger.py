@@ -13,6 +13,7 @@ class ActivityLog(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     action: str
+    status: str = Field(default="pending")
     user_id: Optional[str] = None
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
     task_id: Optional[UUID] = None
@@ -21,11 +22,19 @@ class ActivityLog(SQLModel, table=True):
 engine = create_engine(settings.DATABASE_URL)
 
 
-def log_activity(action: str, details: dict, task_id: Optional[UUID] = None):
+def log_activity(
+    action: str,
+    details: dict,
+    task_id: Optional[UUID] = None,
+    status: str = "pending",
+):
     """
     Persist activity log to database.
     """
     with Session(engine) as session:
-        log = ActivityLog(action=action, details=details, task_id=task_id)
+        log = ActivityLog(
+            action=action, details=details, task_id=task_id, status=status
+        )
         session.add(log)
         session.commit()
+        return log

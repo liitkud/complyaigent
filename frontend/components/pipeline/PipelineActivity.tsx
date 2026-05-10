@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type IngestStatus } from "@/services/api";
+import { apiClient, type IngestStatus } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { Workflow, Loader2 } from "lucide-react";
 
@@ -27,7 +27,7 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
 
     const poll = async () => {
       try {
-        const s: IngestStatus = await api(`/ingest/${taskId}`);
+        const s: IngestStatus = await apiClient.getIngestStatus(taskId);
         setStatus(s);
         if (s.status !== "complete" && s.status !== "failed") {
           setTimeout(poll, 3000);

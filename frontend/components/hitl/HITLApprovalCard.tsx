@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api, type ValidationResult } from "@/services/api";
+import { apiClient, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const mockData: ValidationResult[] = [
   {
@@ -12,6 +12,7 @@ const mockData: ValidationResult[] = [
     reasoning: "Encryption-at-rest not enforced for new data store",
     activity_logged: true,
     created_at: new Date().toISOString(),
+    status: "pending",
   },
 ];
 
@@ -21,9 +22,12 @@ export default function HITLApprovalCard() {
   const [actioning, setActioning] = useState<string | null>(null);
 
   useEffect(() => {
-    api("/validate")
+    apiClient
+      .getValidations()
       .then((v: ValidationResult[]) => {
-        setRequests(v.filter((r) => r.verdict === "MID"));
+        setRequests(
+          v.filter((r) => r.verdict === "MID" && r.status === "pending"),
+        );
       })
       .catch(() => setRequests(mockData))
       .finally(() => setLoading(false));
@@ -31,12 +35,18 @@ export default function HITLApprovalCard() {
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActioning(id);
-    // Simulating approval/rejection as there's no specific endpoint for this in the provided spec
-    // other than maybe a POST/PUT to /validate/{id} which isn't defined.
-    // For now, we just update local state to satisfy the "wiring" requirement.
-    await new Promise((r) => setTimeout(r, 500));
-    setRequests((prev) => prev.filter((r) => r.validation_id !== id));
-    setActioning(null);
+    try {
+      if (action === "approve") {
+        await apiClient.approveHITL(id);
+      } else {
+        await apiClient.rejectHITL(id);
+      }
+      setRequests((prev) => prev.filter((r) => r.validation_id !== id));
+    } catch (err) {
+      console.error("HITL action failed", err);
+    } finally {
+      setActioning(null);
+    }
   };
 
   if (loading) {

@@ -51,8 +51,28 @@ export default function ValidatePage() {
     null,
   );
   const [result, setResult] = useState<ValidationResult | null>(null);
+  const [availableRules, setAvailableRules] = useState<any[]>([]);
   const [usingMock, setUsingMock] = useState(false);
+  const [loadingRules, setLoadingRules] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    apiClient
+      .getRules()
+      .then((res) => {
+        const all = [
+          ...res.buckets.A1,
+          ...res.buckets.A2,
+          ...res.buckets.B,
+          ...res.buckets.C,
+        ];
+        setAvailableRules(all);
+      })
+      .catch(() => {
+        // Fallback or leave empty
+      })
+      .finally(() => setLoadingRules(false));
+  }, []);
 
   const clearPoll = () => {
     if (intervalRef.current) {
@@ -140,16 +160,22 @@ export default function ValidatePage() {
                 htmlFor="rule_id"
                 className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300"
               >
-                Rule ID
+                Select Governance Rule
               </label>
-              <input
+              <select
                 id="rule_id"
-                type="text"
                 value={ruleId}
                 onChange={(e) => setRuleId(e.target.value)}
-                placeholder="e.g. A1-001"
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900"
-              />
+                disabled={loadingRules}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-900"
+              >
+                <option value="">-- Choose a rule --</option>
+                {availableRules.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.rule_name} ({r.id.slice(0, 8)})
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label
