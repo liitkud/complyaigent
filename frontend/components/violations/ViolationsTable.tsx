@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiClient, type ValidationResult } from "@/services/api";
+import { type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 
 const mockData: ValidationResult[] = [
@@ -26,11 +26,22 @@ export default function ViolationsTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient
-      .getValidations()
-      .then((v: ValidationResult[]) => setViolations(v))
-      .catch(() => setViolations(mockData))
-      .finally(() => setLoading(false));
+    const load = async () => {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${apiUrl}/validate`);
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        setViolations(data);
+      } catch (e) {
+        console.error("[ViolationsTable] Fetch failed, using mock:", e);
+        setViolations(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   if (loading) {

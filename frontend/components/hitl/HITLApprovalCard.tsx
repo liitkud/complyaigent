@@ -22,15 +22,24 @@ export default function HITLApprovalCard() {
   const [actioning, setActioning] = useState<string | null>(null);
 
   useEffect(() => {
-    apiClient
-      .getValidations()
-      .then((v: ValidationResult[]) => {
+    const load = async () => {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${apiUrl}/validate`);
+        if (!res.ok) throw new Error("API error");
+        const data: ValidationResult[] = await res.json();
         setRequests(
-          v.filter((r) => r.verdict === "MID" && r.status === "pending"),
+          data.filter((r) => r.verdict === "MID" && r.status === "pending"),
         );
-      })
-      .catch(() => setRequests(mockData))
-      .finally(() => setLoading(false));
+      } catch (e) {
+        console.error("[HITLApprovalCard] Fetch failed, using mock:", e);
+        setRequests(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {

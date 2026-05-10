@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  apiClient,
   type ComplianceMetrics,
   type ValidationResult,
   type RegulationSummary,
@@ -57,70 +56,39 @@ export default function Home() {
   const load = async () => {
     setRefreshing(true);
     try {
-      const [validations, regulations] = await Promise.all([
-        apiClient.getValidations().catch(() => []),
-        apiClient.getRegulations().catch(() => []),
+      // Use raw fetch to ensure we see the calls in the network tab
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const [vRes, rRes] = await Promise.all([
+        fetch(`${apiUrl}/validate`),
+        fetch(`${apiUrl}/regulation`),
       ]);
+
+      if (!vRes.ok || !rRes.ok) throw new Error("API responded with error");
+
+      const validations = await vRes.json();
+      const regulations = await rRes.json();
+
       setMetrics(computeMetrics(validations, regulations));
-      setUsingMock(validations.length === 0 && regulations.length === 0);
-    } catch {
-      // If getRegulations also fails, we're fully offline — use mock fallback
-      try {
-        const validations = await apiClient.getValidations(); // has its own mock
-        setMetrics(computeMetrics(validations, []));
-      } catch {
-        setMetrics({
-          totalScans: 1_247,
-          passRate: 94.2,
-          violationsToday: 12,
-          pendingApprovals: 3,
-          policiesIngested: 28,
-          avgScanTime: "1.2s",
-        });
-      }
+      setUsingMock(false);
+    } catch (e) {
+      console.error("[ComplyAIgent] API unreachable, using mock data:", e);
+      // Fallback to hardcoded mock data for the hackathon
+      setMetrics({
+        totalScans: 1247,
+        passRate: 94.2,
+        violationsToday: 12,
+        pendingApprovals: 3,
+        policiesIngested: 28,
+        avgScanTime: "1.2s",
+      });
       setUsingMock(true);
+    } finally {
+      setRefreshing(false);
     }
-    setRefreshing(false);
   };
 
   useEffect(() => {
-    let cancelled = false;
-    const init = async () => {
-      setRefreshing(true);
-      try {
-        const [validations, regulations] = await Promise.all([
-          apiClient.getValidations(),
-          apiClient.getRegulations(),
-        ]);
-        if (cancelled) return;
-        setMetrics(computeMetrics(validations, regulations));
-        setUsingMock(false);
-      } catch {
-        if (cancelled) return;
-        try {
-          const validations = await apiClient.getValidations();
-          if (cancelled) return;
-          setMetrics(computeMetrics(validations, []));
-        } catch {
-          if (cancelled) return;
-          setMetrics({
-            totalScans: 1_247,
-            passRate: 94.2,
-            violationsToday: 12,
-            pendingApprovals: 3,
-            policiesIngested: 28,
-            avgScanTime: "1.2s",
-          });
-        }
-        setUsingMock(true);
-      } finally {
-        if (!cancelled) setRefreshing(false);
-      }
-    };
-    init();
-    return () => {
-      cancelled = true;
-    };
+    load();
   }, []);
 
   return (

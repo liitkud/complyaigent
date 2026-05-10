@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiClient, type IngestStatus } from "@/services/api";
+import { type IngestStatus } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { Workflow } from "lucide-react";
 
@@ -27,12 +27,17 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
 
     const poll = async () => {
       try {
-        const s: IngestStatus = await apiClient.getIngestStatus(taskId);
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${apiUrl}/ingest/${taskId}`);
+        if (!res.ok) throw new Error("API error");
+        const s: IngestStatus = await res.json();
         setStatus(s);
         if (s.status !== "complete" && s.status !== "failed") {
           setTimeout(poll, 3000);
         }
-      } catch {
+      } catch (e) {
+        console.error("[PipelineActivity] Fetch failed, using mock:", e);
         // Fallback to mock on error
         setStatus(mockData[0]);
       } finally {
