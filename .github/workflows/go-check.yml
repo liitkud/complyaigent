@@ -1,0 +1,39 @@
+name: Go Check
+
+on:
+  push:
+    paths:
+      - 'cli/**'
+  pull_request:
+    paths:
+      - 'cli/**'
+  workflow_dispatch:
+
+jobs:
+  go_check:
+    name: Go Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cli
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: cli/go.sum
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run Vet
+        run: go vet ./...
+
+      - name: Run Tests
+        run: go test -v ./...
+
+      - name: Build Check
+        run: go build -v -o pg ./main.go

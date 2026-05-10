@@ -22,7 +22,7 @@ type Config struct {
 
 func LoadConfig(flagBackend, flagMode string) (Config, error) {
 	cfg := Config{
-		Backend: "http://localhost:8000",
+		Backend: "https://aigent.kuyacarlo.dev",
 		Mode:    "changes",
 	}
 
