@@ -17,10 +17,12 @@ jobs:
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
             test_cmd: uv --version
+            build_args: ""
           - service: frontend
             dockerfile: ./frontend/Dockerfile
             image_name: liitkud/complyaigent-frontend
             test_cmd: node -v
+            build_args: "NEXT_PUBLIC_API_URL=http://backend:8000"
 
     steps:
       - name: Checkout code
@@ -39,6 +41,7 @@ jobs:
           tags: ${{ matrix.image_name }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          build-args: ${{ matrix.build_args }}
 
       - name: Test built containers
         run: |

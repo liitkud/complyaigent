@@ -25,9 +25,11 @@ jobs:
           - service: backend
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
+            build_args: ""
           - service: frontend
             dockerfile: ./frontend/Dockerfile
             image_name: liitkud/complyaigent-frontend
+            build_args: "NEXT_PUBLIC_API_URL=http://backend:8000"
 
     steps:
       - name: Checkout code
@@ -67,6 +69,7 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
             ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_type == 'tag' && 'latest' || 'canary' }}
+          build-args: ${{ matrix.build_args }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           platforms: linux/amd64, linux/arm64
