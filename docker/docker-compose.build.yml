@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: comply
+      POSTGRES_PASSWORD: complyaigent2026 # pragma: allowlist secret
+      POSTGRES_DB: complyaigent
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comply -d complyaigent"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://comply:complyaigent2026 # pragma: allowlist secret@postgres:5432/complyaigent
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_KEY: dev-key
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-dev-key}
+      PROJECT_NAME: ComplyAIgent
+      LOG_LEVEL: DEBUG
+      ENVIRONMENT: development
+    volumes:
+      - ../backend:/app
+      - /app/__pycache__
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NODE_ENV: development
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_dev:

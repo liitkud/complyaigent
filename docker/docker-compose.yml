@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-comply}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complyaigent2026}
+      POSTGRES_DB: ${POSTGRES_DB:-complyaigent}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-comply} -d ${POSTGRES_DB:-complyaigent}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/liitkud/complyaigent-backend:canary
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-comply}:${POSTGRES_PASSWORD:-complyaigent2026}@postgres:5432/${POSTGRES_DB:-complyaigent}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_KEY: ${SUPABASE_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PROJECT_NAME: ComplyAIgent
+      LOG_LEVEL: INFO
+      ENVIRONMENT: production
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --no-reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/liitkud/complyaigent-frontend:canary
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NODE_ENV: production
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata_prod:
