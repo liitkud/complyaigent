@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.db import init_db
 from app.core.config import settings
 from app.core.rate_limit import setup_rate_limiting
@@ -16,6 +17,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,  # type: ignore
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 setup_rate_limiting(app)
 
