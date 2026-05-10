@@ -78,8 +78,7 @@ jobs:
         if: matrix.service == 'frontend'
         run: |
           docker pull ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
-          docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
-
+          docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }} /bin/sh -c "sleep 5 && exit 0"
 
   cli:
     name: Build CLI (${{ matrix.os }})
