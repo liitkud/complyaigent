@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 @lru_cache()
 def get_openai_client():
     return AsyncOpenAI(
-        base_url=settings.LLM_ENDPOINT, api_key=settings.GROQ_API_KEY or "missing-key"
+        base_url=settings.LLM_ENDPOINT, api_key=settings.LLM_API_KEY or "missing-key"
     )
 
 
