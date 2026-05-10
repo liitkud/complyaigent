@@ -1,14 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { useEffect, useState } from 'react';
-import { api, type ComplianceMetrics, type ValidationResult, type RegulationSummary } from '@/services/api';
-import MetricCard from '@/components/ui/MetricCard';
-import ViolationsTable from '@/components/violations/ViolationsTable';
-import HITLApprovalCard from '@/components/hitl/HITLApprovalCard';
-import PolicyDragAndDrop from '@/components/policy/PolicyDragandDrop';
-import PipelineActivity from '@/components/pipeline/PipelineActivity';
-=======
 import { useEffect, useState } from "react";
 import {
   type ComplianceMetrics,
@@ -20,7 +11,6 @@ import ViolationsTable from "@/components/violations/ViolationsTable";
 import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
 import PolicyDragAndDrop from "@/components/policy/PolicyDragandDrop";
 import PipelineActivity from "@/components/pipeline/PipelineActivity";
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 import {
   ScanSearch,
   ShieldCheck,
@@ -30,9 +20,6 @@ import {
   Zap,
   RefreshCw,
   WifiOff,
-<<<<<<< HEAD
-} from 'lucide-react';
-=======
 } from "lucide-react";
 
 function computeMetrics(
@@ -59,7 +46,6 @@ function computeMetrics(
     avgScanTime: "1.2s", // Not available in API — hardcoded for MVP
   };
 }
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 
 function computeMetrics(
   validations: ValidationResult[],
@@ -92,10 +78,7 @@ export default function Home() {
   const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [usingMock, setUsingMock] = useState(false);
-<<<<<<< HEAD
-=======
   const [activeTaskId, setActiveTaskId] = useState<string | undefined>();
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 
   const load = async () => {
     setRefreshing(true);
@@ -103,70 +86,6 @@ export default function Home() {
 <<<<<<< HEAD
       const [validations, regulations] = await Promise.all([
         api.getValidations(),
-        api.getRegulations(),
-      ]);
-      setMetrics(computeMetrics(validations, regulations));
-      setUsingMock(false);
-    } catch {
-      // If getRegulations also fails, we're fully offline — use mock fallback
-      try {
-        const validations = await api.getValidations(); // has its own mock
-        setMetrics(computeMetrics(validations, []));
-      } catch {
-        setMetrics({
-          totalScans: 1_247,
-          passRate: 94.2,
-          violationsToday: 12,
-          pendingApprovals: 3,
-          policiesIngested: 28,
-          avgScanTime: '1.2s',
-        });
-      }
-      setUsingMock(true);
-    }
-    setRefreshing(false);
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    const init = async () => {
-      setRefreshing(true);
-      try {
-        const [validations, regulations] = await Promise.all([
-          api.getValidations(),
-          api.getRegulations(),
-        ]);
-        if (cancelled) return;
-        setMetrics(computeMetrics(validations, regulations));
-        setUsingMock(false);
-      } catch {
-        if (cancelled) return;
-        try {
-          const validations = await api.getValidations();
-          if (cancelled) return;
-          setMetrics(computeMetrics(validations, []));
-        } catch {
-          if (cancelled) return;
-          setMetrics({
-            totalScans: 1_247,
-            passRate: 94.2,
-            violationsToday: 12,
-            pendingApprovals: 3,
-            policiesIngested: 28,
-            avgScanTime: '1.2s',
-          });
-        }
-        setUsingMock(true);
-      } finally {
-        if (!cancelled) setRefreshing(false);
-      }
-    };
-    init();
-    return () => { cancelled = true; };
-=======
-      // Use raw fetch to ensure we see the calls in the network tab
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const [vRes, rRes] = await Promise.all([
         fetch(`${apiUrl}/validate`),
         fetch(`${apiUrl}/regulation`),
       ]);
@@ -200,7 +119,6 @@ export default function Home() {
 >>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
   }, []);
 
-  return (
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
@@ -228,19 +146,6 @@ export default function Home() {
       </header>
 
       <main className="space-y-6 p-6">
-<<<<<<< HEAD
-        {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Backend unavailable — showing mock data</p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Metrics derived from mock <code className="font-mono">GET /validate</code> + <code className="font-mono">GET /regulation</code> fallback.
-              </p>
-            </div>
-          </div>
-        )}
-=======
         {/* {usingMock && (
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
             <WifiOff size={18} className="shrink-0 text-amber-500" />
@@ -256,7 +161,6 @@ export default function Home() {
             </div>
           </div>
         )} */}
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 
         {/* KPI Cards */}
         {metrics ? (

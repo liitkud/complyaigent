@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-'use client';
-=======
 "use client";
 
 import { apiClient, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 
 const mockData: ValidationResult[] = [
   {

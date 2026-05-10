@@ -4,22 +4,6 @@ import {
   LayoutDashboard,
   Upload,
   Shield,
-<<<<<<< HEAD
-  FileText,
-  ShieldCheck,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-
-const navItems = [
-  { icon: LayoutDashboard, label: 'Home', href: '/' },
-  { icon: Shield, label: 'Dashboard', href: '/dashboard' },
-  { icon: Upload, label: 'Upload Policy', href: '/upload' },
-  { icon: ShieldCheck, label: 'Validate', href: '/validate' },
-=======
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
@@ -33,7 +17,6 @@ const navItems = [
   { icon: Shield, label: "Dashboard", href: "/dashboard" },
   { icon: Upload, label: "Upload Policy", href: "/upload" },
   { icon: ShieldCheck, label: "Validate", href: "/validate" },
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
 ];
 
 export default function Sidebar() {
@@ -64,26 +47,17 @@ export default function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 space-y-1 px-2 py-4">
         {navItems.map((item) => {
-<<<<<<< HEAD
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-=======
           const isActive =
             pathname === item.href ||
             (item.href !== "/" && pathname.startsWith(item.href));
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
           return (
             <Link
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-<<<<<<< HEAD
-                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
-=======
                   ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
->>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
               }`}
               title={collapsed ? item.label : undefined}
             >
