@@ -15,9 +15,6 @@ pip install fastapi uvicorn sqlmodel langchain-google-genai pymupdf slowapi tena
 ## 2. Configuration
 
 Set the following environment variables:
-- `GEMINI_API_KEY`: Your Google AI Studio API key.
-- `SUPABASE_URL`: Your Supabase project URL.
-- `SUPABASE_KEY`: Your Supabase service role key.
 - `DATABASE_URL`: Your Supabase PostgreSQL connection string.
 
 ## 3. Running the Server

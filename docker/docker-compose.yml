@@ -17,16 +17,17 @@ services:
     restart: unless-stopped
 
   backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     image: localhost/backend
     ports:
       - "8000:8000"
+    user: root
     env_file:
       - ../.env
     environment:
       DATABASE_URL: ${DATABASE_URL:-sqlite:///./test.db}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      COHERE_API_KEY: ${COHERE_API_KEY}
-      GROQ_API_KEY: ${GROQ_API_KEY}
       PROJECT_NAME: ComplyAIgent
       LOG_LEVEL: INFO
       ENVIRONMENT: production

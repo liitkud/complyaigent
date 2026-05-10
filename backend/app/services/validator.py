@@ -1,4 +1,4 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from ..core.config import settings
 from ..core.logging import logger
 import json
@@ -6,8 +6,10 @@ import json
 
 class ValidatorService:
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL, google_api_key=settings.GEMINI_API_KEY
+        self.llm = ChatOpenAI(
+            model=settings.CHAT_MODEL,
+            openai_api_key=settings.LLM_API_KEY,
+            base_url=settings.LLM_ENDPOINT,
         )
 
     async def validate_risk(self, code: str, rule_context: str) -> dict:

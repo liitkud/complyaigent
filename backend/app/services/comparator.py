@@ -1,14 +1,16 @@
 import re
 from typing import List, Optional, Tuple
 from datasketch import MinHash, MinHashLSH
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from ..core.config import settings
 
 
 class ComparatorService:
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL, google_api_key=settings.GEMINI_API_KEY
+        self.llm = ChatOpenAI(
+            model=settings.CHAT_MODEL,
+            openai_api_key=settings.LLM_API_KEY,
+            base_url=settings.LLM_ENDPOINT,
         )
         self.lsh = MinHashLSH(threshold=0.85, num_perm=128)
         self.anchor_regex_seed = [

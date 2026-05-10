@@ -32,6 +32,7 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
 
 @router.get("/reg")
 async def list_rules(
+    bucket: Optional[str] = None,
     source_category: Optional[SourceCategory] = None,
     session: Session = Depends(get_session),
 ):
@@ -39,8 +40,32 @@ async def list_rules(
     if source_category:
         statement = statement.where(GovernanceRule.source_category == source_category)
 
+    bucket_map = {
+        "A1": "A1_SCANNABLE",
+        "A2": "A2_ACTIONABLE",
+        "B": "B_INFRA_METADATA",
+        "C": "C_SEMANTIC_GUIDANCE",
+    }
+
+    if bucket and bucket in bucket_map:
+        statement = statement.where(GovernanceRule.type == bucket_map[bucket])
+
     rules = session.exec(statement).all()
-    return {"rules": rules}
+
+    buckets = {"A1": [], "A2": [], "B": [], "C": []}
+    reverse_map = {v: k for k, v in bucket_map.items()}
+
+    for rule in rules:
+        val = rule.type.value if hasattr(rule.type, "value") else str(rule.type)
+        b_key = reverse_map.get(val)
+        if b_key:
+            buckets[b_key].append(rule)
+
+    if bucket:
+        # Even if filtered, return consistent structure but only with the requested bucket
+        return {"buckets": {bucket: buckets.get(bucket, [])}}
+
+    return {"buckets": buckets}
 
 
 @router.get("/corp")

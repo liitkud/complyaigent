@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { api, type ComplianceMetrics, type ValidationResult, type RegulationSummary } from '@/services/api';
-import MetricCard from '@/components/ui/MetricCard';
-import ViolationsTable from '@/components/violations/ViolationsTable';
-import HITLApprovalCard from '@/components/hitl/HITLApprovalCard';
-import PolicyDragAndDrop from '@/components/policy/PolicyDragandDrop';
-import PipelineActivity from '@/components/pipeline/PipelineActivity';
+import { useEffect, useState } from "react";
+import {
+  api,
+  type ComplianceMetrics,
+  type ValidationResult,
+  type RegulationSummary,
+} from "@/services/api";
+import MetricCard from "@/components/ui/MetricCard";
+import ViolationsTable from "@/components/violations/ViolationsTable";
+import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
+import PolicyDragAndDrop from "@/components/policy/PolicyDragandDrop";
+import PipelineActivity from "@/components/pipeline/PipelineActivity";
 import {
   ScanSearch,
   ShieldCheck,
@@ -16,24 +21,22 @@ import {
   Zap,
   RefreshCw,
   WifiOff,
-} from 'lucide-react';
+} from "lucide-react";
 
 function computeMetrics(
   validations: ValidationResult[],
   regulations: RegulationSummary[],
 ): ComplianceMetrics {
   const total = validations.length;
-  const lowCount = validations.filter((v) => v.verdict === 'LOW').length;
+  const lowCount = validations.filter((v) => v.verdict === "LOW").length;
   const passRate = total > 0 ? Math.round((lowCount / total) * 1000) / 10 : 0;
 
   // "Today" filter
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayViolations = validations.filter(
-    (v) => v.verdict === 'HIGH' && v.created_at.startsWith(todayStr),
+    (v) => v.verdict === "HIGH" && v.created_at.startsWith(todayStr),
   );
-  const pendingApprovals = validations.filter(
-    (v) => v.verdict === 'MID',
-  );
+  const pendingApprovals = validations.filter((v) => v.verdict === "MID");
 
   return {
     totalScans: total,
@@ -41,7 +44,7 @@ function computeMetrics(
     violationsToday: todayViolations.length,
     pendingApprovals: pendingApprovals.length,
     policiesIngested: regulations.length,
-    avgScanTime: '1.2s', // Not available in API — hardcoded for MVP
+    avgScanTime: "1.2s", // Not available in API — hardcoded for MVP
   };
 }
 
@@ -71,7 +74,7 @@ export default function Home() {
           violationsToday: 12,
           pendingApprovals: 3,
           policiesIngested: 28,
-          avgScanTime: '1.2s',
+          avgScanTime: "1.2s",
         });
       }
       setUsingMock(true);
@@ -105,7 +108,7 @@ export default function Home() {
             violationsToday: 12,
             pendingApprovals: 3,
             policiesIngested: 28,
-            avgScanTime: '1.2s',
+            avgScanTime: "1.2s",
           });
         }
         setUsingMock(true);
@@ -114,7 +117,9 @@ export default function Home() {
       }
     };
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -149,9 +154,13 @@ export default function Home() {
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
             <WifiOff size={18} className="shrink-0 text-amber-500" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Backend unavailable — showing mock data</p>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                Backend unavailable — showing mock data
+              </p>
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Metrics derived from mock <code className="font-mono">GET /validate</code> + <code className="font-mono">GET /regulation</code> fallback.
+                Metrics derived from mock{" "}
+                <code className="font-mono">GET /validate</code> +{" "}
+                <code className="font-mono">GET /regulation</code> fallback.
               </p>
             </div>
           </div>

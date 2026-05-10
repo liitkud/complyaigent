@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { api, type IngestResponse } from '@/services/api';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, WifiOff } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useCallback, useRef } from "react";
+import { api, type IngestResponse } from "@/services/api";
+import {
+  Upload,
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  WifiOff,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
@@ -26,32 +33,43 @@ export default function UploadPage() {
       setUsingMock(true);
       setResult({
         task_id: `mock-task-${Date.now()}`,
-        status: 'processing',
+        status: "processing",
       });
     } finally {
       setUploading(false);
     }
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  }, [handleFile]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile],
+  );
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
-    e.target.value = '';
-  }, [handleFile]);
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+      e.target.value = "";
+    },
+    [handleFile],
+  );
 
   return (
     <div className="flex-1 overflow-y-auto">
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
-        <h1 className="text-lg font-bold text-slate-900 dark:text-white">Upload Policy</h1>
+        <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+          Upload Policy
+        </h1>
         <p className="text-xs text-slate-400">
-          Upload a PDF or Markdown file to <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">POST /ingest</code>
+          Upload a PDF or Markdown file to{" "}
+          <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">
+            POST /ingest
+          </code>
         </p>
       </header>
 
@@ -60,9 +78,12 @@ export default function UploadPage() {
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
             <WifiOff size={18} className="shrink-0 text-amber-500" />
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Backend unavailable — mock response</p>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                Backend unavailable — mock response
+              </p>
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach <code className="font-mono">POST /ingest</code>. Showing simulated task ID for UI preview.
+                Could not reach <code className="font-mono">POST /ingest</code>.
+                Showing simulated task ID for UI preview.
               </p>
             </div>
           </div>
@@ -81,26 +102,40 @@ export default function UploadPage() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           disabled={uploading}
           className={`flex w-full cursor-pointer flex-col items-center gap-4 rounded-xl border-2 border-dashed p-12 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
             dragOver
-              ? 'border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10'
-              : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5'
+              ? "border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10"
+              : "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5"
           }`}
         >
           {uploading ? (
             <Loader2 size={40} className="animate-spin text-blue-500" />
           ) : (
-            <Upload size={40} className={dragOver ? 'text-blue-500' : 'text-slate-300 dark:text-slate-600'} />
+            <Upload
+              size={40}
+              className={
+                dragOver
+                  ? "text-blue-500"
+                  : "text-slate-300 dark:text-slate-600"
+              }
+            />
           )}
           <div>
             <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              {uploading ? 'Uploading to /ingest...' : 'Drag & drop a policy document'}
+              {uploading
+                ? "Uploading to /ingest..."
+                : "Drag & drop a policy document"}
             </p>
-            <p className="mt-1 text-xs text-slate-400">PDF, Markdown, or plain text — or click to browse</p>
+            <p className="mt-1 text-xs text-slate-400">
+              PDF, Markdown, or plain text — or click to browse
+            </p>
           </div>
         </button>
 
@@ -109,7 +144,9 @@ export default function UploadPage() {
           <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/10">
             <AlertCircle size={20} className="shrink-0 text-red-500" />
             <div>
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">Upload failed</p>
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                Upload failed
+              </p>
               <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
             </div>
           </div>
@@ -119,11 +156,17 @@ export default function UploadPage() {
         {result && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-emerald-800 dark:bg-emerald-900/10">
             <div className="flex items-center gap-3">
-              <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2
+                size={20}
+                className="text-emerald-600 dark:text-emerald-400"
+              />
               <div>
-                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Ingestion started</p>
+                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                  Ingestion started
+                </p>
                 <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                  Task ID: <code className="font-mono">{result.task_id}</code> — Status: {result.status}
+                  Task ID: <code className="font-mono">{result.task_id}</code> —
+                  Status: {result.status}
                 </p>
               </div>
             </div>

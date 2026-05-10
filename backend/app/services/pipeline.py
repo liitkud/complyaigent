@@ -1,3 +1,4 @@
+import asyncio
 from ..models.task import IngestionTask, TaskStatus
 from ..models.rule import GovernanceRule
 from ..core.db import engine
@@ -34,12 +35,34 @@ async def update_task_progress(session, task, stage, progress):
 
     session.add(task)
     session.commit()
+    session.refresh(task)
 
 
 async def start_ingestion_pipeline(task_id: str, file_path: str):
     """
     Orchestrates the multi-stage intelligence pipeline.
+    Wraps everything in a 60s timeout and handles per-rule persistence.
     """
+    try:
+        await asyncio.wait_for(_run_pipeline(task_id, file_path), timeout=60.0)
+    except asyncio.TimeoutError:
+        logger.error(f"Pipeline timed out after 60s for task {task_id}")
+        with Session(engine) as session:
+            task = session.get(IngestionTask, UUID(task_id))
+            if task:
+                task.status = TaskStatus.FAILED
+                task.current_stage = "Error: Pipeline timed out after 60s"
+                session.add(task)
+                session.commit()
+    except Exception as e:
+        logger.error(f"Unexpected error in ingestion wrapper for task {task_id}: {e}")
+    finally:
+        # Cleanup temp file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+async def _run_pipeline(task_id: str, file_path: str):
     with Session(engine) as session:
         task = session.get(IngestionTask, UUID(task_id))
         if not task:
@@ -61,12 +84,8 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
                 session, task, "Running Comparator (Deduplication)", 30
             )
 
-            # Tier 1: Anchors (Deduplication / Lineage)
             anchors = comparator.extract_anchors(cleaned_text)
             if anchors:
-                # Search for existing rules with any of these anchors
-                # This is a simplified lineage check for the MVP
-
                 existing_rule = session.exec(
                     select(GovernanceRule).where(
                         col(GovernanceRule.content).like(f"%{anchors[0]}%")
@@ -74,7 +93,6 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
                 ).first()
                 if existing_rule:
                     task.previous_version_id = existing_rule.task_id
-                    # Load previous version chain
                     prev_task = session.get(IngestionTask, existing_rule.task_id)
                     if prev_task:
                         task.version_chain = prev_task.version_chain + [task.id]
@@ -82,39 +100,48 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
                         task.version_chain = [existing_rule.task_id, task.id]
                     session.add(task)
                     session.commit()
-            await update_task_progress(session, task, "Compacting Requirements", 50)
 
+            # Stage 3: Compactor
+            await update_task_progress(session, task, "Compacting Requirements", 50)
             compacted_text = await compactor.compact_document(cleaned_text)
 
             # Stage 4: Categorizer
             await update_task_progress(session, task, "Categorizing Rules", 80)
-
             rules_data = await categorizer.categorize_rules(compacted_text)
 
+            # Per-rule insertion to prevent one bad rule from killing the batch
+            stored_rules = []
             for r_data in rules_data:
-                rule = GovernanceRule(
-                    task_id=task.id,
-                    type=r_data["type"],
-                    impact_radius=r_data["impact_radius"],
-                    risk_level=r_data["risk_level"],
-                    source_category=r_data["source_category"],
-                    content=r_data["content"],
-                    remediation=r_data.get("remediation"),
-                    tags=r_data.get("tags", []),
-                    rule_metadata=r_data.get("metadata", {}),
-                )
-                session.add(rule)
+                try:
+                    rule = GovernanceRule(
+                        task_id=task.id,
+                        type=r_data["type"],
+                        impact_radius=r_data["impact_radius"],
+                        risk_level=r_data["risk_level"],
+                        source_category=r_data["source_category"],
+                        content=r_data["content"],
+                        remediation=r_data.get("remediation"),
+                        tags=r_data.get("tags", []),
+                        rule_metadata=r_data.get("metadata", {}),
+                    )
+                    session.add(rule)
+                    session.commit()  # Individual commit
+                    session.refresh(rule)
+                    stored_rules.append(rule)
+                except Exception as rule_err:
+                    session.rollback()
+                    logger.warning(
+                        f"Skipping malformed rule for task {task_id}: {rule_err}"
+                    )
 
             # Stage 5: Vector Indexing (RAG)
             await update_task_progress(session, task, "Indexing rules for RAG", 95)
-            try:
-                rag_conn = VectorStoreConnection()
-                rules_to_index = [
-                    obj for obj in session.new if isinstance(obj, GovernanceRule)
-                ]
-                rag_conn.index_rules(rules_to_index)
-            except Exception as e:
-                logger.warning(f"RAG Indexing failed: {str(e)}")
+            if stored_rules:
+                try:
+                    rag_conn = VectorStoreConnection()
+                    rag_conn.index_rules(stored_rules)
+                except Exception as e:
+                    logger.warning(f"RAG Indexing failed for task {task_id}: {str(e)}")
 
             # Finalize
             task.status = TaskStatus.COMPLETE
@@ -125,12 +152,10 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
             session.commit()
 
         except Exception as e:
-            logger.error(f"Pipeline failed for task {task_id}: {str(e)}")
+            logger.error(
+                f"Pipeline failed at stage {task.current_stage} for task {task_id}: {str(e)}"
+            )
             task.status = TaskStatus.FAILED
-            task.current_stage = f"Error: {str(e)}"
+            task.current_stage = f"Error in {task.current_stage}: {str(e)}"
             session.add(task)
             session.commit()
-        finally:
-            # Cleanup temp file
-            if os.path.exists(file_path):
-                os.remove(file_path)
