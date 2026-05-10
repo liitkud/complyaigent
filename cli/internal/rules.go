@@ -338,3 +338,18 @@ func writeYAMLFile(path string, value interface{}) error {
 	}
 	return nil
 }
+func TestBackend(backendURL string) error {
+	client := &http.Client{Timeout: 5 * time.Second}
+	url := strings.TrimRight(backendURL, "/") + "/health"
+	resp, err := client.Get(url)
+	if err != nil {
+		return fmt.Errorf("could not connect to backend: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("backend returned status %d", resp.StatusCode)
+	}
+
+	return nil
+}

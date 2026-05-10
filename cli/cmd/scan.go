@@ -34,6 +34,7 @@ func Scan(args []string) error {
 	fs := flag.NewFlagSet("scan", flag.ContinueOnError)
 	backend := fs.String("backend", "", "Backend base URL")
 	mode := fs.String("mode", "", "Scan mode (changes|full)")
+	jsonOutput := fs.Bool("json", false, "Output in JSON format")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -43,7 +44,9 @@ func Scan(args []string) error {
 		return err
 	}
 
-	fmt.Println("[*] ComplyAIgent scan")
+	if !*jsonOutput {
+		fmt.Println("[*] ComplyAIgent scan")
+	}
 
 	diff, err := getGitDiff(cfg.Mode)
 	if err != nil {
@@ -51,15 +54,21 @@ func Scan(args []string) error {
 	}
 
 	if strings.TrimSpace(diff) == "" {
-		fmt.Println("✅ No violations. Push allowed.")
+		if *jsonOutput {
+			fmt.Println(`{"verdict":"allow","reason":"No changes","violations":[]}`)
+		} else {
+			fmt.Println("✅ No violations. Push allowed.")
+		}
 		return nil
 	}
 
-	fmt.Printf("[✓] Diff size: %d bytes\n\n", len(diff))
-	fmt.Println("[1] Running local scanning...")
+	if !*jsonOutput {
+		fmt.Printf("[✓] Diff size: %d bytes\n\n", len(diff))
+		fmt.Println("[1] Running local scanning...")
+	}
 
-	gitleaksViolations, hasGitleaks, gitleaksErr := runGitleaks(diff)
-	if gitleaksErr != nil {
+	gitleaksViolations, hasGitleaks, gitleaksErr := runGitleaks(diff, *jsonOutput)
+	if gitleaksErr != nil && !*jsonOutput {
 		fmt.Fprintf(os.Stderr, "⚠️  gitleaks warning: %v\n", gitleaksErr)
 	}
 
@@ -69,28 +78,38 @@ func Scan(args []string) error {
 	allViolations := append(append(gitleaksViolations, patternViolations...), entropyViolations...)
 
 	if len(allViolations) == 0 {
-		fmt.Println("✅ No violations. Push allowed.")
+		if *jsonOutput {
+			fmt.Println(`{"verdict":"allow","reason":"No patterns detected","violations":[]}`)
+		} else {
+			fmt.Println("✅ No violations. Push allowed.")
+		}
 		return nil
 	}
 
 	localVerdict, localReason := determineLocalVerdict(allViolations, hasGitleaks)
 	if localVerdict == "block" {
-		return executeVerdict("block", allViolations, localReason)
+		return executeVerdict("block", allViolations, localReason, *jsonOutput)
 	}
 
 	if localVerdict == "allow" {
-		fmt.Println("⚠️  Low-risk findings detected, but allowed.")
-		return executeVerdict("allow", allViolations, localReason)
+		if !*jsonOutput {
+			fmt.Println("⚠️  Low-risk findings detected, but allowed.")
+		}
+		return executeVerdict("allow", allViolations, localReason, *jsonOutput)
 	}
 
-	fmt.Println("\n[2] Consulting backend for uncertain findings...")
+	if !*jsonOutput {
+		fmt.Println("\n[2] Consulting backend for uncertain findings...")
+	}
 	backendVerdict, backendViolations, backendReason, err := offloadToValidate(cfg.Backend, diff)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  Backend unreachable (%v). Fail-closed.\n", err)
-		return executeVerdict("block", allViolations, "Backend unavailable; local violations detected")
+		if !*jsonOutput {
+			fmt.Fprintf(os.Stderr, "⚠️  Backend unreachable (%v). Fail-closed.\n", err)
+		}
+		return executeVerdict("block", allViolations, "Backend unavailable; local violations detected", *jsonOutput)
 	}
 
-	return executeVerdict(backendVerdict, backendViolations, backendReason)
+	return executeVerdict(backendVerdict, backendViolations, backendReason, *jsonOutput)
 }
 
 func getGitDiff(mode string) (string, error) {
@@ -110,9 +129,9 @@ func getGitDiff(mode string) (string, error) {
 	return string(output), nil
 }
 
-func runGitleaks(diff string) ([]internal.LocalViolation, bool, error) {
+func runGitleaks(diff string, jsonOutput bool) ([]internal.LocalViolation, bool, error) {
 	if _, err := exec.LookPath("gitleaks"); err != nil {
-		return nil, false, fmt.Errorf("gitleaks is not installed; skipping gitleaks scan")
+		return nil, false, nil // Silent fail if gitleaks missing
 	}
 
 	cmd := exec.Command("gitleaks", "detect", "--source", "diff", "--json", "--exit-code", "0")
@@ -232,7 +251,25 @@ func gitContext() (string, string) {
 	return repoName, commitName
 }
 
-func executeVerdict(verdict string, violations []internal.LocalViolation, reason string) error {
+func executeVerdict(verdict string, violations []internal.LocalViolation, reason string, jsonOutput bool) error {
+	if jsonOutput {
+		result := struct {
+			Verdict    string                    `json:"verdict"`
+			Reason     string                    `json:"reason"`
+			Violations []internal.LocalViolation `json:"violations"`
+		}{
+			Verdict:    verdict,
+			Reason:     reason,
+			Violations: violations,
+		}
+		out, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(out))
+		if strings.ToLower(verdict) == "block" {
+			return fmt.Errorf("push blocked")
+		}
+		return nil
+	}
+
 	switch strings.ToLower(verdict) {
 	case "block":
 		fmt.Println("❌ PUSH BLOCKED")
