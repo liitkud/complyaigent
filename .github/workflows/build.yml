@@ -18,9 +18,11 @@ jobs:
           - service: backend
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
+            test_cmd: uv --version
           - service: frontend
             dockerfile: ./frontend/Dockerfile
             image_name: liitkud/complyaigent-frontend
+            test_cmd: node -v
 
     steps:
       - name: Checkout code
@@ -35,9 +37,16 @@ jobs:
           context: ./${{ matrix.service }}
           file: ${{ matrix.dockerfile }}
           push: false
+          load: true
           tags: ${{ matrix.image_name }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+      - name: Test built containers
+        run: |
+          docker run --rm \
+          ${{ matrix.image_name }}:latest \
+          ${{ matrix.test_cmd }}
 
   golang:
     name: Golang Check & Build
@@ -66,6 +75,10 @@ jobs:
 
       - name: Build Binary
         run: go build -v -o pg ./main.go
+
+      - name: Test Binary
+        run: |
+          ./pg --version
 
   frontend:
     name: Frontend Check & Build

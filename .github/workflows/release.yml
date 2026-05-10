@@ -71,10 +71,6 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           platforms: linux/amd64, linux/arm64
 
-      - name: Test built containers
-        run: |
-          docker run --rm \
-          ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
 
   cli:
     name: Build CLI (${{ matrix.os }})
@@ -114,8 +110,10 @@ jobs:
         run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -o ${{ matrix.binary }} ./main.go
 
       - name: Test Binary
+        if: matrix.os == 'linux'
         run: |
-          ./${{ matrix.binary }} --help
+          ./${{ matrix.binary }} --version
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
