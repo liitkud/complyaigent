@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-comply}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complyaigent2026}
@@ -22,11 +20,13 @@ services:
     image: ghcr.io/liitkud/complyaigent-backend:canary
     ports:
       - "8000:8000"
+    env_file:
+      - ../.env
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-comply}:${POSTGRES_PASSWORD:-complyaigent2026}@postgres:5432/${POSTGRES_DB:-complyaigent}
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_KEY: ${SUPABASE_KEY}
+      DATABASE_URL: ${DATABASE_URL:sqlite:///./test.db}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      COHERE_API_KEY: ${COHERE_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
       PROJECT_NAME: ComplyAIgent
       LOG_LEVEL: INFO
       ENVIRONMENT: production

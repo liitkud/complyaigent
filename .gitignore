@@ -58,3 +58,12 @@ coverage_report.txt
 
 # spec-kit
 .agents/
+
+# Test files
+*.db
+*.sh
+scratch/
+# Compiled files
+*pg*
+
+*/.pnpm-store/*

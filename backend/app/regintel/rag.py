@@ -1,8 +1,10 @@
+from functools import lru_cache
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
-from llama_index.vector_stores.milvus import MilvusVectorStore
+from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
+import sqlalchemy
 from app.core.config import settings
 from openai import AsyncOpenAI
 from pathlib import Path
@@ -13,9 +15,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
-OPENAI_CLIENT = AsyncOpenAI(
-    base_url=settings.LLM_ENDPOINT, api_key=settings.GROQ_API_KEY
-)
+@lru_cache()
+def get_openai_client():
+    return AsyncOpenAI(
+        base_url=settings.LLM_ENDPOINT, api_key=settings.GROQ_API_KEY or "missing-key"
+    )
 
 
 class VectorStoreConnection:
@@ -26,16 +30,15 @@ class VectorStoreConnection:
 
     @property
     def vector_store(self):
-        return MilvusVectorStore(
-            uri=settings.MILVUS_URI,
-            token=settings.MILVUS_TOKEN,
-            collection_name="regulations_collection",
-            dim=1024,
-            embedding_field="embeddings",
-            overwrite=self.should_reset,
-            search_config={"nprobe": 60},
-            similarity_metric="COSINE",
-            consistency_level="Session",
+        url = sqlalchemy.make_url(settings.DATABASE_URL)
+        return PGVectorStore.from_params(
+            host=url.host,
+            port=str(url.port or 5432),
+            user=url.username,
+            password=url.password,
+            database=url.database,
+            table_name="regulations_vectors",
+            embed_dim=1024,
         )
 
     @property
@@ -86,7 +89,7 @@ class VectorStoreConnection:
         """
         print(user_prompt)
 
-        completion = await OPENAI_CLIENT.chat.completions.create(
+        completion = await get_openai_client().chat.completions.create(
             model=settings.CHAT_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -163,3 +166,21 @@ class VectorStoreConnection:
         if self.should_reset:
             self.index.insert_nodes(nodes=nodes)
         return nodes
+
+    def index_rules(self, rules: list):
+        from llama_index.core.schema import TextNode
+
+        nodes = []
+        for rule in rules:
+            nodes.append(
+                TextNode(
+                    text=rule.content,
+                    metadata={
+                        "rule_id": str(rule.task_id),
+                        "type": rule.type,
+                        "risk_level": rule.risk_level,
+                        "source": rule.source_category,
+                    },
+                )
+            )
+        self.index.insert_nodes(nodes)

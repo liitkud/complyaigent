@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     COHERE_API_KEY: str = ""
     EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
 
-    # Vector DB (Milvus)
-    MILVUS_URI: str = "http://localhost:19530"
+    # Vector DB (Optional Milvus)
+    MILVUS_URI: str = ""
     MILVUS_TOKEN: str = ""
 
     # Rate Limiting

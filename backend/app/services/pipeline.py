@@ -7,6 +7,7 @@ from .extractor import extract_text_from_pdf, extract_text_from_markdown, clean_
 from .comparator import comparator
 from .compactor import compactor
 from .categorizer import categorizer
+from ..regintel.rag import VectorStoreConnection
 import os
 from uuid import UUID
 
@@ -103,6 +104,17 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
                     rule_metadata=r_data.get("metadata", {}),
                 )
                 session.add(rule)
+
+            # Stage 5: Vector Indexing (RAG)
+            await update_task_progress(session, task, "Indexing rules for RAG", 95)
+            try:
+                rag_conn = VectorStoreConnection()
+                rules_to_index = [
+                    obj for obj in session.new if isinstance(obj, GovernanceRule)
+                ]
+                rag_conn.index_rules(rules_to_index)
+            except Exception as e:
+                logger.warning(f"RAG Indexing failed: {str(e)}")
 
             # Finalize
             task.status = TaskStatus.COMPLETE

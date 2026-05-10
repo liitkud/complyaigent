@@ -15,6 +15,6 @@ export SUPABASE_KEY="test" # pragma: allowlist secret
 export GEMINI_API_KEY="test" # pragma: allowlist secret
 
 # Run pytest
-pytest backend/tests/integration
+cd backend && uv run pytest tests/integration
 
 echo "Integration tests passed!"

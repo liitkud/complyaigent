@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: comply
       POSTGRES_PASSWORD: complyaigent2026 # pragma: allowlist secret
@@ -23,16 +23,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    user: root
+    env_file:
+      - ../.env
     environment:
-      DATABASE_URL: postgresql+asyncpg://comply:complyaigent2026 # pragma: allowlist secret@postgres:5432/complyaigent
-      SUPABASE_URL: http://localhost:54321
-      SUPABASE_KEY: dev-key
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-dev-key}
+      DATABASE_URL: ${DATABASE_URL:sqlite:///./test.db}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      COHERE_API_KEY: ${COHERE_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
       PROJECT_NAME: ComplyAIgent
-      LOG_LEVEL: DEBUG
-      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+      ENVIRONMENT: production
     volumes:
-      - ../backend:/app
+      - ../backend:/app:z
+      - /app/.venv
       - /app/__pycache__
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
@@ -43,16 +47,20 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+      target: dependencies
     ports:
       - "3001:3000"
+    user: root
+    env_file:
+      - ../.env
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
       NODE_ENV: development
     volumes:
-      - ../frontend:/app
+      - ../frontend:/app:z
       - /app/node_modules
       - /app/.next
-    command: npm run dev
+    command: pnpm dev
     depends_on:
       - backend
 
