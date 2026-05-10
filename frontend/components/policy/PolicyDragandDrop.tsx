@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { api, type Policy, type IngestResponse } from "@/services/api";
+import {
+  api,
+  type Policy,
+  type IngestResponse,
+  type LegacyIngestResponse,
+} from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import {
   Upload,
@@ -18,7 +23,9 @@ export default function PolicyDragAndDrop() {
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [ingestResult, setIngestResult] = useState<LegacyIngestResponse | null>(null);
+  const [ingestResult, setIngestResult] = useState<LegacyIngestResponse | null>(
+    null,
+  );
   const [jsonExpanded, setJsonExpanded] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
