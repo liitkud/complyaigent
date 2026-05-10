@@ -10,9 +10,12 @@ RUN apt-get update && apt-get install -y \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
     && mv /root/.local/bin/uv /usr/local/bin/uv
 
-ENV UV_CACHE_DIR=/tmp/.uv_cache
+ENV HOME=/app
+ENV UV_CACHE_DIR=/app/.uv_cache
+ENV UV_PYTHON_INSTALL_DIR=/app/.uv_python
 
-RUN addgroup --system aigent && adduser --system --group aigent
+RUN addgroup --system aigent && adduser --system --group aigent \
+    && chown aigent:aigent /app
 
 # Copy project files
 COPY pyproject.toml uv.lock ./
