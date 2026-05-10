@@ -6,6 +6,7 @@ from ..models.task import IngestionTask, TaskStatus
 from ..worker.tasks import run_background_task
 from ..services.pipeline import start_ingestion_pipeline
 import os
+import tempfile
 
 router = APIRouter()
 
@@ -37,9 +38,8 @@ async def ingest_document(
     session.refresh(task)
 
     # Save file temporarily for processing
-    temp_dir = f"temp/{task.id}"
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_path = f"{temp_dir}/{file.filename}"
+    temp_dir = tempfile.mkdtemp(prefix=f"ingest_{task.id}_")
+    temp_path = os.path.join(temp_dir, file.filename)
     with open(temp_path, "wb") as f:
         f.write(content)
 
