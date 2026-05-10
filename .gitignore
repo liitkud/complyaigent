@@ -55,3 +55,15 @@ coverage_report.txt
 
 # testing cache
 .pytest_cache
+
+# spec-kit
+.agents/
+
+# Test files
+*.db
+*.sh
+scratch/
+# Compiled files
+*pg*
+
+*/.pnpm-store/*

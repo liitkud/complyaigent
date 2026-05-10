@@ -1,2 +1,3 @@
 dangerouslyAllowAllBuilds: true
-# Allow to build all deps
+packages:
+  - "."

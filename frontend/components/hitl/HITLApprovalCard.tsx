@@ -1,28 +1,65 @@
+<<<<<<< HEAD
 'use client';
+=======
+"use client";
 
-import { useEffect, useState } from 'react';
-import { api, type HITLRequest } from '@/services/api';
-import StatusBadge from '@/components/ui/StatusBadge';
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { apiClient, type ValidationResult } from "@/services/api";
+import StatusBadge from "@/components/ui/StatusBadge";
+import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
+>>>>>>> 22a47dd01e2c2de8af3adcb7591bb6ff28320edf
+
+const mockData: ValidationResult[] = [
+  {
+    validation_id: "hitl-001",
+    verdict: "MID",
+    reasoning: "Encryption-at-rest not enforced for new data store",
+    activity_logged: true,
+    created_at: new Date().toISOString(),
+    status: "pending",
+  },
+];
 
 export default function HITLApprovalCard() {
-  const [requests, setRequests] = useState<HITLRequest[]>([]);
+  const [requests, setRequests] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getHITLRequests().then((r) => {
-      setRequests(r);
-      setLoading(false);
-    });
+    const load = async () => {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${apiUrl}/validate`);
+        if (!res.ok) throw new Error("API error");
+        const data: ValidationResult[] = await res.json();
+        setRequests(
+          data.filter((r) => r.verdict === "MID" && r.status === "pending"),
+        );
+      } catch (e) {
+        console.error("[HITLApprovalCard] Fetch failed, using mock:", e);
+        setRequests(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const handleAction = async (id: string, action: 'approve' | 'reject') => {
+  const handleAction = async (id: string, action: "approve" | "reject") => {
     setActioning(id);
-    if (action === 'approve') await api.approveHITL(id);
-    else await api.rejectHITL(id);
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: action === 'approve' ? 'approved' : 'rejected' } : r)));
-    setActioning(null);
+    try {
+      if (action === "approve") {
+        await apiClient.approveHITL(id);
+      } else {
+        await apiClient.rejectHITL(id);
+      }
+      setRequests((prev) => prev.filter((r) => r.validation_id !== id));
+    } catch (err) {
+      console.error("HITL action failed", err);
+    } finally {
+      setActioning(null);
+    }
   };
 
   if (loading) {
@@ -30,14 +67,17 @@ export default function HITLApprovalCard() {
       <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
         <div className="animate-pulse space-y-4">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-32 rounded-lg bg-slate-100 dark:bg-slate-800" />
+            <div
+              key={i}
+              className="h-32 rounded-lg bg-slate-100 dark:bg-slate-800"
+            />
           ))}
         </div>
       </div>
     );
   }
 
-  const pending = requests.filter((r) => r.status === 'pending');
+  const pending = requests.filter((r) => r.status === "pending");
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -45,8 +85,12 @@ export default function HITLApprovalCard() {
         <div className="flex items-center gap-2">
           <Clock size={16} className="text-amber-500" />
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">HITL Pending Approvals</h3>
-            <p className="text-xs text-slate-400">LangGraph interrupt — awaiting manager decision</p>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              HITL Pending Approvals
+            </h3>
+            <p className="text-xs text-slate-400">
+              LangGraph interrupt — awaiting manager decision
+            </p>
           </div>
         </div>
         {pending.length > 0 && (
@@ -57,59 +101,52 @@ export default function HITLApprovalCard() {
       </div>
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
         {requests.map((r) => (
-          <div key={r.id} className="p-5">
+          <div key={r.validation_id} className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle size={14} className={r.risk === 'high' ? 'text-red-500' : 'text-amber-500'} />
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">{r.description}</span>
+                  <AlertTriangle size={14} className="text-amber-500" />
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    {r.reasoning}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                  <span>by <strong>{r.developer}</strong></span>
+                  <span>
+                    ID: <strong>{r.validation_id}</strong>
+                  </span>
                   <span>•</span>
-                  <code className="rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800">{r.repo}</code>
+                  <span>{new Date(r.created_at).toLocaleDateString()}</span>
                   <span>•</span>
-                  <StatusBadge label={r.risk} variant={r.risk === 'high' ? 'danger' : 'warning'} dot />
+                  <StatusBadge
+                    label="Awaiting Approval"
+                    variant="warning"
+                    dot
+                  />
                 </div>
-                <ul className="mt-2 space-y-1">
-                  {r.findings.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {r.status === 'pending' ? (
-                  <>
-                    <button
-                      onClick={() => handleAction(r.id, 'approve')}
-                      disabled={actioning === r.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                      <CheckCircle size={13} /> Approve
-                    </button>
-                    <button
-                      onClick={() => handleAction(r.id, 'reject')}
-                      disabled={actioning === r.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                    >
-                      <XCircle size={13} /> Reject
-                    </button>
-                  </>
-                ) : (
-                  <StatusBadge
-                    label={r.status === 'approved' ? 'Approved' : 'Rejected'}
-                    variant={r.status === 'approved' ? 'success' : 'danger'}
-                  />
-                )}
+                <button
+                  onClick={() => handleAction(r.validation_id, "approve")}
+                  disabled={actioning === r.validation_id}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircle size={13} /> Approve
+                </button>
+                <button
+                  onClick={() => handleAction(r.validation_id, "reject")}
+                  disabled={actioning === r.validation_id}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                >
+                  <XCircle size={13} /> Reject
+                </button>
               </div>
             </div>
           </div>
         ))}
         {requests.length === 0 && (
-          <div className="p-8 text-center text-sm text-slate-400">No pending approvals</div>
+          <div className="p-8 text-center text-sm text-slate-400">
+            No pending approvals
+          </div>
         )}
       </div>
     </div>

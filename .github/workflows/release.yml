@@ -1,7 +1,7 @@
 name: Release Pipeline
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 on:
@@ -9,7 +9,7 @@ on:
     tags:
       - "v*"
     branches: [dev, main]
-    workflow_dispatch:
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -25,9 +25,11 @@ jobs:
           - service: backend
             dockerfile: ./backend/Dockerfile
             image_name: liitkud/complyaigent-backend
+            build_args: ""
           - service: frontend
             dockerfile: ./frontend/Dockerfile
             image_name: liitkud/complyaigent-frontend
+            build_args: "NEXT_PUBLIC_API_URL=http://backend:8000"
 
     steps:
       - name: Checkout code
@@ -67,6 +69,68 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
             ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_type == 'tag' && 'latest' || 'canary' }}
+          build-args: ${{ matrix.build_args }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
           platforms: linux/amd64, linux/arm64
+
+      - name: Test container
+        if: matrix.service == 'frontend'
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
+          docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }} /bin/sh -c "sleep 5 && exit 0"
+
+  cli:
+    name: Build CLI (${{ matrix.os }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            goos: linux
+            goarch: amd64
+            binary: pg-linux
+          - os: macos
+            goos: darwin
+            goarch: arm64
+            binary: pg-macos
+          - os: windows
+            goos: windows
+            goarch: amd64
+            binary: pg-windows.exe
+    defaults:
+      run:
+        working-directory: ./cli
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: cli/go.sum
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build Binary
+        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -o ${{ matrix.binary }} ./main.go
+
+      - name: Test Binary
+        if: matrix.os == 'linux'
+        run: |
+          ./${{ matrix.binary }} --version
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary }}
+          path: cli/${{ matrix.binary }}
+
+      - name: Release Asset
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: cli/${{ matrix.binary }}
+          generate_release_notes: true

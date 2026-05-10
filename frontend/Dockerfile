@@ -2,32 +2,26 @@
 # Stage 1: Dependencies Installation Stage
 # ============================================
 
-# IMPORTANT: Node.js Version Maintenance
-# This Dockerfile uses Node.js 24.13.0-slim, which was the latest LTS version at the time of writing.
-# To ensure security and compatibility, regularly update the NODE_VERSION ARG to the latest LTS version.
 ARG NODE_VERSION=24.13.0-slim
 
 FROM node:${NODE_VERSION} AS dependencies
 
-# Set working directory
 WORKDIR /app
 
-# Copy package-related files first to leverage Docker's caching mechanism
 COPY package.json package-lock.json* pnpm-lock.yaml* pnpm-workspace.yaml* ./
 
-# Install project dependencies with frozen lockfile for reproducible builds
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/usr/local/share/.cache/yarn \
     --mount=type=cache,target=/root/.local/share/pnpm/store \
     corepack enable pnpm && pnpm install --frozen-lockfile;
-  
+
 
 # ============================================
-# Stage 2: Build Next.js application in standalone mode
+# Stage 2: Build Next.js application
 # ============================================
 
-# Stage 2: Build Next.js application in standalone mode
 FROM node:${NODE_VERSION} AS builder
+
 WORKDIR /app
 
 COPY --from=dependencies /app/node_modules ./node_modules
@@ -36,7 +30,10 @@ COPY . .
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Allow build scripts to run
+# Accept build arg and pass as env var for Next.js
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN corepack enable pnpm && pnpm config set ignore-scripts false
 
 RUN --mount=type=cache,target=/app/.next/cache \
@@ -48,31 +45,21 @@ RUN --mount=type=cache,target=/app/.next/cache \
 
 FROM node:${NODE_VERSION} AS runner
 
-# Set working directory
 WORKDIR /app
 
-# Set production environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the run time.
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy production assets
+# Copy built application (without standalone)
 COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/.next ./.next
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/package.json ./package.json
 
-# Copy the standalone Next.js server and required static assets
-COPY --from=builder --chown=node:node /app/.next/standalone ./
-COPY --from=builder --chown=node:node /app/.next/static ./.next/static
-
-# Switch to non-root user for security best practices
 USER node
 
-# Expose port 3000 to allow HTTP traffic
 EXPOSE 3000
 
-# Start Next.js standalone server
-CMD ["node", "server.js"]
+CMD ["/app/node_modules/.bin/next", "start"]

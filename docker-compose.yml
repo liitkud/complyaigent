@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-comply}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complyaigent2026}
+      POSTGRES_DB: ${POSTGRES_DB:-complyaigent}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-comply} -d ${POSTGRES_DB:-complyaigent}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - shared_apps
+
+  backend:
+    image: ghcr.io/liitkud/complyaigent-backend:canary
+    ports:
+      - "8000:8000"
+    user: root
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./test.db}
+      PROJECT_NAME: ComplyAIgent
+      LOG_LEVEL: INFO
+      ENVIRONMENT: production
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - shared_apps
+
+volumes:
+  pgdata_prod:
+
+networks:
+  shared_apps:
+    external: true
+    name: shared_apps
