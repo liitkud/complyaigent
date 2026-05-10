@@ -21,12 +21,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
 
-    # LLMs (Gemini)
-    GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-1.5-flash"
-
     # External LLM Providers (Groq, etc.)
-    GROQ_API_KEY: str = ""
+    LLM_API_KEY: str = ""
     LLM_ENDPOINT: str = "https://api.groq.com/openai/v1"
     CHAT_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
