@@ -2,21 +2,18 @@
 
 import {
   LayoutDashboard,
-  Upload,
   Shield,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UploadCTA, ValidateCTA } from "./CTAButton";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Home", href: "/" },
   { icon: Shield, label: "Dashboard", href: "/dashboard" },
-  { icon: Upload, label: "Upload Policy", href: "/upload" },
-  { icon: ShieldCheck, label: "Validate", href: "/validate" },
 ];
 
 export default function Sidebar() {
@@ -31,7 +28,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-4 dark:border-slate-700">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 text-sm font-bold text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-violet-600 text-sm font-bold text-white">
           C
         </div>
         {!collapsed && (
@@ -44,12 +41,17 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Nav */}
+      {/* Nav (analytics / read-only) */}
       <nav className="flex-1 space-y-1 px-2 py-4">
+        {!collapsed && (
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Analytics
+          </p>
+        )}
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
+            (item.href !== "/" && (pathname?.startsWith(item.href) ?? false));
           return (
             <Link
               key={item.label}
@@ -67,6 +69,25 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Action CTAs */}
+      <div className="space-y-2 border-t border-slate-200 px-2 py-3 dark:border-slate-700">
+        {!collapsed && (
+          <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Actions
+          </p>
+        )}
+        <UploadCTA
+          size="sm"
+          label={collapsed ? "" : "Upload Policy"}
+          className={`w-full justify-center ${collapsed ? "px-2" : ""}`}
+        />
+        <ValidateCTA
+          size="sm"
+          label={collapsed ? "" : "Validate"}
+          className={`w-full justify-center ${collapsed ? "px-2" : ""}`}
+        />
+      </div>
 
       {/* Collapse toggle */}
       <div className="border-t border-slate-200 p-2 dark:border-slate-700">

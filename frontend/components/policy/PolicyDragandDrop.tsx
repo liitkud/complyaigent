@@ -246,6 +246,24 @@ export default function PolicyDragAndDrop({
         </div>
       )}
 
+      {/* Ingest failed panel */}
+      {ingestStatus && ingestStatus.status === "failed" && (
+        <div className="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/10">
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-400">
+              <X size={14} />
+              Ingestion failed at: {ingestStatus.current_stage}
+            </span>
+            <button
+              onClick={() => setIngestStatus(null)}
+              className="rounded p-0.5 text-red-400 transition-colors hover:text-red-600 dark:hover:text-red-300"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Policy list */}
       <div className="divide-y divide-slate-100 p-5 dark:divide-slate-800">
         {policies.map((p) => (

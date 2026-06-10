@@ -5,17 +5,6 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const mockData: ValidationResult[] = [
-  {
-    validation_id: "hitl-001",
-    verdict: "MID",
-    reasoning: "Encryption-at-rest not enforced for new data store",
-    activity_logged: true,
-    created_at: new Date().toISOString(),
-    status: "pending",
-  },
-];
-
 export default function HITLApprovalCard() {
   const [requests, setRequests] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,8 +22,8 @@ export default function HITLApprovalCard() {
           data.filter((r) => r.verdict === "MID" && r.status === "pending"),
         );
       } catch (e) {
-        console.error("[HITLApprovalCard] Fetch failed, using mock:", e);
-        setRequests(mockData);
+        console.error("[HITLApprovalCard] Fetch failed:", e);
+        setRequests([]);
       } finally {
         setLoading(false);
       }
@@ -53,6 +42,7 @@ export default function HITLApprovalCard() {
       setRequests((prev) => prev.filter((r) => r.validation_id !== id));
     } catch (err) {
       console.error("HITL action failed", err);
+      alert(`Failed to ${action}: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
       setActioning(null);
     }
