@@ -6,8 +6,8 @@ from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
 import sqlalchemy
 from app.core.config import settings
-from openai import AsyncOpenAI
 from pathlib import Path
+from ..core.lifespan import app_state
 
 
 # Detect project root (where .env lives)
@@ -15,11 +15,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
-@lru_cache()
-def get_openai_client():
-    return AsyncOpenAI(
-        base_url=settings.LLM_ENDPOINT, api_key=settings.LLM_API_KEY or "missing-key"
-    )
+
 
 
 class VectorStoreConnection:
@@ -88,8 +84,7 @@ class VectorStoreConnection:
         {query}
         """
         print(user_prompt)
-
-        completion = await get_openai_client().chat.completions.create(
+        completion = await app_state.groq_client.chat.completions.create(
             model=settings.CHAT_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
