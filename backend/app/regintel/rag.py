@@ -1,10 +1,8 @@
-from functools import lru_cache
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
-import sqlalchemy
 from app.core.config import settings
 from pathlib import Path
 from ..core.lifespan import app_state
@@ -25,17 +23,8 @@ class VectorStoreConnection:
         self.should_reset = False
 
     @property
-    def vector_store(self):
-        url = sqlalchemy.make_url(settings.DATABASE_URL)
-        return PGVectorStore.from_params(
-            host=url.host,
-            port=str(url.port or 5432),
-            user=url.username,
-            password=url.password,
-            database=url.database,
-            table_name="regulations_vectors",
-            embed_dim=1024,
-        )
+    def vector_store(self) -> PGVectorStore:
+        return app_state.vector_client
 
     @property
     def embedding_model(self):
