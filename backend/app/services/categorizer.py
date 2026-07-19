@@ -8,13 +8,19 @@ import json
 
 class CategorizerService:
     def __init__(self):
-        self.llm = ChatOpenAI(
-            model=settings.CHAT_MODEL,
-            openai_api_key=settings.LLM_API_KEY,
-            base_url=settings.LLM_ENDPOINT,
-            timeout=5.0,
-            # 5s timeout per LLM call
-        )
+        self._llm = None
+
+    @property
+    def llm(self):
+        if self._llm is None:
+            self._llm = ChatOpenAI(
+                model=settings.CHAT_MODEL,
+                openai_api_key=settings.LLM_API_KEY,
+                base_url=settings.LLM_ENDPOINT,
+                timeout=5.0,
+                # 5s timeout per LLM call
+            )
+        return self._llm
 
     async def categorize_rules(self, compacted_text: str) -> List[Dict]:
         """

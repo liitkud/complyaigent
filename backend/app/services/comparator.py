@@ -7,11 +7,7 @@ from ..core.config import settings
 
 class ComparatorService:
     def __init__(self):
-        self.llm = ChatOpenAI(
-            model=settings.CHAT_MODEL,
-            openai_api_key=settings.LLM_API_KEY,
-            base_url=settings.LLM_ENDPOINT,
-        )
+        self._llm = None
         self.lsh = MinHashLSH(threshold=0.85, num_perm=128)
         self.anchor_regex_seed = [
             r"Article\s+\d+",
@@ -19,6 +15,16 @@ class ComparatorService:
             r"CC\d+\.\d+",
             r"Section\s+\d+(\.\d+)*",
         ]
+
+    @property
+    def llm(self):
+        if self._llm is None:
+            self._llm = ChatOpenAI(
+                model=settings.CHAT_MODEL,
+                openai_api_key=settings.LLM_API_KEY,
+                base_url=settings.LLM_ENDPOINT,
+            )
+        return self._llm
 
     def extract_anchors(self, text: str) -> List[str]:
         """
