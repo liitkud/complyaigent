@@ -218,23 +218,89 @@ func offloadToValidate(backendURL string, diff string) (string, []internal.Local
 		return "", nil, "", fmt.Errorf("encode validation request: %w", err)
 	}
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 15 * time.Second}
 	resp, err := client.Post(strings.TrimRight(backendURL, "/")+"/validate", "application/json", bytes.NewReader(reqBody))
 	if err != nil {
 		return "", nil, "", err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		return "", nil, "", fmt.Errorf("backend returned HTTP %d", resp.StatusCode)
 	}
 
-	var validation ValidateResponse
-	if err := json.NewDecoder(resp.Body).Decode(&validation); err != nil {
+	var submitResp struct {
+		ValidationID string `json:"validation_id"`
+		Status       string `json:"status"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&submitResp); err != nil {
 		return "", nil, "", fmt.Errorf("parse backend response: %w", err)
 	}
 
-	return validation.Verdict, nil, validation.Reasoning, nil
+	validationID := submitResp.ValidationID
+	if validationID == "" {
+		return "", nil, "", fmt.Errorf("empty validation ID from backend")
+	}
+
+	if !strings.Contains(os.Args[0], "test") {
+		fmt.Printf("[*] Validation submitted (ID: %s). Status: %s\n", validationID, submitResp.Status)
+	}
+
+	pollClient := &http.Client{Timeout: 5 * time.Second}
+	maxAttempts := 30
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		getURL := fmt.Sprintf("%s/validate/%s", strings.TrimRight(backendURL, "/"), validationID)
+		getResp, err := pollClient.Get(getURL)
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		var result struct {
+			ValidationID string `json:"validation_id"`
+			Verdict      string `json:"verdict"`
+			Reasoning    string `json:"reasoning"`
+			Status       string `json:"status"`
+		}
+
+		decodeErr := json.NewDecoder(getResp.Body).Decode(&result)
+		getResp.Body.Close()
+
+		if getResp.StatusCode != http.StatusOK {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if decodeErr != nil {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if result.Status == "approved" {
+			return "allow", nil, "Compliance approved: " + result.Reasoning, nil
+		}
+		if result.Status == "rejected" {
+			return "block", nil, "Compliance rejected: " + result.Reasoning, nil
+		}
+		if result.Status == "complete" {
+			verdict := strings.ToLower(result.Verdict)
+			if verdict == "low" {
+				return "allow", nil, result.Reasoning, nil
+			}
+			if verdict == "high" {
+				return "block", nil, result.Reasoning, nil
+			}
+			return verdict, nil, result.Reasoning, nil
+		}
+
+		if attempt == 1 && !strings.Contains(os.Args[0], "test") {
+			fmt.Println("[*] Awaiting compliance officer approval...")
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return "block", nil, "Validation timed out awaiting compliance decision", nil
 }
 
 func gitContext() (string, string) {
