@@ -1,7 +1,9 @@
-from fastapi.testclient import TestClient
 from uuid import uuid4
-from app.models.rule import GovernanceRule, RuleType, SourceCategory
+
+from fastapi.testclient import TestClient
 from sqlmodel import Session
+
+from app.models.rule import GovernanceRule, RuleType, SourceCategory
 
 
 def test_validate_code_safe(client: TestClient, session: Session):
@@ -33,10 +35,11 @@ def test_validate_code_safe(client: TestClient, session: Session):
 
 
 def test_activity_logging(client: TestClient, session: Session):
-    from app.services.logger import ActivityLog
     from sqlmodel import select
+
     from app.models.rule import GovernanceRule, RuleType, SourceCategory
     from app.models.task import IngestionTask
+    from app.services.logger import ActivityLog
 
     # Setup rule
     rule_id = uuid4()

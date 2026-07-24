@@ -1,7 +1,9 @@
+import json
+
 from langchain_openai import ChatOpenAI
+
 from ..core.config import settings
 from ..core.logging import logger
-import json
 
 
 class ValidatorService:
@@ -25,10 +27,10 @@ class ValidatorService:
         """
         prompt = f"""
         As a compliance agent, evaluate the following code against this governance rule:
-        
+
         Rule: {rule_context}
         Code: {code}
-        
+
         Provide a safety verdict and reasoning.
         Verdict LOW: Safe to merge.
         Verdict MID: Needs human review (ambiguous or minor policy concern).
@@ -45,10 +47,10 @@ class ValidatorService:
                 raw_content = raw_content.split("```json")[1].split("```")[0].strip()
             return json.loads(raw_content)
         except Exception as e:
-            logger.error(f"Risk validation failed: {str(e)}")
+            logger.error(f"Risk validation failed: {e!s}")
             return {
                 "verdict": "HIGH",
-                "reasoning": f"Validation system error: {str(e)}",
+                "reasoning": f"Validation system error: {e!s}",
                 "remediation": "Review manually.",
             }
 

@@ -1,21 +1,22 @@
 from functools import lru_cache
+from pathlib import Path
+
+import sqlalchemy
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
-from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
-import sqlalchemy
-from app.core.config import settings
+from llama_index.vector_stores.postgres import PGVectorStore
 from openai import AsyncOpenAI
-from pathlib import Path
 
+from app.core.config import settings
 
 # Detect project root (where .env lives)
 # rag.py is in backend/app/regintel/
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
-@lru_cache()
+@lru_cache
 def get_openai_client():
     return AsyncOpenAI(
         base_url=settings.LLM_ENDPOINT, api_key=settings.LLM_API_KEY or "missing-key"
@@ -72,18 +73,18 @@ class VectorStoreConnection:
 
         system_prompt = """
         ## SYSTEM:
-        You are a precise and reliable assistant. Answer the user's question 
-        using ONLY the provided context below. If the context lacks sufficient 
+        You are a precise and reliable assistant. Answer the user's question
+        using ONLY the provided context below. If the context lacks sufficient
         information, politely state that you cannot answer based on the given data.
-        
+
         ## INSTRUCTIONS:
-        Maintain a professional tone. Reference metadata when citing sources. 
+        Maintain a professional tone. Reference metadata when citing sources.
         Do not fabricate information outside the provided context."""
 
         user_prompt = f"""
         ## CONTEXT:
         {user_context}
-            
+
         ## USER QUERY:
         {query}
         """

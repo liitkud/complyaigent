@@ -1,9 +1,10 @@
 import asyncio
+import json
+
 from langchain_openai import ChatOpenAI
+
 from ..core.config import settings
 from ..core.logging import logger
-from typing import List, Dict
-import json
 
 
 class CategorizerService:
@@ -22,7 +23,7 @@ class CategorizerService:
             )
         return self._llm
 
-    async def categorize_rules(self, compacted_text: str) -> List[Dict]:
+    async def categorize_rules(self, compacted_text: str) -> list[dict]:
         """
         Classifies rules into A1, A2, B, C buckets.
         Retries once on failure with 2s delay.
@@ -36,12 +37,12 @@ class CategorizerService:
                 - A2_ACTIONABLE: Requires human verification. Provide instructions and a yes/no verification question.
                 - B_INFRA_METADATA: Infrastructure config (e.g., encryption=true).
                 - C_SEMANTIC_GUIDANCE: General advice.
-                
+
                 For each rule, also determine impact_radius (code_base, org_wide, global_standard) and risk_level (low, medium, high).
-                
+
                 Requirements:
                 {compacted_text}
-                
+
                 Return a JSON list of objects with: type, impact_radius, risk_level, source_category, content, remediation, tags, metadata.
                 STRICT RULES FOR VALUES:
                 - type: MUST BE one of ["A1_SCANNABLE", "A2_ACTIONABLE", "B_INFRA_METADATA", "C_SEMANTIC_GUIDANCE"].
@@ -118,15 +119,15 @@ class CategorizerService:
                     )
                 return rules
 
-            except (asyncio.TimeoutError, Exception) as e:
+            except (TimeoutError, Exception) as e:
                 if attempt < max_attempts:
                     logger.warning(
-                        f"Categorizer attempt {attempt} failed: {str(e)}. Retrying in 2s..."
+                        f"Categorizer attempt {attempt} failed: {e!s}. Retrying in 2s..."
                     )
                     await asyncio.sleep(2)
                 else:
                     logger.error(
-                        f"Categorizer failed after {max_attempts} attempts: {str(e)}"
+                        f"Categorizer failed after {max_attempts} attempts: {e!s}"
                     )
 
         return []

@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Detect project root (where .env lives)
 # config.py is in backend/app/core/
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     )
 
 
-@lru_cache()
+@lru_cache
 def get_settings():
     return Settings()
 

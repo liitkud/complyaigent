@@ -1,5 +1,6 @@
-from fastapi.testclient import TestClient
 import io
+
+from fastapi.testclient import TestClient
 
 
 def test_ingest_document(client: TestClient):
