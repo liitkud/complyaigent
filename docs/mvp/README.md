@@ -39,6 +39,8 @@
 
 ## References
 
+- [Per-feature handoffs](../handoffs/) + skill `feature-plan`
+
 - [Handover](../handover/README.md)
 - [Onboarding](../ONBOARDING.md)
 - [Audit (historical)](../audit/README.md)

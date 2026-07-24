@@ -56,8 +56,10 @@ coverage_report.txt
 # testing cache
 .pytest_cache
 
-# spec-kit
-.agents/
+# spec-kit / local agent state — keep versioned skills
+.agents/*
+!.agents/skills/
+!.agents/skills/**
 
 # Test files
 *.db

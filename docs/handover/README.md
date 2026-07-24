@@ -79,3 +79,7 @@ Or use root `docker-compose.yml` when bringing up DB-backed stacks.
 - Default branch for work: `dev`
 - Prefer small PRs mapped to MVP sub-issues
 - `agy` is available on the `idea` host for implementation jobs; keep changes scoped to the issue
+
+## Per-feature handoffs
+
+Feature-level continuity lives in [`docs/handoffs/`](../handoffs/) (see skill `feature-plan`). This page stays project-wide.

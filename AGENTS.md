@@ -7,6 +7,11 @@
 - [docs/ONBOARDING.md](docs/ONBOARDING.md) — local setup
 - Epic: https://github.com/liitkud/complyaigent/issues/74
 
+## Feature plans & handoffs
+- Skill: `feature-plan` (`.agents/skills/feature-plan/`, `.cursor/skills/feature-plan/`)
+- Per-feature docs: [`docs/handoffs/`](docs/handoffs/) — dated handoffs on `docs/<topic>-handoffs` or `feat|mvp/<issue>-*` branches
+- Project-wide overview only: [`docs/handover/`](docs/handover/README.md)
+
 ## Defaults
 - Branch from `dev`; small PRs mapped to MVP sub-issues (#75–#81)
 - Backend: `cd backend && uv sync && uv run …`
