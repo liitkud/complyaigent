@@ -28,6 +28,7 @@ def log_activity(
 ):
     """
     Persist activity log to database.
+    Returns an expunged instance safe to read after the session closes.
     """
     with Session(engine) as session:
         log = ActivityLog(
@@ -35,4 +36,6 @@ def log_activity(
         )
         session.add(log)
         session.commit()
+        session.refresh(log)
+        session.expunge(log)
         return log

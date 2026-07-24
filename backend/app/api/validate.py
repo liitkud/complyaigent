@@ -5,10 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, col, select
 
+from ..core.config import settings
 from ..core.db import get_session
 from ..models.rule import GovernanceRule
-from ..services.logger import ActivityLog, log_activity
+from ..services.logger import ActivityLog, engine as activity_engine, log_activity
 from ..services.validator import validator
+from ..services.verdict_log import build_verdict_event, emit_verdict_log
 
 router = APIRouter()
 
@@ -17,6 +19,8 @@ class ValidateRequest(BaseModel):
     code_snippet: str
     rule_id: str
     context: str | None = None
+    repo: str | None = None
+    policy_id: str | None = None
 
 
 class HITLAction(BaseModel):
@@ -40,19 +44,44 @@ async def submit_validation(
     # Perform validation
     result = await validator.validate_risk(request.code_snippet, rule_content)
 
-    # Log activity
+    status = "complete" if result["verdict"] != "MID" else "pending"
+
+    # Pre-allocate validation id via activity log, then attach structured verdict
+    details = {
+        "request": request.model_dump(),
+        "result": result,
+    }
     log = log_activity(
         action="risk_validation",
-        status="complete" if result["verdict"] != "MID" else "pending",
-        details={
-            "request": request.model_dump(),
-            "result": result,
-        },
+        status=status,
+        details=details,
     )
+
+    verdict_event = build_verdict_event(
+        action="risk_validation",
+        verdict=result["verdict"],
+        repo=request.repo or getattr(settings, "PROJECT_NAME", "") or "",
+        policy_id=request.policy_id,
+        validation_id=str(log.id),
+        rule_id=request.rule_id,
+        timestamp=log.timestamp if log.timestamp.tzinfo else log.timestamp.replace(tzinfo=None),
+    )
+    emit_verdict_log(verdict_event)
+
+    # Persist structured event on the activity row (same engine as log_activity)
+    with Session(activity_engine) as s:
+        row = s.get(ActivityLog, log.id)
+        if row:
+            merged = dict(row.details or {})
+            merged["verdict_event"] = verdict_event
+            row.details = merged
+            s.add(row)
+            s.commit()
 
     return {
         "validation_id": str(log.id),
         "status": "processing" if result["verdict"] == "MID" else "complete",
+        "verdict_event": verdict_event,
     }
 
 
@@ -63,7 +92,8 @@ async def get_validation(id: UUID, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Validation result not found")
 
     result = log.details.get("result", {})
-    return {
+    verdict_event = log.details.get("verdict_event")
+    payload = {
         "validation_id": str(log.id),
         "verdict": result.get("verdict", "HIGH"),
         "reasoning": result.get("reasoning", "No reasoning provided"),
@@ -71,6 +101,9 @@ async def get_validation(id: UUID, session: Session = Depends(get_session)):
         "created_at": log.timestamp.isoformat(),
         "status": log.status,
     }
+    if verdict_event:
+        payload["verdict_event"] = verdict_event
+    return payload
 
 
 @router.patch("/validate/{id}")
@@ -118,15 +151,16 @@ async def list_validations(
         if verdict and current_verdict != verdict.upper():
             continue
 
-        results.append(
-            {
-                "validation_id": str(log.id),
-                "verdict": current_verdict,
-                "reasoning": res.get("reasoning"),
-                "activity_logged": True,
-                "created_at": log.timestamp.isoformat(),
-                "status": log.status,
-            }
-        )
+        item = {
+            "validation_id": str(log.id),
+            "verdict": current_verdict,
+            "reasoning": res.get("reasoning"),
+            "activity_logged": True,
+            "created_at": log.timestamp.isoformat(),
+            "status": log.status,
+        }
+        if "verdict_event" in (log.details or {}):
+            item["verdict_event"] = log.details["verdict_event"]
+        results.append(item)
 
     return results
