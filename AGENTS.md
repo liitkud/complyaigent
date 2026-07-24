@@ -18,5 +18,12 @@
 - Do not reintroduce floating unpinned `ruff`/`ty` in CI without lockfile pins
 - Prefer project-scoped changes; no drive-by refactors outside the issue
 
+## MVP foundation (issues #75–#81)
+- Sample policy fixtures: [`docs/mvp/fixtures/`](docs/mvp/fixtures/) — Markdown with H1 + `## Controls`; covered by `backend/tests/test_mvp_fixtures.py`
+- Verdict events: `backend/app/services/verdict_log.py` — validate returns `verdict_event` with required keys (`action`, `verdict`, `repo`, `timestamp`, `policy_id`/`policyId`, `validation_id`, `rule_id`)
+- Policies API: `GET /policies`, `GET /policies/{id}`; `POST /ingest` returns `policy_id` and versions by content hash
+- Backend tests: `cd backend && uv run pytest` (pyproject sets `pythonpath = ["."]`)
+- Prefer TDD on MVP slices; update the matching `docs/handoffs/YYYY-MM-DD-*.md` when status changes
+
 ## Speckit
 Feature plans live under `specs/` and `.specify/`. Constitution: `docs/constitution.md` → `.specify/memory/constitution.md`.
