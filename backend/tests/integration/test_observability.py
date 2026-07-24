@@ -1,8 +1,10 @@
-from fastapi.testclient import TestClient
 from uuid import uuid4
+
+from fastapi.testclient import TestClient
+from sqlmodel import Session
+
 from app.models.rule import GovernanceRule, RuleType, SourceCategory
 from app.models.task import IngestionTask
-from sqlmodel import Session
 
 
 def test_get_activity(client: TestClient):

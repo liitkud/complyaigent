@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
+
 from ..core.db import get_session
 from ..services.logger import ActivityLog
 

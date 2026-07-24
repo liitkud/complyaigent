@@ -1,12 +1,13 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.db import init_db
-from app.core.config import settings
-from app.core.rate_limit import setup_rate_limiting
-from app.api import ingest, manifest, validate, activity
-from app.core.logging import logger
 
-from contextlib import asynccontextmanager
+from app.api import activity, ingest, manifest, validate
+from app.core.config import settings
+from app.core.db import init_db
+from app.core.logging import logger
+from app.core.rate_limit import setup_rate_limiting
 
 
 @asynccontextmanager

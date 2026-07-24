@@ -1,7 +1,8 @@
 import re
-from typing import List, Optional, Tuple
+
 from datasketch import MinHash, MinHashLSH
 from langchain_openai import ChatOpenAI
+
 from ..core.config import settings
 
 
@@ -26,7 +27,7 @@ class ComparatorService:
             )
         return self._llm
 
-    def extract_anchors(self, text: str) -> List[str]:
+    def extract_anchors(self, text: str) -> list[str]:
         """
         Tier 1: Entity Anchor Extraction.
         """
@@ -37,8 +38,8 @@ class ComparatorService:
         return list(set(anchors))
 
     def check_minhash(
-        self, text: str, existing_minhashes: List[Tuple[str, MinHash]]
-    ) -> Optional[str]:
+        self, text: str, existing_minhashes: list[tuple[str, MinHash]]
+    ) -> str | None:
         """
         Tier 2: MinHash LSH deduplication.
         """
@@ -60,10 +61,10 @@ class ComparatorService:
         """
         prompt = f"""
         Are these two governance requirements legally distinct or the same requirement phrased differently?
-        
+
         Requirement A: {new_text}
         Requirement B: {existing_text}
-        
+
         Return exactly one word: DUPLICATE, UPDATE, or DISTINCT.
         """
         response = await self.llm.ainvoke(prompt)

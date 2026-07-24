@@ -30,8 +30,34 @@ testpaths = ["tests"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "ruff>=0.16.0",
+    "ty>=0.0.63",
 ]
 
 [tool.ty.rules]
 unknown-argument = "ignore"
 no-matching-overload = "ignore"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "BLE",    # flake8-blind-except
+    "EXE",    # flake8-executable
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "B008",   # Do not perform function call `Depends` in parameter defaults
+    "EXE002", # The file is executable but no shebang is present
+    "E501",   # Line too long
+    "BLE001", # Do not catch blind exception: Exception
+]
+

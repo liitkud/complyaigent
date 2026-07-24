@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, UploadFile, File, BackgroundTasks, HTTPException
+import os
+import tempfile
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from sqlmodel import Session, select
+
 from ..core.db import get_session
 from ..core.hashing import calculate_sha256
 from ..models.task import IngestionTask, TaskStatus
-from ..worker.tasks import run_background_task
 from ..services.pipeline import start_ingestion_pipeline
-import os
-import tempfile
+from ..worker.tasks import run_background_task
 
 router = APIRouter()
 
@@ -62,7 +64,7 @@ async def get_task_status(task_id: str, session: Session = Depends(get_session))
     try:
         uuid_id = UUID(task_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid task ID format")
+        raise HTTPException(status_code=400, detail="Invalid task ID format") from None
 
     task = session.get(IngestionTask, uuid_id)
     if not task:

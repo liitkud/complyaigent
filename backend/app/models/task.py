@@ -1,12 +1,12 @@
-from sqlmodel import SQLModel, Field
-from typing import Optional, List
+from datetime import UTC, datetime
+from enum import StrEnum
 from uuid import UUID, uuid4
-from datetime import datetime, timezone
-from enum import Enum
-from sqlalchemy import Column, JSON
+
+from sqlalchemy import JSON, Column
+from sqlmodel import Field, SQLModel
 
 
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     COMPARING = "comparing"
     COMPACTING = "compacting"
     CATEGORIZING = "categorizing"
@@ -18,10 +18,10 @@ class IngestionTask(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     status: TaskStatus = Field(default=TaskStatus.COMPARING)
     progress_pct: int = Field(default=0)
-    current_stage: Optional[str] = None
-    eta_seconds: Optional[int] = None
+    current_stage: str | None = None
+    eta_seconds: int | None = None
     source_hash: str = Field(index=True)
-    previous_version_id: Optional[UUID] = None
-    version_chain: List[UUID] = Field(default_factory=list, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    previous_version_id: UUID | None = None
+    version_chain: list[UUID] = Field(default_factory=list, sa_column=Column(JSON))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
