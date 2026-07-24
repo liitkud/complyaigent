@@ -56,7 +56,7 @@ select = [
 ]
 ignore = [
     "B008",   # Do not perform function call `Depends` in parameter defaults
-    "EXE002", # The file is executable but no shebang is present
+    # The file is executable but no shebang is present
     "E501",   # Line too long
     "BLE001", # Do not catch blind exception: Exception
 ]
