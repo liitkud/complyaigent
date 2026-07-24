@@ -20,7 +20,7 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 # CORS Configuration
 app.add_middleware(
-    CORSMiddleware,  # type: ignore
+    CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "https://comply.kuyacarlo.dev",
