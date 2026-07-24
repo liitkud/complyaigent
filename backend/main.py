@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import activity, ingest, manifest, validate
+from app.api import activity, ingest, manifest, policies, validate
 from app.core.config import settings
 from app.core.db import init_db
 from app.core.logging import logger
@@ -36,6 +36,7 @@ setup_rate_limiting(app)
 
 # Include routers
 app.include_router(ingest.router, tags=["Ingestion"])
+app.include_router(policies.router, tags=["Policies"])
 app.include_router(manifest.router, tags=["Manifest"])
 app.include_router(validate.router, tags=["Validation"])
 app.include_router(activity.router, tags=["Activity"])

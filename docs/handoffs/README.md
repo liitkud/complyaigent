@@ -40,4 +40,4 @@ Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and
 | 2026-07-24 | [mvp-continuous-compliance-gate](2026-07-24-mvp-continuous-compliance-gate.md) | `docs/mvp-handoffs` / #74 | In progress |
 | 2026-07-24 | [mvp-sample-policies](2026-07-24-mvp-sample-policies.md) | `mvp/75-76-81-foundation` / #81 | Done |
 | 2026-07-24 | [verdict-log-schema](2026-07-24-verdict-log-schema.md) | `mvp/75-76-81-foundation` / #76 | Done |
-| 2026-07-24 | [policy-versioning](2026-07-24-policy-versioning.md) | `mvp/75-76-81-foundation` / #75 | In progress |
+| 2026-07-24 | [policy-versioning](2026-07-24-policy-versioning.md) | `mvp/75-76-81-foundation` / #75 | Done |

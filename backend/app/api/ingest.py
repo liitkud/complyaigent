@@ -2,15 +2,56 @@ import os
 import tempfile
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from ..core.db import get_session
 from ..core.hashing import calculate_sha256
+from ..models.policy import Policy
 from ..models.task import IngestionTask, TaskStatus
 from ..services.pipeline import start_ingestion_pipeline
 from ..worker.tasks import run_background_task
 
 router = APIRouter()
+
+
+def _upsert_policy(
+    session: Session,
+    *,
+    name: str,
+    file_hash: str,
+    task_id,
+    source_url: str | None = None,
+) -> Policy:
+    """Create or reuse a Policy version row for this ingest."""
+    existing_hash = session.exec(
+        select(Policy).where(Policy.hash == file_hash)
+    ).first()
+    if existing_hash:
+        return existing_hash
+
+    previous = session.exec(
+        select(Policy)
+        .where(Policy.name == name, Policy.is_current.is_(True))
+        .order_by(col(Policy.version).desc())
+    ).first()
+
+    next_version = (previous.version + 1) if previous else 1
+    if previous:
+        previous.is_current = False
+        session.add(previous)
+
+    policy = Policy(
+        name=name,
+        source_url=source_url,
+        version=next_version,
+        hash=file_hash,
+        task_id=task_id,
+        is_current=True,
+    )
+    session.add(policy)
+    session.commit()
+    session.refresh(policy)
+    return policy
 
 
 @router.post("/ingest", status_code=202)
@@ -21,16 +62,21 @@ async def ingest_document(
 ):
     content = await file.read()
     file_hash = calculate_sha256(content)
+    name = file.filename or "untitled"
 
     # Check for existing task (idempotency)
     existing_task = session.exec(
         select(IngestionTask).where(IngestionTask.source_hash == file_hash)
     ).first()
     if existing_task:
+        policy = _upsert_policy(
+            session, name=name, file_hash=file_hash, task_id=existing_task.id
+        )
         return {
             "task_id": existing_task.id,
             "status": existing_task.status,
             "message": "File already processed or in progress.",
+            "policy_id": str(policy.id),
         }
 
     # Create new task
@@ -39,9 +85,11 @@ async def ingest_document(
     session.commit()
     session.refresh(task)
 
+    policy = _upsert_policy(session, name=name, file_hash=file_hash, task_id=task.id)
+
     # Save file temporarily for processing
     temp_dir = tempfile.mkdtemp(prefix=f"ingest_{task.id}_")
-    temp_path = os.path.join(temp_dir, file.filename)
+    temp_path = os.path.join(temp_dir, name)
     with open(temp_path, "wb") as f:
         f.write(content)
 
@@ -50,11 +98,12 @@ async def ingest_document(
         run_background_task, start_ingestion_pipeline, str(task.id), temp_path
     )
 
-    task_id = str(task.id)
-    task_status = task.status
-    task_progress = task.progress_pct
-
-    return {"task_id": task_id, "status": task_status, "progress_pct": task_progress}
+    return {
+        "task_id": str(task.id),
+        "status": task.status,
+        "progress_pct": task.progress_pct,
+        "policy_id": str(policy.id),
+    }
 
 
 @router.get("/ingest/{task_id}")
