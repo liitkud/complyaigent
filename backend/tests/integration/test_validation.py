@@ -24,12 +24,12 @@ def test_validate_code_safe(client: TestClient, session: Session):
 
     response = client.post(
         "/validate",
-        json={"code": "password = 'secret'", "metadata": {"rule_id": str(rule_id)}},
+        json={"code_snippet": "password = 'secret'", "rule_id": str(rule_id)},
     )
     assert response.status_code == 202
     data = response.json()
-    assert "decision" in data
-    assert "reasoning" in data
+    assert "validation_id" in data
+    assert "status" in data
 
 
 def test_activity_logging(client: TestClient, session: Session):
@@ -56,7 +56,7 @@ def test_activity_logging(client: TestClient, session: Session):
     # Trigger a validation
     client.post(
         "/validate",
-        json={"code": "eval('evil')", "metadata": {"rule_id": str(rule_id)}},
+        json={"code_snippet": "eval('evil')", "rule_id": str(rule_id)},
     )
 
     # Check if log exists

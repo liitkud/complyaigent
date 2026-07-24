@@ -34,7 +34,7 @@ def test_list_validations_filter(client: TestClient, session: Session):
     # Trigger validation (will return safe/unsafe)
     client.post(
         "/validate",
-        json={"code": "print('test')", "metadata": {"rule_id": str(rule_id)}},
+        json={"code_snippet": "print('test')", "rule_id": str(rule_id)},
     )
 
     # List validations
