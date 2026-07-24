@@ -1,6 +1,6 @@
 # HANDOFF — MVP sample policy pack (#81)
 
-**Status:** In progress  
+**Status:** Done  
 **Branch:** `mvp/75-76-81-foundation`  
 **Issue(s):** #81  
 **Last updated:** 2026-07-24
@@ -9,12 +9,12 @@
 Minimal Markdown policy fixtures for ingest/E2E — not a hackathon corpus.
 
 ## Current state
-Starting TDD: tests require fixtures under `docs/mvp/fixtures/`.
+Two fixtures under `docs/mvp/fixtures/` with H1 title + `## Controls`.
 
 ## What shipped
 | PR / commit | Delivers |
 |-------------|---------|
-| (pending) | |
+| (this branch) | `data-classification.md`, `access-control.md` + `test_mvp_fixtures.py` |
 
 ## Hook points
 - `docs/mvp/fixtures/`
@@ -29,5 +29,5 @@ cd backend && uv run pytest tests/test_mvp_fixtures.py -v
 ```
 
 ## Done means
-- [ ] ≥1 MD fixture with title + controls section
-- [ ] Tests green
+- [x] ≥1 MD fixture with title + controls section
+- [x] Tests green
