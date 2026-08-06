@@ -15,9 +15,6 @@ from ..core.lifespan import app_state
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
-
-
-
 class VectorStoreConnection:
     def __init__(self):
         self.splitter = SentenceSplitter(chunk_size=512, chunk_overlap=60)

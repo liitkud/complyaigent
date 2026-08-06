@@ -15,9 +15,8 @@ class AppState:
     groq_client: AsyncOpenAI | None = None
     vector_client: PGVectorStore | None = None
 
+
 app_state = AppState()
-
-
 
 
 @asynccontextmanager
@@ -28,7 +27,8 @@ async def lifespan(app: FastAPI):
         logger.info("Database initialized")
 
         app_state.groq_client = AsyncOpenAI(
-            base_url=settings.LLM_ENDPOINT, api_key=settings.LLM_API_KEY or "missing-key"
+            base_url=settings.LLM_ENDPOINT,
+            api_key=settings.LLM_API_KEY or "missing-key",
         )
 
         url = sqlalchemy.make_url(settings.DATABASE_URL)
