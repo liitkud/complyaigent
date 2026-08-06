@@ -57,18 +57,18 @@ class VectorStoreConnection:
 
         system_prompt = """
         ## SYSTEM:
-        You are a precise and reliable assistant. Answer the user's question 
-        using ONLY the provided context below. If the context lacks sufficient 
+        You are a precise and reliable assistant. Answer the user's question
+        using ONLY the provided context below. If the context lacks sufficient
         information, politely state that you cannot answer based on the given data.
-        
+
         ## INSTRUCTIONS:
-        Maintain a professional tone. Reference metadata when citing sources. 
+        Maintain a professional tone. Reference metadata when citing sources.
         Do not fabricate information outside the provided context."""
 
         user_prompt = f"""
         ## CONTEXT:
         {user_context}
-            
+
         ## USER QUERY:
         {query}
         """

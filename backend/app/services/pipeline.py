@@ -1,16 +1,18 @@
 import asyncio
-from ..models.task import IngestionTask, TaskStatus
-from ..models.rule import GovernanceRule
-from ..core.db import engine
-from sqlmodel import Session, select, col
-from ..core.logging import logger
-from .extractor import extract_text_from_pdf, extract_text_from_markdown, clean_text
-from .comparator import comparator
-from .compactor import compactor
-from .categorizer import categorizer
-from ..regintel.rag import VectorStoreConnection
 import os
 from uuid import UUID
+
+from sqlmodel import Session, col, select
+
+from ..core.db import engine
+from ..core.logging import logger
+from ..models.rule import GovernanceRule
+from ..models.task import IngestionTask, TaskStatus
+from ..regintel.rag import VectorStoreConnection
+from .categorizer import categorizer
+from .compactor import compactor
+from .comparator import comparator
+from .extractor import clean_text, extract_text_from_markdown, extract_text_from_pdf
 
 # Stage Averages (seconds)
 STAGE_TIMINGS = {
@@ -45,7 +47,7 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
     """
     try:
         await asyncio.wait_for(_run_pipeline(task_id, file_path), timeout=60.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error(f"Pipeline timed out after 60s for task {task_id}")
         with Session(engine) as session:
             task = session.get(IngestionTask, UUID(task_id))
@@ -95,7 +97,7 @@ async def _run_pipeline(task_id: str, file_path: str):
                     task.previous_version_id = existing_rule.task_id
                     prev_task = session.get(IngestionTask, existing_rule.task_id)
                     if prev_task:
-                        task.version_chain = prev_task.version_chain + [task.id]
+                        task.version_chain = [*prev_task.version_chain, task.id]
                     else:
                         task.version_chain = [existing_rule.task_id, task.id]
                     session.add(task)
@@ -141,7 +143,7 @@ async def _run_pipeline(task_id: str, file_path: str):
                     rag_conn = VectorStoreConnection()
                     rag_conn.index_rules(stored_rules)
                 except Exception as e:
-                    logger.warning(f"RAG Indexing failed for task {task_id}: {str(e)}")
+                    logger.warning(f"RAG Indexing failed for task {task_id}: {e!s}")
 
             # Finalize
             task.status = TaskStatus.COMPLETE
@@ -153,9 +155,9 @@ async def _run_pipeline(task_id: str, file_path: str):
 
         except Exception as e:
             logger.error(
-                f"Pipeline failed at stage {task.current_stage} for task {task_id}: {str(e)}"
+                f"Pipeline failed at stage {task.current_stage} for task {task_id}: {e!s}"
             )
             task.status = TaskStatus.FAILED
-            task.current_stage = f"Error in {task.current_stage}: {str(e)}"
+            task.current_stage = f"Error in {task.current_stage}: {e!s}"
             session.add(task)
             session.commit()

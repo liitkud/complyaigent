@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select, col
-from ..core.db import get_session
-from pydantic import BaseModel
-from ..services.validator import validator
-from ..services.logger import log_activity, ActivityLog
-from ..models.rule import GovernanceRule
-from uuid import UUID
-from typing import Optional
 from datetime import datetime
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlmodel import Session, col, select
+
+from ..core.db import get_session
+from ..models.rule import GovernanceRule
+from ..services.logger import ActivityLog, log_activity
+from ..services.validator import validator
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ router = APIRouter()
 class ValidateRequest(BaseModel):
     code_snippet: str
     rule_id: str
-    context: Optional[str] = None
+    context: str | None = None
 
 
 class HITLAction(BaseModel):
@@ -94,8 +95,8 @@ async def hitl_action(
 
 @router.get("/validate")
 async def list_validations(
-    verdict: Optional[str] = None,
-    since: Optional[str] = None,
+    verdict: str | None = None,
+    since: str | None = None,
     session: Session = Depends(get_session),
 ):
     statement = select(ActivityLog).where(ActivityLog.action == "risk_validation")

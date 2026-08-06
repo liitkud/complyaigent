@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select, col
+from sqlmodel import Session, col, select
+
 from ..core.db import get_session
-from ..models.task import IngestionTask
 from ..models.rule import GovernanceRule, SourceCategory
-from typing import Optional
+from ..models.task import IngestionTask
 
 router = APIRouter()
 
@@ -52,7 +52,9 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
                 return rule
         except Exception:
             pass
-        raise HTTPException(status_code=404, detail="Manifest or Rule not found")
+        raise HTTPException(
+            status_code=404, detail="Manifest or Rule not found"
+        ) from None
 
     task = session.get(IngestionTask, task_id)
     if not task:
@@ -90,8 +92,8 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
 
 @router.get("/reg")
 async def list_rules(
-    bucket: Optional[str] = None,
-    source_category: Optional[SourceCategory] = None,
+    bucket: str | None = None,
+    source_category: SourceCategory | None = None,
     session: Session = Depends(get_session),
 ):
     statement = select(GovernanceRule)

@@ -1,4 +1,6 @@
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
+
 from ..core.logging import logger
 
 
@@ -13,5 +15,5 @@ async def run_background_task(task_func: Callable[..., Any], *args, **kwargs):
         await task_func(*args, **kwargs)
         logger.info(f"Completed background task: {task_name}")
     except Exception as e:
-        logger.error(f"Background task {task_name} failed: {str(e)}")
+        logger.error(f"Background task {task_name} failed: {e!s}")
         # purpose: error visibility and resilience (retry logic would be handled by the service)

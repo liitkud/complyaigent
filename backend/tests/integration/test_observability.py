@@ -1,8 +1,10 @@
-from fastapi.testclient import TestClient
 from uuid import uuid4
+
+from fastapi.testclient import TestClient
+from sqlmodel import Session
+
 from app.models.rule import GovernanceRule, RuleType, SourceCategory
 from app.models.task import IngestionTask
-from sqlmodel import Session
 
 
 def test_get_activity(client: TestClient):
@@ -34,7 +36,7 @@ def test_list_validations_filter(client: TestClient, session: Session):
     # Trigger validation (will return safe/unsafe)
     client.post(
         "/validate",
-        json={"code": "print('test')", "metadata": {"rule_id": str(rule_id)}},
+        json={"code_snippet": "print('test')", "rule_id": str(rule_id)},
     )
 
     # List validations
