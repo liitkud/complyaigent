@@ -23,6 +23,7 @@ class VectorStoreConnection:
 
     @property
     def vector_store(self) -> PGVectorStore:
+        assert app_state.vector_client is not None, "Vector client is not initialized"
         return app_state.vector_client
 
     @property
@@ -72,6 +73,7 @@ class VectorStoreConnection:
         {query}
         """
         print(user_prompt)
+        assert app_state.groq_client is not None, "Groq client is not initialized"
         completion = await app_state.groq_client.chat.completions.create(
             model=settings.CHAT_MODEL,
             messages=[
