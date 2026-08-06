@@ -1,12 +1,14 @@
+from pathlib import Path
+
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
-from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.embeddings.cohere import CohereEmbedding
-from app.core.config import settings
-from pathlib import Path
-from ..core.lifespan import app_state
+from llama_index.vector_stores.postgres import PGVectorStore
 
+from app.core.config import settings
+
+from ..core.lifespan import app_state
 
 # Detect project root (where .env lives)
 # rag.py is in backend/app/regintel/

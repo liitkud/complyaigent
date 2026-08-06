@@ -1,19 +1,19 @@
-from typing import Optional
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from app.core.logging import logger
-from openai import AsyncOpenAI
-from llama_index.vector_stores.postgres import PGVectorStore
+
 import sqlalchemy
+from fastapi import FastAPI
+from llama_index.vector_stores.postgres import PGVectorStore
+from openai import AsyncOpenAI
 
-from .db import init_db
+from app.core.logging import logger
+
 from .config import settings
-
+from .db import init_db
 
 
 class AppState:
-    groq_client: Optional[AsyncOpenAI] = None
-    vector_client: Optional[PGVectorStore] = None
+    groq_client: AsyncOpenAI | None = None
+    vector_client: PGVectorStore | None = None
 
 app_state = AppState()
 

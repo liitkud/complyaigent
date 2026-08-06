@@ -1,13 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api import activity, ingest, manifest, validate
 from app.core.config import settings
-from app.core.rate_limit import setup_rate_limiting
-from app.api import ingest, manifest, validate, activity
 from app.core.lifespan import lifespan
-
-
-
-
+from app.core.rate_limit import setup_rate_limiting
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
