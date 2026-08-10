@@ -123,7 +123,21 @@ async def hitl_action(
 
     session.add(log)
     session.commit()
-    return {"success": True, "status": log.status}
+
+    # Structured HITL resolve event → same Loki/file sink as validate (#77)
+    prior = (log.details or {}).get("verdict_event") or {}
+    req = (log.details or {}).get("request") or {}
+    hitl_event = build_verdict_event(
+        action="hitl_resolve",
+        verdict=log.status,
+        repo=prior.get("repo") or req.get("repo") or "",
+        policy_id=prior.get("policy_id") or req.get("policy_id"),
+        validation_id=str(log.id),
+        rule_id=prior.get("rule_id") or req.get("rule_id"),
+    )
+    emit_verdict_log(hitl_event)
+
+    return {"success": True, "status": log.status, "verdict_event": hitl_event}
 
 
 @router.get("/validate")

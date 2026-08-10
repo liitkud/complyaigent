@@ -41,3 +41,4 @@ Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and
 | 2026-07-24 | [mvp-sample-policies](2026-07-24-mvp-sample-policies.md) | `mvp/75-76-81-foundation` / #81 | Done |
 | 2026-07-24 | [verdict-log-schema](2026-07-24-verdict-log-schema.md) | `mvp/75-76-81-foundation` / #76 | Done |
 | 2026-07-24 | [policy-versioning](2026-07-24-policy-versioning.md) | `mvp/75-76-81-foundation` / #75 | Done |
+| 2026-08-10 | [verdict-loki-push](2026-08-10-verdict-loki-push.md) | `mvp/77-loki-sink` / #77 | Done |

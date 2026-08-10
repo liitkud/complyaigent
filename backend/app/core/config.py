@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     # Pipeline
     MAX_RETRIES: int = 3
 
+    # Verdict sink (#77) — Loki when LOKI_URL set; else optional JSONL file; else no-op
+    LOKI_URL: str = ""
+    LOKI_JOB: str = "complyaigent"
+    VERDICT_SINK_PATH: str = ""
+
     model_config = SettingsConfigDict(
         env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
     )

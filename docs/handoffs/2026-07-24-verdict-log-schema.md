@@ -29,7 +29,7 @@ Required keys on `verdict_event`:
 | `backend/tests/test_verdict_log.py` | schema + validate path |
 
 ## Open follow-ups
-- [ ] #77 Loki/promtail shipper
+- [x] #77 Loki/promtail shipper — see `2026-08-10-verdict-loki-push.md`
 - [ ] Align activity DB session with FastAPI `get_session` (dual-engine smell)
 
 ## How to verify
