@@ -23,15 +23,13 @@ def _upsert_policy(
     source_url: str | None = None,
 ) -> Policy:
     """Create or reuse a Policy version row for this ingest."""
-    existing_hash = session.exec(
-        select(Policy).where(Policy.hash == file_hash)
-    ).first()
+    existing_hash = session.exec(select(Policy).where(Policy.hash == file_hash)).first()
     if existing_hash:
         return existing_hash
 
     previous = session.exec(
         select(Policy)
-        .where(Policy.name == name, Policy.is_current.is_(True))
+        .where(Policy.name == name, col(Policy.is_current).is_(True))
         .order_by(col(Policy.version).desc())
     ).first()
 

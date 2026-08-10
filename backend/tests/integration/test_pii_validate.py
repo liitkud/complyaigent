@@ -55,7 +55,9 @@ def test_validate_blocks_email_pii(client: TestClient, session: Session, monkeyp
     assert detail.status_code == 200
     detail_body = detail.json()
     assert detail_body["verdict"] == "HIGH"
-    assert "PII" in detail_body["reasoning"] or "pii" in detail_body["reasoning"].lower()
+    assert (
+        "PII" in detail_body["reasoning"] or "pii" in detail_body["reasoning"].lower()
+    )
 
 
 def test_validate_blocks_card_pii(client: TestClient, session: Session, monkeypatch):

@@ -29,7 +29,7 @@ async def list_policies(
 ):
     statement = select(Policy)
     if current_only:
-        statement = statement.where(Policy.is_current.is_(True))
+        statement = statement.where(col(Policy.is_current).is_(True))
     statement = statement.order_by(col(Policy.name), col(Policy.version).desc())
     policies = session.exec(statement).all()
     return [_serialize(p) for p in policies]

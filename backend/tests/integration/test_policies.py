@@ -17,7 +17,9 @@ def test_ingest_creates_policy_version(client: TestClient):
     content = b"# Sample\n\n## Controls\n- one\n"
     resp = client.post(
         "/ingest",
-        files={"file": ("data-classification.md", io.BytesIO(content), "text/markdown")},
+        files={
+            "file": ("data-classification.md", io.BytesIO(content), "text/markdown")
+        },
     )
     assert resp.status_code == 202, resp.text
     body = resp.json()

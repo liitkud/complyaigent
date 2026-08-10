@@ -31,7 +31,7 @@ BackendName = Literal["presidio", "regex"]
 _EMAIL_RE = re.compile(
     r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
 )
-# 13–19 digits with optional separators (Visa/MC/Amex-shaped)
+# 13-19 digits with optional separators (Visa/MC/Amex-shaped)
 _CARD_RE = re.compile(
     r"(?<!\d)(?:\d[ -]*?){13,19}(?!\d)",
 )
@@ -145,9 +145,11 @@ def _try_presidio_engine():
         # Prefer small model; AnalyzerEngine loads default NLP on init.
         engine = AnalyzerEngine()
         # Smoke: ensure analyze works (model present)
-        engine.analyze(text="test@example.com", language="en", entities=["EMAIL_ADDRESS"])
+        engine.analyze(
+            text="test@example.com", language="en", entities=["EMAIL_ADDRESS"]
+        )
         return engine
-    except Exception as exc:  # noqa: BLE001 — graceful degrade is intentional
+    except Exception as exc:
         logger.warning(
             "Presidio unavailable (%s); using regex PII backend. "
             "Install with: uv sync --extra pii && "
@@ -203,7 +205,7 @@ class PIIScannerService:
                 language="en",
                 entities=list(HIGH_RISK_ENTITIES),
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Presidio analyze failed (%s); falling back to regex", exc)
             return _scan_regex(text)
 
