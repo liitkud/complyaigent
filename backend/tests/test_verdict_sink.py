@@ -40,13 +40,17 @@ class _FakeClient:
         self.raise_exc = raise_exc
         self.calls: list[dict] = []
 
-    def post(self, url: str, *, content: bytes, headers: dict[str, str], timeout: float):
+    def post(
+        self, url: str, *, content: bytes, headers: dict[str, str], timeout: float
+    ):
         self.calls.append(
             {"url": url, "content": content, "headers": headers, "timeout": timeout}
         )
         if self.raise_exc:
             raise self.raise_exc
-        return _FakeResp(self.status_code, text="ok" if self.status_code < 400 else "boom")
+        return _FakeResp(
+            self.status_code, text="ok" if self.status_code < 400 else "boom"
+        )
 
 
 def test_push_verdict_noop_when_unset():

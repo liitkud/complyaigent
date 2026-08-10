@@ -8,7 +8,8 @@ from sqlmodel import Session, col, select
 from ..core.config import settings
 from ..core.db import get_session
 from ..models.rule import GovernanceRule
-from ..services.logger import ActivityLog, engine as activity_engine, log_activity
+from ..services.logger import ActivityLog, log_activity
+from ..services.logger import engine as activity_engine
 from ..services.validator import validator
 from ..services.verdict_log import build_verdict_event, emit_verdict_log
 
@@ -64,7 +65,9 @@ async def submit_validation(
         policy_id=request.policy_id,
         validation_id=str(log.id),
         rule_id=request.rule_id,
-        timestamp=log.timestamp if log.timestamp.tzinfo else log.timestamp.replace(tzinfo=None),
+        timestamp=log.timestamp
+        if log.timestamp.tzinfo
+        else log.timestamp.replace(tzinfo=None),
     )
     emit_verdict_log(verdict_event)
 

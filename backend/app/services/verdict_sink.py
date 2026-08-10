@@ -79,7 +79,7 @@ def push_to_loki(
     else:
         try:
             resp = client.post(url, content=body, headers=headers, timeout=timeout)
-        except Exception as exc:  # noqa: BLE001 — mock or transport failure
+        except Exception as exc:
             raise VerdictSinkError(f"Loki request failed: {exc}") from exc
 
     status = getattr(resp, "status_code", None)

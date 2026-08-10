@@ -51,7 +51,9 @@ def build_verdict_event(
 
 def emit_verdict_log(event: dict[str, Any]) -> None:
     """Emit structured verdict to app logger and configured sink (Loki/file/noop)."""
-    missing = [k for k in ("action", "verdict", "timestamp", "validation_id") if k not in event]
+    missing = [
+        k for k in ("action", "verdict", "timestamp", "validation_id") if k not in event
+    ]
     if missing:
         logger.warning("verdict_event missing keys: %s", missing)
     logger.info("verdict_event %s", event)
