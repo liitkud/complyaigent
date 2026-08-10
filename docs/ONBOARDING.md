@@ -1,32 +1,36 @@
 # Developer Onboarding Guide
 
-Welcome to **ComplyAIgent**! This guide will walk you through setting up your local environment for development and testing.
+Welcome to **ComplyAIgent**. This guide walks you through local setup for development and testing.
 
-## 📁 Codebase Architecture
+Product name stays **ComplyAIgent** (no FerretOps rename).
 
-ComplyAIgent is composed of three primary components:
-1. **Backend (`/backend`)**: A FastAPI service powering rule ingestion, classification pipelines (via LangChain), and policy validation logs. Powered by SQLModel/SQLAlchemy (configured with SQLite or PostgreSQL).
-2. **Frontend (`/frontend`)**: A Next.js (App Router) dashboard to upload policies, track compliance history, and approve/reject medium-risk pushes paused by LangGraph.
-3. **CLI (`/cli`)**: A Go command-line tool (`pg`) serving as a git pre-push hook. It executes fast, local-first scans (Gitleaks, regex, and entropy check) and offloads complex validation to the backend.
+## Codebase architecture
+
+ComplyAIgent has three primary components:
+
+1. **Backend (`/backend`)**: FastAPI — rule ingestion, classification (LangChain), validate + HITL, verdict logs. SQLModel/SQLAlchemy (SQLite or PostgreSQL).
+2. **Frontend (`/frontend`)**: Next.js (App Router) dashboard — policy upload, compliance history, HITL approve/reject against the live API.
+3. **CLI (`/cli`)**: Go tool (`pg`) as a git pre-push hook — local A1 scans (Gitleaks, regex, entropy), then `/validate` + poll on the backend.
 
 ---
 
-## 🛠️ Prerequisites
+## Prerequisites
 
-Ensure you have the following installed on your system:
 * **Go** (v1.20 or newer)
-* **Python** (v3.11 or newer) and **uv** (fast Python package installer/manager)
-* **Node.js** (v18 or newer) and **npm** or **pnpm**
-* **Docker** / **Podman** & Compose (optional, for local postgres + full stack)
+* **Python** (v3.11 or newer) and **uv**
+* **Node.js** (v18 or newer) and **pnpm** (prefer over npm)
+* **Podman** (preferred) or Docker & Compose — for the full MVP stack
 
 ---
 
-## 🚀 Setup Instructions
+## Setup instructions
 
 ### 0. Full stack via Compose (MVP E2E)
 
+Compose and smoke land on open PR [#91](https://github.com/liitkud/complyaigent/pull/91) (`#78`). Prefer Podman.
+
 ```bash
-# from repo root — prefer podman
+# from repo root
 podman compose up --build
 # or: docker compose up --build
 
@@ -34,84 +38,65 @@ podman compose up --build
 ./scripts/e2e-smoke.sh
 ```
 
-Details: [docs/mvp/e2e-happy-path.md](mvp/e2e-happy-path.md).
+Details: [docs/mvp/e2e-happy-path.md](mvp/e2e-happy-path.md) · DoD: [docs/mvp/README.md](mvp/README.md).
 
-### 1. Backend Setup
-
-The backend uses `uv` for python package management.
+### 1. Backend setup
 
 ```bash
-# Navigate to the backend directory
 cd backend
-
-# Sync dependencies and create a virtual environment
 uv sync
-
-# Copy the example environment file from the root
 cp ../.env.example .env
-```
-
-Open `.env` and configure the settings. If you don't have active LLM keys, you can run integration tests or preview mock configurations.
-
-To start the FastAPI dev server:
-```bash
 uv run fastapi dev main.py
 ```
-By default, the server runs on `http://localhost:8000`. You can verify it by hitting `http://localhost:8000/health`.
 
-### 2. Frontend Setup
+Server: `http://localhost:8000`. Health: `http://localhost:8000/health`.
 
-The frontend is a Next.js client.
+LLM clients are lazy-loaded (PR #63). Missing API keys do not crash import. Paths that call the LLM still need credentials. HITL smoke does not need an LLM key (`COMPLYAIGENT_E2E_HITL_MID` marker).
+
+Optional PII extra (open PR [#90](https://github.com/liitkud/complyaigent/pull/90)): `uv sync --extra pii`.
+
+### 2. Frontend setup
 
 ```bash
 cd frontend
-
-# Install packages (prefer pnpm)
 pnpm install
-
-# Start the dev server (point at local API)
 NEXT_PUBLIC_API_URL=http://localhost:8000 pnpm dev
 ```
-The client runs on `http://localhost:3000`. It communicates with the backend API on `http://localhost:8000`. If the backend is down, the frontend automatically falls back to static mock data so you can preview the UI.
 
-### 3. CLI Setup
+UI: `http://localhost:3000`. HITL approve/reject uses the live API when the backend is up (PR [#91](https://github.com/liitkud/complyaigent/pull/91)). Metrics may still fall back to mocks if the API is down.
 
-Build and install the Go CLI tool (`pg`):
+### 3. CLI setup
 
 ```bash
 cd cli
-
-# Build the binary
 make build
-
-# Install the binary locally (adds to ~/.local/bin/pg)
 make install
 ```
-*Note: Make sure `~/.local/bin` is in your `$PATH`.*
 
-To initialize ComplyAIgent in a repository:
+Ensure `~/.local/bin` is on `$PATH`. Then in a monitored repo:
+
 ```bash
-# In the root of the repository you want to monitor
 pg init
 ```
-This will create a `.pg.yaml` configuration file and automatically configure a git pre-push hook at `.git/hooks/pre-push`.
+
+Creates `.pg.yaml` and installs `.git/hooks/pre-push`. Full `pg init` → pre-push → `/validate` poll is still an open DoD item (not asserted by `e2e-smoke.sh`).
 
 ---
 
-## 🧪 Running Tests
+## Running tests
 
-An integration test suite is located in `/scripts` to test the end-to-end flow.
-
-To run tests:
 ```bash
 # From the project root
 ./scripts/integration-test.sh
 
-# MVP live HITL smoke (backend must be up)
+# MVP live HITL smoke (backend must be up — compose or uv)
 ./scripts/e2e-smoke.sh
+
+# Backend unit/integration (example)
+cd backend && DATABASE_URL=sqlite:///./test.db uv run pytest -q
 ```
 
 > [!NOTE]
-> LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md) and [Handover](handover/README.md).
+> **MVP context:** [docs/mvp/README.md](mvp/README.md) · [ROADMAP](ROADMAP.md) · [Handover](handover/README.md) · [Handoffs](handoffs/)
 >
-> **MVP context:** [docs/mvp/README.md](mvp/README.md) · [ROADMAP](ROADMAP.md)
+> Open MVP PRs (merge #86 first): [#86](https://github.com/liitkud/complyaigent/pull/86) · [#89](https://github.com/liitkud/complyaigent/pull/89) · [#90](https://github.com/liitkud/complyaigent/pull/90) · [#91](https://github.com/liitkud/complyaigent/pull/91)

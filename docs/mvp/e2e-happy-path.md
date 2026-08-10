@@ -65,9 +65,10 @@ Backend returns `verdict=MID`, `status=pending` so HITL can be exercised offline
 
 | Workstream | Status for this path |
 |------------|----------------------|
-| #75/#76/#81 foundation | Required (this branch) |
-| #77 Loki verdict sink | Optional — smoke does not assert Loki push |
-| #79 Presidio on `/validate` | Optional — PII block not asserted here |
+| #75/#76/#81 foundation | Required — [#86](https://github.com/liitkud/complyaigent/pull/86) (open; merge gate) |
+| #77 Loki verdict sink | Optional — [#89](https://github.com/liitkud/complyaigent/pull/89); smoke does not assert Loki push |
+| #79 Presidio on `/validate` | Optional — [#90](https://github.com/liitkud/complyaigent/pull/90); PII block not asserted here |
+| This E2E / HITL path | [#91](https://github.com/liitkud/complyaigent/pull/91) (open; blocked on #86) |
 | Full ingest→rules LLM pipeline | Optional — smoke tolerates ingest still processing |
 
 ## Related files

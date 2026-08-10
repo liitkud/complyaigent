@@ -2,6 +2,8 @@
 
 Handoff notes for engineers picking up **MVP** work. For the plan and checklists, see [docs/mvp/README.md](../mvp/README.md) and [docs/ROADMAP.md](../ROADMAP.md).
 
+Product name: **ComplyAIgent** (no FerretOps rename).
+
 ---
 
 ## System overview
@@ -13,6 +15,7 @@ Handoff notes for engineers picking up **MVP** work. For the plan and checklists
                                                                       │
                                                                  SQLModel DB
                                                                  Verdict logs
+                                                                 (optional Loki)
 ```
 
 | Component | Path | Role |
@@ -23,7 +26,7 @@ Handoff notes for engineers picking up **MVP** work. For the plan and checklists
 
 ---
 
-## What’s already fixed (do not re-open as blockers)
+## What’s already fixed on `dev` (do not re-open as blockers)
 
 | Item | PR / notes |
 |------|------------|
@@ -35,13 +38,18 @@ Handoff notes for engineers picking up **MVP** work. For the plan and checklists
 
 ---
 
-## Current MVP priorities
+## MVP delivery (open PRs — not on `dev` until merged)
 
-1. **Policy versioning** — durable policy metadata + history ([#10](https://github.com/liitkud/complyaigent/issues/10) / MVP sub-issue).
-2. **Structured verdict logging** — schema + emit on every decision ([#4](https://github.com/liitkud/complyaigent/issues/4), [#20](https://github.com/liitkud/complyaigent/issues/20)).
-3. **Live E2E / HITL** — dashboard against real API; compose path documented.
-4. **PII gate** — Presidio (or equivalent) on validate ([#17](https://github.com/liitkud/complyaigent/issues/17)).
-5. **A1 regex safety** — validate generated patterns before serving to CLI (see audit §6).
+Merge [#86](https://github.com/liitkud/complyaigent/pull/86) first.
+
+| Area | PR | Notes |
+|------|-----|-------|
+| Policy versioning + fixtures + verdict schema | [#86](https://github.com/liitkud/complyaigent/pull/86) | #75 #76 #81 — merge gate |
+| Loki / file verdict sink | [#89](https://github.com/liitkud/complyaigent/pull/89) | #77 — blocked on #86 |
+| Presidio / regex PII on `/validate` | [#90](https://github.com/liitkud/complyaigent/pull/90) | #79 — blocked on #86 |
+| Compose + live HITL + `e2e-smoke.sh` | [#91](https://github.com/liitkud/complyaigent/pull/91) | #78 — blocked on #86 |
+
+Still open without a PR: A1 ReDoS gate ([#80](https://github.com/liitkud/complyaigent/issues/80)); full `pg init` pre-push leg in happy-path smoke.
 
 Deferred: load test (#22), RAG tune (#14), reg simulator (#13).
 
@@ -51,7 +59,8 @@ Deferred: load test (#22), RAG tune (#14), reg simulator (#13).
 
 **CLI:** `cli/cmd/scan.go`, `cli/internal/rules.go`  
 **Backend:** `backend/main.py`, `app/api/validate.py`, `app/services/pipeline.py`, `app/services/validator.py`  
-**Frontend:** `frontend/services/api.ts`, `frontend/components/hitl/`, `frontend/app/page.tsx`
+**Frontend:** `frontend/services/api.ts`, `frontend/components/hitl/`, `frontend/app/page.tsx`  
+**MVP stack:** `docker-compose.yml`, `scripts/e2e-smoke.sh`, `docs/mvp/e2e-happy-path.md`
 
 ---
 
@@ -60,23 +69,22 @@ Deferred: load test (#22), RAG tune (#14), reg simulator (#13).
 See [ONBOARDING.md](../ONBOARDING.md). Quick path:
 
 ```bash
-# backend
+# Prefer full stack
+podman compose up --build
+./scripts/e2e-smoke.sh
+
+# Or without containers
 cd backend && uv sync && cp ../.env.example .env && uv run fastapi dev main.py
-
-# frontend
-cd frontend && pnpm install && pnpm dev
-
-# CLI
+cd frontend && pnpm install && NEXT_PUBLIC_API_URL=http://localhost:8000 pnpm dev
 cd cli && make build && make install
 ```
-
-Or use root `docker-compose.yml` when bringing up DB-backed stacks.
 
 ---
 
 ## Agent / contributor notes
 
 - Default branch for work: `dev`
+- Branch MVP features from the foundation tip (`mvp/75-76-81-foundation` / PR #86), not bare `dev`, until #86 merges
 - Prefer small PRs mapped to MVP sub-issues
 - `agy` is available on the `idea` host for implementation jobs; keep changes scoped to the issue
 

@@ -38,6 +38,9 @@ Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and
 |------|---------|----------------|--------|
 | 2026-07-24 | [stabilize-contracts-and-ci](2026-07-24-stabilize-contracts-and-ci.md) | `dev` / #61–#64, #73, #84 | Done |
 | 2026-07-24 | [mvp-continuous-compliance-gate](2026-07-24-mvp-continuous-compliance-gate.md) | `docs/mvp-handoffs` / #74 | In progress |
-| 2026-07-24 | [mvp-sample-policies](2026-07-24-mvp-sample-policies.md) | `mvp/75-76-81-foundation` / #81 | Done |
-| 2026-07-24 | [verdict-log-schema](2026-07-24-verdict-log-schema.md) | `mvp/75-76-81-foundation` / #76 | Done |
-| 2026-07-24 | [policy-versioning](2026-07-24-policy-versioning.md) | `mvp/75-76-81-foundation` / #75 | Done |
+| 2026-07-24 | [mvp-sample-policies](2026-07-24-mvp-sample-policies.md) | `mvp/75-76-81-foundation` / #81 · [#86](https://github.com/liitkud/complyaigent/pull/86) | Done (PR open) |
+| 2026-07-24 | [verdict-log-schema](2026-07-24-verdict-log-schema.md) | `mvp/75-76-81-foundation` / #76 · [#86](https://github.com/liitkud/complyaigent/pull/86) | Done (PR open) |
+| 2026-07-24 | [policy-versioning](2026-07-24-policy-versioning.md) | `mvp/75-76-81-foundation` / #75 · [#86](https://github.com/liitkud/complyaigent/pull/86) | Done (PR open) |
+| 2026-07-24 | [e2e-live-hitl](2026-07-24-e2e-live-hitl.md) | `mvp/78-e2e-hitl` / #78 · [#91](https://github.com/liitkud/complyaigent/pull/91) | Done (PR open) |
+| 2026-07-24 | [presidio-pii](2026-07-24-presidio-pii.md) | `mvp/79-presidio` / #79 · [#90](https://github.com/liitkud/complyaigent/pull/90) | Done (PR open; blocked on #86) |
+| 2026-08-10 | [verdict-loki-push](2026-08-10-verdict-loki-push.md) | `mvp/77-loki-sink` / #77 · [#89](https://github.com/liitkud/complyaigent/pull/89) | Done (PR open; blocked on #86) |
