@@ -17,11 +17,24 @@ Ensure you have the following installed on your system:
 * **Go** (v1.20 or newer)
 * **Python** (v3.11 or newer) and **uv** (fast Python package installer/manager)
 * **Node.js** (v18 or newer) and **npm** or **pnpm**
-* **Docker** & **docker-compose** (optional, for local postgres/services container setup)
+* **Docker** / **Podman** & Compose (optional, for local postgres + full stack)
 
 ---
 
 ## 🚀 Setup Instructions
+
+### 0. Full stack via Compose (MVP E2E)
+
+```bash
+# from repo root — prefer podman
+podman compose up --build
+# or: docker compose up --build
+
+# API smoke (HITL approve, no LLM key required)
+./scripts/e2e-smoke.sh
+```
+
+Details: [docs/mvp/e2e-happy-path.md](mvp/e2e-happy-path.md).
 
 ### 1. Backend Setup
 
@@ -53,11 +66,11 @@ The frontend is a Next.js client.
 ```bash
 cd frontend
 
-# Install packages
-npm install  # or pnpm install
+# Install packages (prefer pnpm)
+pnpm install
 
-# Start the dev server
-npm run dev
+# Start the dev server (point at local API)
+NEXT_PUBLIC_API_URL=http://localhost:8000 pnpm dev
 ```
 The client runs on `http://localhost:3000`. It communicates with the backend API on `http://localhost:8000`. If the backend is down, the frontend automatically falls back to static mock data so you can preview the UI.
 
@@ -93,6 +106,9 @@ To run tests:
 ```bash
 # From the project root
 ./scripts/integration-test.sh
+
+# MVP live HITL smoke (backend must be up)
+./scripts/e2e-smoke.sh
 ```
 
 > [!NOTE]

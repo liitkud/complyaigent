@@ -272,12 +272,18 @@ export const apiClient = {
   getValidation: (id: string) =>
     apiFetch<ValidationResult>(`/validate/${encodeURIComponent(id)}`),
 
-  /** GET /validate — list all validation results (with mock fallback) */
-  getValidations: async (): Promise<ValidationResult[]> => {
+  /**
+   * GET /validate — list validation results.
+   * liveOnly: throw on API failure (HITL card). Otherwise mock fallback for metrics UI.
+   */
+  getValidations: async (opts?: {
+    liveOnly?: boolean;
+  }): Promise<ValidationResult[]> => {
     try {
       return await apiFetch<ValidationResult[]>("/validate");
-    } catch {
-      // Mock fallback — realistic scan history for dashboard
+    } catch (err) {
+      if (opts?.liveOnly) throw err;
+      // Mock fallback — preview-only when backend is down
       await delay(300);
       const now = new Date();
       const today = now.toISOString().slice(0, 10);
@@ -291,95 +297,12 @@ export const apiClient = {
           status: "complete",
         },
         {
-          validation_id: "val-002",
-          verdict: "HIGH",
-          reasoning: "Private RSA key committed to repository",
-          activity_logged: true,
-          created_at: `${today}T12:10:00Z`,
-          status: "complete",
-        },
-        {
           validation_id: "val-003",
           verdict: "MID",
           reasoning: "Encryption-at-rest not enforced for new data store",
           activity_logged: true,
           created_at: `${today}T11:55:00Z`,
           status: "pending",
-        },
-        {
-          validation_id: "val-004",
-          verdict: "HIGH",
-          reasoning: "Email addresses found in debug log output",
-          activity_logged: true,
-          created_at: `${today}T13:45:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-005",
-          verdict: "LOW",
-          reasoning: "Code follows secure patterns — no violations detected",
-          activity_logged: true,
-          created_at: `${today}T10:00:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-006",
-          verdict: "LOW",
-          reasoning: "API authentication correctly enforced on all routes",
-          activity_logged: true,
-          created_at: `${today}T09:30:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-007",
-          verdict: "MID",
-          reasoning:
-            "Philippine national IDs found in test fixtures — PII risk",
-          activity_logged: true,
-          created_at: `${today}T10:30:00Z`,
-          status: "pending",
-        },
-        {
-          validation_id: "val-008",
-          verdict: "LOW",
-          reasoning:
-            "No hardcoded credentials — environment variables used correctly",
-          activity_logged: true,
-          created_at: `${today}T08:15:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-009",
-          verdict: "HIGH",
-          reasoning: "Database connection string contains plaintext password",
-          activity_logged: true,
-          created_at: `${today}T14:00:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-010",
-          verdict: "LOW",
-          reasoning:
-            "TLS 1.2 minimum enforced — transport encryption compliant",
-          activity_logged: true,
-          created_at: `${today}T07:45:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-011",
-          verdict: "MID",
-          reasoning: "New S3 bucket created without encryption policy tag",
-          activity_logged: true,
-          created_at: `${today}T13:50:00Z`,
-          status: "pending",
-        },
-        {
-          validation_id: "val-012",
-          verdict: "LOW",
-          reasoning: "Audit logging correctly configured for all admin actions",
-          activity_logged: true,
-          created_at: `${today}T06:30:00Z`,
-          status: "complete",
         },
       ];
     }
@@ -481,49 +404,21 @@ export const apiClient = {
     ];
   },
 
+  /** Live MID+pending validations mapped to legacy HITLRequest shape */
   getHITLRequests: async (): Promise<HITLRequest[]> => {
-    await delay(250);
-    return [
-      {
-        id: "hitl-001",
-        timestamp: "2026-05-09T14:35:00Z",
-        developer: "karlo.santos",
-        repo: "payments-api",
-        risk: "high",
-        description:
-          "Push contains potential AWS credentials in environment config",
-        findings: [
-          "AWS_ACCESS_KEY_ID pattern detected",
-          "Key appears in 2 files",
-          "No .gitignore entry for config.yaml",
-        ],
-        status: "pending",
-      },
-      {
-        id: "hitl-002",
-        timestamp: "2026-05-09T13:50:00Z",
-        developer: "ellah.reyes",
-        repo: "ml-pipeline",
-        risk: "medium",
-        description: "New data store created without encryption policy mapping",
-        findings: ["No encryption-at-rest tag", "Policy CP-7 requires AES-256"],
-        status: "pending",
-      },
-      {
-        id: "hitl-003",
-        timestamp: "2026-05-09T12:20:00Z",
-        developer: "jepoy.cruz",
-        repo: "auth-gateway",
-        risk: "high",
-        description: "RSA private key detected in committed files",
-        findings: [
-          "PEM header detected",
-          "File: keys/private.pem",
-          "Key size: 2048-bit",
-        ],
-        status: "pending",
-      },
-    ];
+    const validations = await apiClient.getValidations({ liveOnly: true });
+    return validations
+      .filter((v) => v.verdict === "MID" && v.status === "pending")
+      .map((v) => ({
+        id: v.validation_id,
+        timestamp: v.created_at,
+        developer: "unknown",
+        repo: "unknown",
+        risk: "medium" as const,
+        description: v.reasoning,
+        findings: [v.reasoning],
+        status: v.status as HITLRequest["status"],
+      }));
   },
 
   getPolicies: async (): Promise<Policy[]> => {

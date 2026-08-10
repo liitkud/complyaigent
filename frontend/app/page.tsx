@@ -35,7 +35,9 @@ function computeMetrics(
   const todayViolations = validations.filter(
     (v) => v.verdict === "HIGH" && v.created_at.startsWith(todayStr),
   );
-  const pendingApprovals = validations.filter((v) => v.verdict === "MID");
+  const pendingApprovals = validations.filter(
+    (v) => v.verdict === "MID" && v.status === "pending",
+  );
 
   return {
     totalScans: total,
@@ -119,21 +121,20 @@ export default function Home() {
       </header>
 
       <main className="space-y-6 p-6">
-        {/* {usingMock && (
+        {usingMock && (
           <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
             <WifiOff size={18} className="shrink-0 text-amber-500" />
             <div>
               <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — showing mock data
+                Backend unavailable — showing mock metrics (HITL stays live-only)
               </p>
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Metrics derived from mock{" "}
-                <code className="font-mono">GET /validate</code> +{" "}
-                <code className="font-mono">GET /regulation</code> fallback.
+                Start compose or the uv backend, then refresh. See{" "}
+                <code className="font-mono">docs/mvp/e2e-happy-path.md</code>.
               </p>
             </div>
           </div>
-        )} */}
+        )}
 
         {/* KPI Cards */}
         {metrics ? (

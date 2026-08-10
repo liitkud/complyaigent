@@ -9,10 +9,10 @@
 
 ## Definition of Done
 
-- [ ] `docker compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB
+- [x] `docker compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB — see [e2e-happy-path.md](e2e-happy-path.md) (#78)
 - [ ] Officer uploads a sample policy → rules appear with **version metadata**
 - [ ] `pg init` + pre-push runs local A1 checks and successfully completes `/validate` poll flow
-- [ ] Dashboard HITL approve/reject works against the **live** API (not mock-only)
+- [x] Dashboard HITL approve/reject works against the **live** API (not mock-only) — [#78](https://github.com/liitkud/complyaigent/issues/78), `./scripts/e2e-smoke.sh`
 - [ ] Every scan decision emits a **structured verdict log** (schema documented; Loki push if endpoint configured)
 - [ ] PII scan on validate path blocks obvious leaks (email / card / phone at minimum)
 - [ ] A1 regex rules are smoke-tested before serve (no unchecked ReDoS)
@@ -40,7 +40,7 @@
 ## References
 
 - [Per-feature handoffs](../handoffs/) + skill `feature-plan`
-
+- [E2E happy path + live HITL](e2e-happy-path.md) (#78)
 - [Handover](../handover/README.md)
 - [Onboarding](../ONBOARDING.md)
 - [Audit (historical)](../audit/README.md)

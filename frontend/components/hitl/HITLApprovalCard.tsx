@@ -2,34 +2,38 @@
 
 import { apiClient, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CheckCircle, XCircle, Clock, AlertTriangle, WifiOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function HITLApprovalCard() {
   const [requests, setRequests] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiClient.getValidations({ liveOnly: true });
+      setRequests(
+        data.filter((r) => r.verdict === "MID" && r.status === "pending"),
+      );
+      setLive(true);
+    } catch (e) {
+      console.error("[HITLApprovalCard] Live fetch failed:", e);
+      setRequests([]);
+      setLive(false);
+      setError(e instanceof Error ? e.message : "API unreachable");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const res = await fetch(`${apiUrl}/validate`);
-        if (!res.ok) throw new Error("API error");
-        const data: ValidationResult[] = await res.json();
-        setRequests(
-          data.filter((r) => r.verdict === "MID" && r.status === "pending"),
-        );
-      } catch (e) {
-        console.error("[HITLApprovalCard] Fetch failed:", e);
-        setRequests([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActioning(id);
@@ -42,7 +46,9 @@ export default function HITLApprovalCard() {
       setRequests((prev) => prev.filter((r) => r.validation_id !== id));
     } catch (err) {
       console.error("HITL action failed", err);
-      alert(`Failed to ${action}: ${err instanceof Error ? err.message : "unknown error"}`);
+      alert(
+        `Failed to ${action}: ${err instanceof Error ? err.message : "unknown error"}`,
+      );
     } finally {
       setActioning(null);
     }
@@ -75,16 +81,36 @@ export default function HITLApprovalCard() {
               HITL Pending Approvals
             </h3>
             <p className="text-xs text-slate-400">
-              LangGraph interrupt — awaiting manager decision
+              {live
+                ? "Live API — PATCH /validate/{id}"
+                : "Backend unreachable — approve/reject disabled"}
             </p>
           </div>
         </div>
-        {pending.length > 0 && (
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-            {pending.length} pending
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {pending.length > 0 && (
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              {pending.length} pending
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
+      {!live && (
+        <div className="flex items-center gap-2 border-b border-amber-200 bg-amber-50 px-5 py-3 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+          <WifiOff size={14} className="shrink-0" />
+          <span>
+            Start the API (`podman compose up` or `uv run fastapi dev`) then
+            refresh. {error ? `(${error})` : null}
+          </span>
+        </div>
+      )}
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
         {requests.map((r) => (
           <div key={r.validation_id} className="p-5">
@@ -112,15 +138,17 @@ export default function HITLApprovalCard() {
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => handleAction(r.validation_id, "approve")}
-                  disabled={actioning === r.validation_id}
+                  disabled={!live || actioning === r.validation_id}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
                 >
                   <CheckCircle size={13} /> Approve
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleAction(r.validation_id, "reject")}
-                  disabled={actioning === r.validation_id}
+                  disabled={!live || actioning === r.validation_id}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                 >
                   <XCircle size={13} /> Reject

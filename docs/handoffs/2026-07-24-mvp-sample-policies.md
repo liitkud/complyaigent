@@ -21,7 +21,7 @@ Two fixtures under `docs/mvp/fixtures/` with H1 title + `## Controls`.
 - `backend/tests/test_mvp_fixtures.py`
 
 ## Open follow-ups
-- [ ] Wire fixtures into #78 E2E runbook
+- Wire fixtures into #78 E2E runbook — see `docs/mvp/e2e-happy-path.md`
 
 ## How to verify
 ```bash

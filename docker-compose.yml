@@ -1,6 +1,16 @@
+# MVP local stack (#78): postgres + backend + frontend
+#
+#   podman compose up --build
+#   # or: docker compose up --build
+#
+# Dev without containers: see docs/mvp/e2e-happy-path.md (uv + pnpm path).
+# Optional GHCR canary: set COMPLY_BACKEND_IMAGE / COMPLY_FRONTEND_IMAGE.
+
+name: complyaigent
+
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: docker.io/pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-comply}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complyaigent2026}
@@ -8,40 +18,67 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata_prod:/var/lib/postgresql/data
+      - pgdata_mvp:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-comply} -d ${POSTGRES_DB:-complyaigent}"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-comply} -d ${POSTGRES_DB:-complyaigent}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
-    networks:
-      - shared_apps
 
   backend:
-    image: ghcr.io/liitkud/complyaigent-backend:canary
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ${COMPLY_BACKEND_IMAGE:-localhost/complyaigent-backend:mvp}
     ports:
       - "8000:8000"
-    user: root
-    env_file:
-      - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-sqlite:///./test.db}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://comply:complyaigent2026@postgres:5432/complyaigent}
       PROJECT_NAME: ComplyAIgent
-      LOG_LEVEL: INFO
-      ENVIRONMENT: production
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_ENDPOINT: ${LLM_ENDPOINT:-https://api.groq.com/openai/v1}
+      CHAT_MODEL: ${CHAT_MODEL:-meta-llama/llama-4-scout-17b-16e-instruct}
+      SUPABASE_URL: ${SUPABASE_URL:-http://localhost:54321}
+      SUPABASE_KEY: ${SUPABASE_KEY:-dev-key-placeholder}
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
     restart: unless-stopped
-    networks:
-      - shared_apps
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    image: ${COMPLY_FRONTEND_IMAGE:-localhost/complyaigent-frontend:mvp}
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NODE_ENV: production
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  pgdata_prod:
-
-networks:
-  shared_apps:
-    external: true
-    name: shared_apps
+  pgdata_mvp:

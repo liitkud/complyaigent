@@ -22,6 +22,7 @@
 - Sample policy fixtures: [`docs/mvp/fixtures/`](docs/mvp/fixtures/) — Markdown with H1 + `## Controls`; covered by `backend/tests/test_mvp_fixtures.py`
 - Verdict events: `backend/app/services/verdict_log.py` — validate returns `verdict_event` with required keys (`action`, `verdict`, `repo`, `timestamp`, `policy_id`/`policyId`, `validation_id`, `rule_id`)
 - Policies API: `GET /policies`, `GET /policies/{id}`; `POST /ingest` returns `policy_id` and versions by content hash
+- E2E / live HITL (#78): [`docs/mvp/e2e-happy-path.md`](docs/mvp/e2e-happy-path.md), `./scripts/e2e-smoke.sh`, root `docker-compose.yml`
 - Backend tests: `cd backend && uv run pytest` (pyproject sets `pythonpath = ["."]`)
 - Prefer TDD on MVP slices; update the matching `docs/handoffs/YYYY-MM-DD-*.md` when status changes
 

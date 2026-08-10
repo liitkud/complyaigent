@@ -27,6 +27,11 @@ class HITLAction(BaseModel):
     action: str  # "approve" or "reject"
 
 
+def _activity_session() -> Session:
+    """ActivityLog rows are written via logger.engine — use the same engine for HITL."""
+    return Session(activity_engine)
+
+
 @router.post("/validate", status_code=202)
 async def submit_validation(
     request: ValidateRequest, session: Session = Depends(get_session)
@@ -69,7 +74,7 @@ async def submit_validation(
     emit_verdict_log(verdict_event)
 
     # Persist structured event on the activity row (same engine as log_activity)
-    with Session(activity_engine) as s:
+    with _activity_session() as s:
         row = s.get(ActivityLog, log.id)
         if row:
             merged = dict(row.details or {})
@@ -86,81 +91,82 @@ async def submit_validation(
 
 
 @router.get("/validate/{id}")
-async def get_validation(id: UUID, session: Session = Depends(get_session)):
-    log = session.get(ActivityLog, id)
-    if not log or log.action != "risk_validation":
-        raise HTTPException(status_code=404, detail="Validation result not found")
+async def get_validation(id: UUID):
+    with _activity_session() as session:
+        log = session.get(ActivityLog, id)
+        if not log or log.action != "risk_validation":
+            raise HTTPException(status_code=404, detail="Validation result not found")
 
-    result = log.details.get("result", {})
-    verdict_event = log.details.get("verdict_event")
-    payload = {
-        "validation_id": str(log.id),
-        "verdict": result.get("verdict", "HIGH"),
-        "reasoning": result.get("reasoning", "No reasoning provided"),
-        "activity_logged": True,
-        "created_at": log.timestamp.isoformat(),
-        "status": log.status,
-    }
-    if verdict_event:
-        payload["verdict_event"] = verdict_event
-    return payload
+        result = log.details.get("result", {})
+        verdict_event = log.details.get("verdict_event")
+        payload = {
+            "validation_id": str(log.id),
+            "verdict": result.get("verdict", "HIGH"),
+            "reasoning": result.get("reasoning", "No reasoning provided"),
+            "activity_logged": True,
+            "created_at": log.timestamp.isoformat(),
+            "status": log.status,
+        }
+        if verdict_event:
+            payload["verdict_event"] = verdict_event
+        return payload
 
 
 @router.patch("/validate/{id}")
-async def hitl_action(
-    id: UUID, action: HITLAction, session: Session = Depends(get_session)
-):
-    log = session.get(ActivityLog, id)
-    if not log or log.action != "risk_validation":
-        raise HTTPException(status_code=404, detail="Validation result not found")
+async def hitl_action(id: UUID, action: HITLAction):
+    with _activity_session() as session:
+        log = session.get(ActivityLog, id)
+        if not log or log.action != "risk_validation":
+            raise HTTPException(status_code=404, detail="Validation result not found")
 
-    if action.action == "approve":
-        log.status = "approved"
-    elif action.action == "reject":
-        log.status = "rejected"
-    else:
-        raise HTTPException(status_code=400, detail="Invalid action")
+        if action.action == "approve":
+            log.status = "approved"
+        elif action.action == "reject":
+            log.status = "rejected"
+        else:
+            raise HTTPException(status_code=400, detail="Invalid action")
 
-    session.add(log)
-    session.commit()
-    return {"success": True, "status": log.status}
+        session.add(log)
+        session.commit()
+        session.refresh(log)
+        return {"success": True, "status": log.status}
 
 
 @router.get("/validate")
 async def list_validations(
     verdict: str | None = None,
     since: str | None = None,
-    session: Session = Depends(get_session),
 ):
-    statement = select(ActivityLog).where(ActivityLog.action == "risk_validation")
+    with _activity_session() as session:
+        statement = select(ActivityLog).where(ActivityLog.action == "risk_validation")
 
-    if since:
-        try:
-            since_dt = datetime.fromisoformat(since)
-            statement = statement.where(ActivityLog.timestamp >= since_dt)
-        except ValueError:
-            pass
+        if since:
+            try:
+                since_dt = datetime.fromisoformat(since)
+                statement = statement.where(ActivityLog.timestamp >= since_dt)
+            except ValueError:
+                pass
 
-    logs = session.exec(statement.order_by(col(ActivityLog.timestamp).desc())).all()
+        logs = session.exec(statement.order_by(col(ActivityLog.timestamp).desc())).all()
 
-    results = []
-    for log in logs:
-        res = log.details.get("result", {})
-        current_verdict = res.get("verdict", "unknown").upper()
+        results = []
+        for log in logs:
+            res = (log.details or {}).get("result", {})
+            current_verdict = res.get("verdict", "unknown").upper()
 
-        if verdict and current_verdict != verdict.upper():
-            continue
+            if verdict and current_verdict != verdict.upper():
+                continue
 
-        item = {
-            "validation_id": str(log.id),
-            "verdict": current_verdict,
-            "reasoning": res.get("reasoning"),
-            "activity_logged": True,
-            "created_at": log.timestamp.isoformat(),
-            "status": log.status,
-        }
-        if "verdict_event" in (log.details or {}):
-            item["verdict_event"] = log.details["verdict_event"]
-        results.append(item)
+            item = {
+                "validation_id": str(log.id),
+                "verdict": current_verdict,
+                "reasoning": res.get("reasoning"),
+                "activity_logged": True,
+                "created_at": log.timestamp.isoformat(),
+                "status": log.status,
+            }
+            if "verdict_event" in (log.details or {}):
+                item["verdict_event"] = log.details["verdict_event"]
+            results.append(item)
 
-    return results
+        return results

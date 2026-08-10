@@ -5,6 +5,10 @@ from langchain_openai import ChatOpenAI
 from ..core.config import settings
 from ..core.logging import logger
 
+# Deterministic HITL seed for smoke / E2E without an LLM (#78).
+# Include this token in code_snippet to force a pending MID verdict.
+E2E_HITL_MID_MARKER = "COMPLYAIGENT_E2E_HITL_MID"
+
 
 class ValidatorService:
     def __init__(self):
@@ -25,6 +29,16 @@ class ValidatorService:
         Validates offending code against a governance rule.
         Returns decision and reasoning.
         """
+        if E2E_HITL_MID_MARKER in (code or ""):
+            return {
+                "verdict": "MID",
+                "reasoning": (
+                    "E2E marker detected — queued for human-in-the-loop review "
+                    f"(rule context length={len(rule_context or '')})."
+                ),
+                "remediation": "Approve or reject from the dashboard HITL card.",
+            }
+
         prompt = f"""
         As a compliance agent, evaluate the following code against this governance rule:
 

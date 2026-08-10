@@ -17,7 +17,12 @@ class ActivityLog(SQLModel, table=True):
     task_id: UUID | None = None
 
 
-engine = create_engine(settings.DATABASE_URL)
+engine = create_engine(
+    settings.DATABASE_URL or "sqlite:///./test.db",
+    connect_args={"check_same_thread": False, "timeout": 10}
+    if "sqlite" in (settings.DATABASE_URL or "sqlite")
+    else {},
+)
 
 
 def log_activity(
