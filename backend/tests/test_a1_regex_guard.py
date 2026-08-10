@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from app.services.a1_regex_guard import (
@@ -84,7 +86,7 @@ def test_test_pass_fail_enforced() -> None:
 
 
 def test_apply_guard_demotes_reject() -> None:
-    rule = {
+    rule: dict[str, Any] = {
         "type": "A1_SCANNABLE",
         "metadata": {"regex": "(unclosed"},
     }
@@ -94,7 +96,7 @@ def test_apply_guard_demotes_reject() -> None:
 
 
 def test_apply_guard_quarantines_evil() -> None:
-    rule = {
+    rule: dict[str, Any] = {
         "type": "A1_SCANNABLE",
         "metadata": {
             "regex": r"(a+)+$",
@@ -109,7 +111,7 @@ def test_apply_guard_quarantines_evil() -> None:
 
 
 def test_apply_guard_stamps_ok() -> None:
-    rule = {
+    rule: dict[str, Any] = {
         "type": "A1_SCANNABLE",
         "metadata": {
             "regex": r"token=[A-Z0-9]{8}",
