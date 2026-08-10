@@ -1,6 +1,6 @@
 # HANDOFF — Presidio PII gate on /validate (#79)
 
-**Status:** In progress  
+**Status:** In progress (PR open; awaits merge after foundation #86)  
 **Branch:** `mvp/79-presidio`  
 **Issue(s):** #79 (legacy #17)  
 **Last updated:** 2026-08-10
@@ -15,12 +15,13 @@ Block high-risk PII in `code_snippet` on `/validate` (email / card / phone at mi
 - `POST /validate` short-circuits to HIGH before the LLM when PII is found
 - Optional deps: `uv sync --extra pii` then `uv run python -m spacy download en_core_web_sm`
 - Default `uv sync` stays light (regex path); CI does not need spaCy models
+- Tests: `DATABASE_URL=sqlite:///./test.db uv run pytest` — 27 passed locally
 
 ## What shipped
 
 | PR / commit | Delivers |
 |-------------|---------|
-| (this branch) | PII gate + tests |
+| (this branch) | PII gate + unit/integration tests + optional Presidio extra |
 
 ## Hook points (files to touch)
 
@@ -37,7 +38,7 @@ Block high-risk PII in `code_snippet` on `/validate` (email / card / phone at mi
 ## How to verify
 
 ```bash
-cd backend && uv sync && uv run pytest tests/ -k pii -v
+cd backend && uv sync && DATABASE_URL=sqlite:///./test.db uv run pytest tests/ -k pii -v
 ```
 
 ## Done means
