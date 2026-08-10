@@ -92,7 +92,9 @@ def test_apply_guard_demotes_reject() -> None:
     }
     apply_a1_guard_to_rule(rule)
     assert rule["type"] == "C_SEMANTIC_GUIDANCE"
-    assert rule["metadata"]["a1_validation"]["status"] == "rejected"
+    stamp = rule["metadata"]["a1_validation"]
+    assert isinstance(stamp, dict)
+    assert stamp["status"] == "rejected"
 
 
 def test_apply_guard_quarantines_evil() -> None:
@@ -106,7 +108,9 @@ def test_apply_guard_quarantines_evil() -> None:
     }
     apply_a1_guard_to_rule(rule)
     assert rule["type"] == "A1_SCANNABLE"
-    assert rule["metadata"]["a1_validation"]["status"] == "quarantined"
+    stamp = rule["metadata"]["a1_validation"]
+    assert isinstance(stamp, dict)
+    assert stamp["status"] == "quarantined"
     assert not is_a1_serveable(rule["type"], rule["metadata"])
 
 
@@ -121,7 +125,9 @@ def test_apply_guard_stamps_ok() -> None:
     }
     apply_a1_guard_to_rule(rule)
     assert rule["type"] == "A1_SCANNABLE"
-    assert rule["metadata"]["a1_validation"]["status"] == "ok"
+    stamp = rule["metadata"]["a1_validation"]
+    assert isinstance(stamp, dict)
+    assert stamp["status"] == "ok"
     assert is_a1_serveable(rule["type"], rule["metadata"])
 
 
