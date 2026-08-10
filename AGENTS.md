@@ -22,7 +22,8 @@
 - Sample policy fixtures: [`docs/mvp/fixtures/`](docs/mvp/fixtures/) — Markdown with H1 + `## Controls`; covered by `backend/tests/test_mvp_fixtures.py`
 - Verdict events: `backend/app/services/verdict_log.py` — validate returns `verdict_event` with required keys (`action`, `verdict`, `repo`, `timestamp`, `policy_id`/`policyId`, `validation_id`, `rule_id`)
 - Policies API: `GET /policies`, `GET /policies/{id}`; `POST /ingest` returns `policy_id` and versions by content hash
-- Backend tests: `cd backend && uv run pytest` (pyproject sets `pythonpath = ["."]`)
+- PII gate (#79): `backend/app/services/pii.py` on `POST /validate` — forces HIGH before LLM when email/card/phone found; optional Presidio via `uv sync --extra pii` (+ spaCy model), else regex/Luhn
+- Backend tests: `cd backend && uv run pytest` (pyproject sets `pythonpath = ["."]`; needs `DATABASE_URL`, e.g. `sqlite:///./test.db`)
 - Prefer TDD on MVP slices; update the matching `docs/handoffs/YYYY-MM-DD-*.md` when status changes
 
 ## Speckit

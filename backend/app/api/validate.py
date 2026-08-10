@@ -9,6 +9,7 @@ from ..core.config import settings
 from ..core.db import get_session
 from ..models.rule import GovernanceRule
 from ..services.logger import ActivityLog, engine as activity_engine, log_activity
+from ..services.pii import pii_scanner
 from ..services.validator import validator
 from ..services.verdict_log import build_verdict_event, emit_verdict_log
 
@@ -41,8 +42,12 @@ async def submit_validation(
 
     rule_content = rule.content if rule else "General guidance"
 
-    # Perform validation
-    result = await validator.validate_risk(request.code_snippet, rule_content)
+    # PII gate (#79): force HIGH/block before LLM when high-risk PII is present
+    pii_block = pii_scanner.block_result(request.code_snippet)
+    if pii_block is not None:
+        result = pii_block
+    else:
+        result = await validator.validate_risk(request.code_snippet, rule_content)
 
     status = "complete" if result["verdict"] != "MID" else "pending"
 

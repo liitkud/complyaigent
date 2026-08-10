@@ -18,6 +18,13 @@ dependencies = [
 ]
 requires-python = ">=3.12"
 
+[project.optional-dependencies]
+# Heavy: pulls spaCy. Regex fallback in app.services.pii covers MVP without this.
+pii = [
+    "presidio-analyzer>=2.2.355",
+    "spacy>=3.7.0",
+]
+
 [tool.black]
 line-length = 88
 target-version = ['py311']
