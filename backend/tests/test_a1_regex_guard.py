@@ -67,8 +67,7 @@ def test_missing_regex_rejected() -> None:
 def test_test_pass_fail_enforced() -> None:
     pattern = r"secret-\d{4}"
     assert (
-        validate_a1_regex(pattern, test_pass="nope", test_fail="x").status
-        == "rejected"
+        validate_a1_regex(pattern, test_pass="nope", test_fail="x").status == "rejected"
     )
     assert (
         validate_a1_regex(
