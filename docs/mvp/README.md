@@ -15,7 +15,7 @@
 - [ ] Dashboard HITL approve/reject works against the **live** API (not mock-only)
 - [ ] Every scan decision emits a **structured verdict log** (schema documented; Loki push if endpoint configured)
 - [ ] PII scan on validate path blocks obvious leaks (email / card / phone at minimum)
-- [ ] A1 regex rules are smoke-tested before serve (no unchecked ReDoS)
+- [x] A1 regex rules are smoke-tested before serve (no unchecked ReDoS)
 - [ ] Handoff + onboarding docs match reality; CI green on `dev`
 
 ## Workstreams → issues

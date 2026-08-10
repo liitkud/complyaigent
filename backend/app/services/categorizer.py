@@ -5,6 +5,7 @@ from langchain_openai import ChatOpenAI
 
 from ..core.config import settings
 from ..core.logging import logger
+from .a1_regex_guard import apply_a1_guard_to_rule
 
 
 class CategorizerService:
@@ -112,6 +113,9 @@ class CategorizerService:
                     rem = rule.get("remediation")
                     if isinstance(rem, (dict, list)):
                         rule["remediation"] = json.dumps(rem)
+
+                    # #80 — ReDoS / self-test gate before A1 leaves categorizer
+                    apply_a1_guard_to_rule(rule)
 
                 if rules:
                     logger.debug(

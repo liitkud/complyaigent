@@ -9,6 +9,7 @@ from ..core.logging import logger
 from ..models.rule import GovernanceRule
 from ..models.task import IngestionTask, TaskStatus
 from ..regintel.rag import VectorStoreConnection
+from .a1_regex_guard import apply_a1_guard_to_rule
 from .categorizer import categorizer
 from .compactor import compactor
 from .comparator import comparator
@@ -115,6 +116,9 @@ async def _run_pipeline(task_id: str, file_path: str):
             stored_rules = []
             for r_data in rules_data:
                 try:
+                    # Defense in depth: re-run A1 guard at publish even if
+                    # categorizer already stamped metadata (#80).
+                    apply_a1_guard_to_rule(r_data)
                     rule = GovernanceRule(
                         task_id=task.id,
                         type=r_data["type"],

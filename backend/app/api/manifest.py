@@ -4,8 +4,14 @@ from sqlmodel import Session, col, select
 from ..core.db import get_session
 from ..models.rule import GovernanceRule, SourceCategory
 from ..models.task import IngestionTask
+from ..services.a1_regex_guard import is_a1_serveable
 
 router = APIRouter()
+
+
+def _serveable_rule(rule: GovernanceRule) -> bool:
+    """Drop quarantined / unvalidated A1 patterns before CLI fetch (#80)."""
+    return is_a1_serveable(rule.type, rule.rule_metadata)
 
 
 @router.get("/regulation")
@@ -49,7 +55,13 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
         try:
             rule = session.get(GovernanceRule, UUID(id))
             if rule:
+                if not _serveable_rule(rule):
+                    raise HTTPException(
+                        status_code=404, detail="Manifest or Rule not found"
+                    )
                 return rule
+        except HTTPException:
+            raise
         except Exception:
             pass
         raise HTTPException(
@@ -72,10 +84,14 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
         "C_SEMANTIC_GUIDANCE": "C",
     }
 
+    served = 0
     for rule in rules:
+        if not _serveable_rule(rule):
+            continue
         b_key = bucket_map.get(rule.type)
         if b_key:
             buckets[b_key].append(rule)
+            served += 1
 
     return {
         "meta": {
@@ -84,7 +100,7 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
             "source_type": rules[0].source_category if rules else "org_guideline",
             "ingested_at": task.created_at.isoformat(),
             "version": task.source_hash[:7],
-            "total_rules": len(rules),
+            "total_rules": served,
         },
         "buckets": buckets,
     }
@@ -116,6 +132,8 @@ async def list_rules(
     reverse_map = {v: k for k, v in bucket_map.items()}
 
     for rule in rules:
+        if not _serveable_rule(rule):
+            continue
         val = rule.type.value if hasattr(rule.type, "value") else str(rule.type)
         b_key = reverse_map.get(val)
         if b_key:

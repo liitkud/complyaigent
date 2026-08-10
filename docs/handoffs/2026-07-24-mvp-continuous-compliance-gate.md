@@ -25,7 +25,7 @@ Ship a minimum viable continuous compliance gate: ingest → versioned policy �
 | #77 | Loki / sink push | `…-verdict-loki-push.md` |
 | #78 | E2E + live HITL | `…-e2e-live-hitl.md` |
 | #79 | Presidio PII on `/validate` | `…-presidio-pii.md` |
-| #80 | A1 regex validation / ReDoS | `…-a1-regex-guard.md` |
+| #80 | A1 regex validation / ReDoS | `2026-08-10-a1-regex-guard.md` |
 | #81 | Sample policy pack | `…-mvp-sample-policies.md` |
 | #82 | Docs sync | Done via #83 |
 
