@@ -1,10 +1,84 @@
 import asyncio
 import json
+import re
+from re import _constants, _parser
 
 from langchain_openai import ChatOpenAI
 
 from ..core.config import settings
 from ..core.logging import logger
+
+MAX_A1_PATTERN_LENGTH = 500
+MAX_A1_TEST_LENGTH = 10_000
+
+
+def validate_a1_rule(rule: dict) -> str | None:
+    """Return a rejection reason when an A1 rule is unsafe to publish."""
+    metadata = rule.get("metadata")
+    if not isinstance(metadata, dict):
+        return "metadata must be an object"
+
+    pattern = metadata.get("pattern")
+    test_pass = metadata.get("test_pass")
+    test_fail = metadata.get("test_fail")
+    if not all(isinstance(value, str) for value in (pattern, test_pass, test_fail)):
+        return "pattern, test_pass, and test_fail are required strings"
+    if not pattern:
+        return "pattern must not be empty"
+    if len(pattern) > MAX_A1_PATTERN_LENGTH:
+        return f"pattern exceeds {MAX_A1_PATTERN_LENGTH} characters"
+    if len(test_pass) > MAX_A1_TEST_LENGTH or len(test_fail) > MAX_A1_TEST_LENGTH:
+        return f"test strings exceed {MAX_A1_TEST_LENGTH} characters"
+
+    try:
+        compiled = re.compile(pattern)
+        parsed = _parser.parse(pattern, 0)
+    except (re.error, ValueError) as error:
+        return f"malformed regex: {error}"
+
+    def contains_token(tokens, wanted) -> bool:
+        for token, value in tokens:
+            if token == wanted:
+                return True
+            if token in (_constants.MAX_REPEAT, _constants.MIN_REPEAT):
+                if contains_token(value[2], wanted):
+                    return True
+            elif token == _constants.SUBPATTERN and contains_token(value[3], wanted):
+                return True
+            elif token == _constants.BRANCH and any(
+                contains_token(branch, wanted) for branch in value[1]
+            ):
+                return True
+        return False
+
+    def has_pathological_repetition(tokens) -> bool:
+        for token, value in tokens:
+            if token in (_constants.MAX_REPEAT, _constants.MIN_REPEAT):
+                children = value[2]
+                if contains_token(children, _constants.MAX_REPEAT) or contains_token(
+                    children, _constants.MIN_REPEAT
+                ):
+                    return True
+                if contains_token(children, _constants.BRANCH):
+                    return True
+                if has_pathological_repetition(children):
+                    return True
+            elif token == _constants.SUBPATTERN:
+                if has_pathological_repetition(value[3]):
+                    return True
+            elif token == _constants.BRANCH and any(
+                has_pathological_repetition(branch) for branch in value[1]
+            ):
+                return True
+        return False
+
+    if has_pathological_repetition(parsed):
+        return "pathological regex: nested or ambiguous repetition"
+    if compiled.search(test_pass) is None:
+        return "test_pass does not match pattern"
+    if compiled.search(test_fail) is not None:
+        return "test_fail matches pattern"
+    return None
 
 
 class CategorizerService:
@@ -112,6 +186,18 @@ class CategorizerService:
                     rem = rule.get("remediation")
                     if isinstance(rem, (dict, list)):
                         rule["remediation"] = json.dumps(rem)
+
+                safe_rules = []
+                for rule in rules:
+                    if rule.get("type") == "A1_SCANNABLE":
+                        rejection = validate_a1_rule(rule)
+                        if rejection:
+                            logger.warning(
+                                "Discarding unsafe generated A1 rule: %s", rejection
+                            )
+                            continue
+                    safe_rules.append(rule)
+                rules = safe_rules
 
                 if rules:
                     logger.debug(

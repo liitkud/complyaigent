@@ -9,7 +9,7 @@ from ..core.logging import logger
 from ..models.rule import GovernanceRule
 from ..models.task import IngestionTask, TaskStatus
 from ..regintel.rag import VectorStoreConnection
-from .categorizer import categorizer
+from .categorizer import categorizer, validate_a1_rule
 from .compactor import compactor
 from .comparator import comparator
 from .extractor import clean_text, extract_text_from_markdown, extract_text_from_pdf
@@ -108,6 +108,15 @@ async def _run_pipeline(task_id: str, file_path: str):
             stored_rules = []
             for r_data in rules_data:
                 try:
+                    if r_data.get("type") == "A1_SCANNABLE":
+                        rejection = validate_a1_rule(r_data)
+                        if rejection:
+                            logger.warning(
+                                "Discarding unsafe A1 rule for task %s: %s",
+                                task_id,
+                                rejection,
+                            )
+                            continue
                     rule = GovernanceRule(
                         task_id=task.id,
                         type=r_data["type"],

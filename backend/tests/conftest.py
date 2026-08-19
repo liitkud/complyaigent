@@ -42,7 +42,11 @@ class FakeLLM:
                         "content": "Test-only governance requirement.",
                         "remediation": "Review the requirement.",
                         "tags": [],
-                        "metadata": {},
+                        "metadata": {
+                            "pattern": r"test-only",
+                            "test_pass": "test-only value",
+                            "test_fail": "safe value",
+                        },
                     }
                 ]
             )
