@@ -43,7 +43,10 @@ async def ingest_document(
         }
 
     # Create new task
-    task = IngestionTask(source_hash=file_hash)
+    task = IngestionTask(
+        source_hash=file_hash,
+        source_name=file.filename or "Unnamed policy",
+    )
     session.add(task)
     session.commit()
     session.refresh(task)

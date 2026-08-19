@@ -86,22 +86,7 @@ async def _run_pipeline(task_id: str, file_path: str):
                 session, task, "Running Comparator (Deduplication)", 30
             )
 
-            anchors = comparator.extract_anchors(cleaned_text)
-            if anchors:
-                existing_rule = session.exec(
-                    select(GovernanceRule).where(
-                        col(GovernanceRule.content).like(f"%{anchors[0]}%")
-                    )
-                ).first()
-                if existing_rule:
-                    task.previous_version_id = existing_rule.task_id
-                    prev_task = session.get(IngestionTask, existing_rule.task_id)
-                    if prev_task:
-                        task.version_chain = [*prev_task.version_chain, task.id]
-                    else:
-                        task.version_chain = [existing_rule.task_id, task.id]
-                    session.add(task)
-                    session.commit()
+            _link_policy_revision(session, task, cleaned_text)
 
             # Stage 3: Compactor
             await update_task_progress(session, task, "Compacting Requirements", 50)
@@ -110,6 +95,11 @@ async def _run_pipeline(task_id: str, file_path: str):
             # Stage 4: Categorizer
             await update_task_progress(session, task, "Categorizing Rules", 80)
             rules_data = await categorizer.categorize_rules(compacted_text)
+            if rules_data:
+                source_type = rules_data[0]["source_category"]
+                task.source_type = getattr(source_type, "value", source_type)
+                session.add(task)
+                session.commit()
 
             # Per-rule insertion to prevent one bad rule from killing the batch
             stored_rules = []
@@ -161,3 +151,37 @@ async def _run_pipeline(task_id: str, file_path: str):
             task.current_stage = f"Error in {task.current_stage}: {e!s}"
             session.add(task)
             session.commit()
+
+
+def _link_policy_revision(session: Session, task: IngestionTask, text: str) -> None:
+    """Attach a changed upload to the latest deterministic policy revision."""
+    previous = session.exec(
+        select(IngestionTask)
+        .where(
+            IngestionTask.source_name == task.source_name,
+            IngestionTask.id != task.id,
+        )
+        .order_by(col(IngestionTask.version_number).desc())
+    ).first()
+
+    if not previous:
+        anchors = comparator.extract_anchors(text)
+        if anchors:
+            existing_rule = session.exec(
+                select(GovernanceRule)
+                .where(col(GovernanceRule.content).like(f"%{anchors[0]}%"))
+                .order_by(col(GovernanceRule.id))
+            ).first()
+            if existing_rule:
+                previous = session.get(IngestionTask, existing_rule.task_id)
+
+    if previous:
+        task.policy_id = previous.policy_id
+        task.previous_version_id = previous.id
+        task.version_number = previous.version_number + 1
+        task.version_chain = [
+            *(previous.version_chain or [str(previous.id)]),
+            str(task.id),
+        ]
+        session.add(task)
+        session.commit()

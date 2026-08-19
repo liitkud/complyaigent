@@ -19,20 +19,21 @@ async def list_regulations(session: Session = Depends(get_session)):
 
     results = []
     for task in tasks:
-        # Try to find rule category for source_type
-        first_rule = session.exec(
-            select(GovernanceRule).where(GovernanceRule.task_id == task.id)
-        ).first()
-
         results.append(
             {
                 "id": str(task.id),
-                "source_name": f"Regulation {str(task.id)[:8]}",
-                "source_type": first_rule.source_category
-                if first_rule
-                else "org_guideline",
+                "policy_id": str(task.policy_id),
+                "source_name": task.source_name,
+                "source_type": task.source_type,
                 "ingested_at": task.created_at.isoformat(),
-                "version": task.source_hash[:7],
+                "version": str(task.version_number),
+                "version_number": task.version_number,
+                "source_hash": task.source_hash,
+                "previous_version_id": (
+                    str(task.previous_version_id)
+                    if task.previous_version_id
+                    else None
+                ),
             }
         )
     return results
@@ -80,10 +81,17 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
     return {
         "meta": {
             "source_uuid": str(task.id),
-            "source_name": f"Regulation {str(task.id)[:8]}",
-            "source_type": rules[0].source_category if rules else "org_guideline",
+            "policy_id": str(task.policy_id),
+            "source_name": task.source_name,
+            "source_type": task.source_type,
             "ingested_at": task.created_at.isoformat(),
-            "version": task.source_hash[:7],
+            "version": str(task.version_number),
+            "version_number": task.version_number,
+            "source_hash": task.source_hash,
+            "previous_version_id": (
+                str(task.previous_version_id) if task.previous_version_id else None
+            ),
+            "version_chain": task.version_chain,
             "total_rules": len(rules),
         },
         "buckets": buckets,
