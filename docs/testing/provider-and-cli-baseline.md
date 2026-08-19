@@ -89,3 +89,8 @@ Observed:
 Podman failed before this fix because `pgvector/pgvector:pg16` was an
 unqualified image name and short-name resolution required an interactive
 prompt. Compose files now use `docker.io/pgvector/pgvector:pg16` explicitly.
+
+The frontend development container also failed once because Next.js 16
+inferred `/app/app` as the Turbopack workspace root. `frontend/next.config.ts`
+now sets `turbopack.root` to the project directory. After rebuilding the
+frontend service, both the frontend and backend returned HTTP 200.
