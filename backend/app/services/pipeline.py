@@ -44,9 +44,12 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
     """
     Orchestrates the multi-stage intelligence pipeline.
     Wraps everything in a 60s timeout and handles per-rule persistence.
+    The worker owns retries, so failures are re-raised after task state is saved.
     """
     try:
         await asyncio.wait_for(_run_pipeline(task_id, file_path), timeout=60.0)
+        if os.path.exists(file_path):
+            os.remove(file_path)
     except TimeoutError:
         logger.error(f"Pipeline timed out after 60s for task {task_id}")
         with Session(engine) as session:
@@ -56,12 +59,10 @@ async def start_ingestion_pipeline(task_id: str, file_path: str):
                 task.current_stage = "Error: Pipeline timed out after 60s"
                 session.add(task)
                 session.commit()
+        raise
     except Exception as e:
         logger.error(f"Unexpected error in ingestion wrapper for task {task_id}: {e}")
-    finally:
-        # Cleanup temp file
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        raise
 
 
 async def _run_pipeline(task_id: str, file_path: str):
@@ -95,6 +96,8 @@ async def _run_pipeline(task_id: str, file_path: str):
             # Stage 4: Categorizer
             await update_task_progress(session, task, "Categorizing Rules", 80)
             rules_data = await categorizer.categorize_rules(compacted_text)
+            if not rules_data:
+                raise ValueError("Categorizer returned zero rules")
             if rules_data:
                 source_type = rules_data[0]["source_category"]
                 task.source_type = getattr(source_type, "value", source_type)
@@ -126,6 +129,9 @@ async def _run_pipeline(task_id: str, file_path: str):
                         f"Skipping malformed rule for task {task_id}: {rule_err}"
                     )
 
+            if not stored_rules:
+                raise ValueError("Pipeline produced zero valid rules")
+
             # Stage 5: Vector Indexing (RAG)
             await update_task_progress(session, task, "Indexing rules for RAG", 95)
             if stored_rules:
@@ -151,6 +157,7 @@ async def _run_pipeline(task_id: str, file_path: str):
             task.current_stage = f"Error in {task.current_stage}: {e!s}"
             session.add(task)
             session.commit()
+            raise
 
 
 def _link_policy_revision(session: Session, task: IngestionTask, text: str) -> None:

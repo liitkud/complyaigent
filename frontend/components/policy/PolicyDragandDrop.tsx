@@ -20,16 +20,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-const mockData: RegulationSummary[] = [
-  {
-    id: "p-001",
-    source_name: "SOC2 Type II Controls",
-    source_type: "org_guideline",
-    ingested_at: "2026-05-08T09:00:00Z",
-    version: "1.0",
-  },
-];
-
 export default function PolicyDragAndDrop({
   onIngestStart,
 }: {
@@ -37,6 +27,7 @@ export default function PolicyDragAndDrop({
 }) {
   const [policies, setPolicies] = useState<RegulationSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ingestStatus, setIngestStatus] = useState<IngestStatus | null>(null);
@@ -46,7 +37,7 @@ export default function PolicyDragAndDrop({
   useEffect(() => {
     api("/regulation")
       .then((p: RegulationSummary[]) => setPolicies(p))
-      .catch(() => setPolicies(mockData))
+      .catch(() => setError("Backend unavailable. Policy repository cannot be loaded."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -63,6 +54,13 @@ export default function PolicyDragAndDrop({
       }
     } catch (err) {
       console.error("Polling failed", err);
+      setIngestStatus({
+        task_id: taskId,
+        status: "failed",
+        progress_pct: 0,
+        current_stage: "Backend unavailable",
+        eta_seconds: null,
+      });
     }
   }, []);
 
@@ -125,6 +123,10 @@ export default function PolicyDragAndDrop({
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
   }
 
   return (

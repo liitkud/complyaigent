@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,6 +46,52 @@ func TestLoadScannablePatternsCombinesManifestAndBuiltinRules(t *testing.T) {
 	}
 	if got[0].ID != "remote" || got[1].ID != "local" {
 		t.Fatalf("rule IDs = %q, %q, want remote, local", got[0].ID, got[1].ID)
+	}
+}
+
+func TestFetchAndCacheRulesLoadsRemoteRuleForScanning(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "manifest.yaml")
+	builtinPath := filepath.Join(dir, "builtin.yaml")
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.String() != "/reg?bucket=A1" {
+			t.Fatalf("request URL = %q, want /reg?bucket=A1", r.URL.String())
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"buckets":{"A1":[{"id":"remote-only","rule_name":"Remote-only rule","pattern":"REMOTE_ONLY_[A-Z]+","logic":"regex","test_pass":"REMOTE_ONLY_OK","test_fail":"REMOTE_ONLY_BAD","remediation":"Remove it"}]}}`))
+	}))
+	defer server.Close()
+
+	ruleCount, _, err := FetchAndCacheRules(server.URL, manifestPath, builtinPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ruleCount != 1 {
+		t.Fatalf("FetchAndCacheRules() loaded %d rules, want 1", ruleCount)
+	}
+
+	if err := os.MkdirAll(filepath.Join(dir, ".pg", "cache"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	// ScanPatterns uses the CLI cache paths, so place the fetched fixture there.
+	if err := os.Rename(manifestPath, filepath.Join(dir, ".pg", "cache", "manifest.yaml")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(builtinPath, filepath.Join(dir, ".pg", "cache", "builtin.yaml")); err != nil {
+		t.Fatal(err)
+	}
+	oldDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(oldDir) })
+
+	violations := ScanPatterns("+++ b/remote.txt\n@@ -0,0 +1 @@\n+REMOTE_ONLY_VALUE\n", Config{})
+	if len(violations) != 1 || violations[0].Pattern != "Remote-only rule" {
+		t.Fatalf("ScanPatterns() = %#v, want one remote violation", violations)
 	}
 }
 

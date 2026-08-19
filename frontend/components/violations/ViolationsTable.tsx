@@ -1,20 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type ValidationResult } from "@/services/api";
-import { getApiBase } from "@/services/api-base.mjs";
+import { apiClient, type ValidationResult } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
-
-const mockData: ValidationResult[] = [
-  {
-    validation_id: "val-001",
-    verdict: "HIGH",
-    reasoning: "AWS Access Key (AKIA...) detected in config.yaml",
-    activity_logged: true,
-    created_at: new Date().toISOString(),
-    status: "complete",
-  },
-];
 
 const severityMap = {
   HIGH: "danger",
@@ -25,22 +13,15 @@ const severityMap = {
 export default function ViolationsTable() {
   const [violations, setViolations] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const apiUrl = getApiBase({
-          configuredUrl: process.env.NEXT_PUBLIC_API_URL,
-          isBrowser: true,
-          hostname: window.location.hostname,
-        });
-        const res = await fetch(`${apiUrl}/validate`);
-        if (!res.ok) throw new Error("API error");
-        const data = await res.json();
-        setViolations(data);
+        setViolations(await apiClient.getValidations());
       } catch (e) {
-        console.error("[ViolationsTable] Fetch failed, using mock:", e);
-        setViolations(mockData);
+        console.error("[ViolationsTable] Fetch failed:", e);
+        setError("Backend unavailable. Violations cannot be loaded.");
       } finally {
         setLoading(false);
       }
@@ -61,6 +42,10 @@ export default function ViolationsTable() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
   }
 
   return (

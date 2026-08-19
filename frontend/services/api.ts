@@ -231,8 +231,6 @@ export const api = async (path: string) => {
 
 // ── Helpers ────────────────────────────────────────────
 
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 // ── API Client ─────────────────────────────────────────
 
 export const apiClient = {
@@ -280,146 +278,24 @@ export const apiClient = {
   getValidation: (id: string) =>
     apiFetch<ValidationResult>(`/validate/${encodeURIComponent(id)}`),
 
-  /** GET /validate — list all validation results (with mock fallback) */
-  getValidations: async (): Promise<ValidationResult[]> => {
-    try {
-      return await apiFetch<ValidationResult[]>("/validate");
-    } catch {
-      // Mock fallback — realistic scan history for dashboard
-      await delay(300);
-      const now = new Date();
-      const today = now.toISOString().slice(0, 10);
-      return [
-        {
-          validation_id: "val-001",
-          verdict: "HIGH",
-          reasoning: "AWS Access Key (AKIA...) detected in config.yaml",
-          activity_logged: true,
-          created_at: `${today}T14:32:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-002",
-          verdict: "HIGH",
-          reasoning: "Private RSA key committed to repository",
-          activity_logged: true,
-          created_at: `${today}T12:10:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-003",
-          verdict: "MID",
-          reasoning: "Encryption-at-rest not enforced for new data store",
-          activity_logged: true,
-          created_at: `${today}T11:55:00Z`,
-          status: "pending",
-        },
-        {
-          validation_id: "val-004",
-          verdict: "HIGH",
-          reasoning: "Email addresses found in debug log output",
-          activity_logged: true,
-          created_at: `${today}T13:45:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-005",
-          verdict: "LOW",
-          reasoning: "Code follows secure patterns — no violations detected",
-          activity_logged: true,
-          created_at: `${today}T10:00:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-006",
-          verdict: "LOW",
-          reasoning: "API authentication correctly enforced on all routes",
-          activity_logged: true,
-          created_at: `${today}T09:30:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-007",
-          verdict: "MID",
-          reasoning:
-            "Philippine national IDs found in test fixtures — PII risk",
-          activity_logged: true,
-          created_at: `${today}T10:30:00Z`,
-          status: "pending",
-        },
-        {
-          validation_id: "val-008",
-          verdict: "LOW",
-          reasoning:
-            "No hardcoded credentials — environment variables used correctly",
-          activity_logged: true,
-          created_at: `${today}T08:15:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-009",
-          verdict: "HIGH",
-          reasoning: "Database connection string contains plaintext password",
-          activity_logged: true,
-          created_at: `${today}T14:00:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-010",
-          verdict: "LOW",
-          reasoning:
-            "TLS 1.2 minimum enforced — transport encryption compliant",
-          activity_logged: true,
-          created_at: `${today}T07:45:00Z`,
-          status: "complete",
-        },
-        {
-          validation_id: "val-011",
-          verdict: "MID",
-          reasoning: "New S3 bucket created without encryption policy tag",
-          activity_logged: true,
-          created_at: `${today}T13:50:00Z`,
-          status: "pending",
-        },
-        {
-          validation_id: "val-012",
-          verdict: "LOW",
-          reasoning: "Audit logging correctly configured for all admin actions",
-          activity_logged: true,
-          created_at: `${today}T06:30:00Z`,
-          status: "complete",
-        },
-      ];
-    }
-  },
+  /** GET /validate — list all validation results */
+  getValidations: () => apiFetch<ValidationResult[]>("/validate"),
 
   // ── Mock / legacy endpoints (used by existing UI) ────
 
   getStatus: async (): Promise<{ status: string }> => {
-    try {
-      const h = await apiFetch<HealthResponse>("/health");
-      return { status: h.status };
-    } catch {
-      await delay(300);
-      return { status: "ok" };
-    }
+    const h = await apiFetch<HealthResponse>("/health");
+    return { status: h.status };
   },
 
-  getMetrics: async (): Promise<ComplianceMetrics> => {
-    await delay(200);
-    return {
-      totalScans: 1_247,
-      passRate: 94.2,
-      violationsToday: 12,
-      pendingApprovals: 3,
-      policiesIngested: 28,
-      avgScanTime: "1.2s",
-    };
-  },
-
-  getViolations: async (): Promise<Violation[]> => {
-    await delay(300);
-    return [
+  /* Legacy UI data helpers are intentionally not mocked. */
+  getMetrics: (): Promise<ComplianceMetrics> => apiFetch("/metrics"),
+  getViolations: (): Promise<Violation[]> => apiFetch("/violations"),
+  getHITLRequests: (): Promise<HITLRequest[]> => apiFetch("/hitl"),
+  getPolicies: (): Promise<Policy[]> => apiFetch("/policies"),
+  getPipelineEvents: (): Promise<PipelineEvent[]> => apiFetch("/pipeline"),
+  getSystemHealth: (): Promise<SystemHealth[]> => apiFetch("/system/health"),
+/*
       {
         id: "v-001",
         timestamp: "2026-05-09T14:32:00Z",
@@ -674,6 +550,7 @@ export const apiClient = {
       },
     ];
   },
+*/
 
   approveHITL: (id: string): Promise<HITLActionResponse> =>
     apiFetch<HITLActionResponse>(`/validate/${encodeURIComponent(id)}`, {
@@ -690,67 +567,9 @@ export const apiClient = {
     }),
 
   /** @deprecated Use api.ingest() instead — kept for PolicyDragandDrop compatibility */
-  ingestPolicy: async (file: File): Promise<LegacyIngestResponse> => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API_BASE}/ingest`, {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) return res.json();
-    } catch {
-      // Backend unavailable — fall through to mock
-    }
-    // Mock fallback when backend is not running
-    await delay(1500);
-    return {
-      id: `p-${Date.now()}`,
-      name: file.name,
-      framework: "Custom",
-      controlsExtracted: 5,
-      controls: [
-        {
-          id: "ctrl-1",
-          title: "Access Control",
-          description:
-            "Enforce role-based access control (RBAC) for all production systems",
-          framework: "SOC2",
-          severity: "critical",
-        },
-        {
-          id: "ctrl-2",
-          title: "Data Encryption",
-          description: "All data at rest must use AES-256 encryption",
-          framework: "SOC2",
-          severity: "high",
-        },
-        {
-          id: "ctrl-3",
-          title: "Audit Logging",
-          description:
-            "Maintain immutable audit logs for all privileged actions",
-          framework: "SOC2",
-          severity: "high",
-        },
-        {
-          id: "ctrl-4",
-          title: "Incident Response",
-          description: "Incident response plan must be tested quarterly",
-          framework: "SOC2",
-          severity: "medium",
-        },
-        {
-          id: "ctrl-5",
-          title: "Vendor Assessment",
-          description:
-            "Third-party vendors must complete security questionnaire annually",
-          framework: "SOC2",
-          severity: "medium",
-        },
-      ],
-      status: "active",
-      ingestedAt: new Date().toISOString(),
-    };
+  ingestPolicy: (file: File): Promise<LegacyIngestResponse> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch<LegacyIngestResponse>("/ingest", { method: "POST", body: formData });
   },
 };

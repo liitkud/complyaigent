@@ -9,6 +9,7 @@ export default function HITLApprovalCard() {
   const [requests, setRequests] = useState<ValidationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -19,7 +20,7 @@ export default function HITLApprovalCard() {
         );
       } catch (e) {
         console.error("[HITLApprovalCard] Fetch failed:", e);
-        setRequests([]);
+        setError("Backend unavailable. Pending approvals cannot be loaded.");
       } finally {
         setLoading(false);
       }
@@ -57,6 +58,10 @@ export default function HITLApprovalCard() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
   }
 
   const pending = requests.filter((r) => r.status === "pending");

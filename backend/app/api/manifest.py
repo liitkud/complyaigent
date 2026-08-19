@@ -8,6 +8,22 @@ from ..models.task import IngestionTask
 router = APIRouter()
 
 
+def _serialize_rule(rule: GovernanceRule) -> dict:
+    """Expose A1 scanner metadata where the CLI manifest contract expects it."""
+    result = rule.model_dump(mode="json")
+    metadata = rule.rule_metadata or {}
+    if rule.type == "A1_SCANNABLE":
+        result.update(
+            {
+                "pattern": metadata.get("pattern", ""),
+                "logic": metadata.get("logic", ""),
+                "test_pass": metadata.get("test_pass", ""),
+                "test_fail": metadata.get("test_fail", ""),
+            }
+        )
+    return result
+
+
 @router.get("/regulation")
 async def list_regulations(session: Session = Depends(get_session)):
     """
@@ -76,7 +92,7 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
     for rule in rules:
         b_key = bucket_map.get(rule.type)
         if b_key:
-            buckets[b_key].append(rule)
+            buckets[b_key].append(_serialize_rule(rule))
 
     return {
         "meta": {
@@ -127,7 +143,7 @@ async def list_rules(
         val = rule.type.value if hasattr(rule.type, "value") else str(rule.type)
         b_key = reverse_map.get(val)
         if b_key:
-            buckets[b_key].append(rule)
+            buckets[b_key].append(_serialize_rule(rule))
 
     if bucket:
         # Even if filtered, return consistent structure but only with the requested bucket

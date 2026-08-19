@@ -11,10 +11,10 @@ import {
   Server,
   BookOpen,
   Shield,
-  WifiOff,
 } from "lucide-react";
 import Link from "next/link";
 
+/* Legacy preview fixture intentionally disabled in the production path.
 const mockManifest = (id: string): GovernanceManifest => ({
   meta: {
     source_uuid: id,
@@ -116,13 +116,14 @@ const mockManifest = (id: string): GovernanceManifest => ({
     ],
   },
 });
+*/
 
 export default function RegulationDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
   const [manifest, setManifest] = useState<GovernanceManifest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [usingMock, setUsingMock] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -132,10 +133,9 @@ export default function RegulationDetailPage() {
       .then((m) => {
         if (!cancelled) setManifest(m);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelled) {
-          setManifest(mockManifest(id));
-          setUsingMock(true);
+          setError(err instanceof Error ? err.message : "Backend unavailable. Regulation cannot be loaded.");
         }
       })
       .finally(() => {
@@ -170,21 +170,7 @@ export default function RegulationDetailPage() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 p-6">
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — showing mock regulation
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach{" "}
-                <code className="font-mono">GET /regulation/{"{id}"}</code>.
-                Displaying fallback data for UI preview.
-              </p>
-            </div>
-          </div>
-        )} */}
+        {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">Backend unavailable. {error}</div>}
 
         {loading ? (
           <div className="space-y-4">

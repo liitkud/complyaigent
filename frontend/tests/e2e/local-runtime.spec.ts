@@ -25,3 +25,14 @@ test("dashboard loads from the local API", async ({ page, request }) => {
   expect(await page.getByText("Backend unavailable").count()).toBe(0);
   expect(await page.getByText("1,247").count()).toBe(0);
 });
+
+test("dashboard shows an unavailable state when the backend is down", async ({ page }) => {
+  await page.route("**/validate", (route) => route.abort("failed"));
+  await page.route("**/regulation", (route) => route.abort("failed"));
+
+  await page.goto("/");
+
+  await expect(page.getByRole("alert").first()).toContainText("Backend unavailable");
+  await expect(page.getByText("1,247")).toHaveCount(0);
+  await expect(page.getByText("No pending approvals")).toHaveCount(0);
+});

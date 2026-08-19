@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import {
+  apiClient,
   type ComplianceMetrics,
   type ValidationResult,
   type RegulationSummary,
 } from "@/services/api";
-import { getApiBase } from "@/services/api-base.mjs";
 import MetricCard from "@/components/ui/MetricCard";
 import ViolationsTable from "@/components/violations/ViolationsTable";
 import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
@@ -51,42 +51,23 @@ function computeMetrics(
 export default function Home() {
   const [metrics, setMetrics] = useState<ComplianceMetrics | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [usingMock, setUsingMock] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | undefined>();
 
   const load = async () => {
     setRefreshing(true);
+    setError(null);
     try {
-      // Use raw fetch to ensure we see the calls in the network tab
-      const apiUrl = getApiBase({
-        configuredUrl: process.env.NEXT_PUBLIC_API_URL,
-        isBrowser: true,
-        hostname: window.location.hostname,
-      });
-      const [vRes, rRes] = await Promise.all([
-        fetch(`${apiUrl}/validate`),
-        fetch(`${apiUrl}/regulation`),
+      const [validations, regulations] = await Promise.all([
+        apiClient.getValidations(),
+        apiClient.getRegulations(),
       ]);
 
-      if (!vRes.ok || !rRes.ok) throw new Error("API responded with error");
-
-      const validations = await vRes.json();
-      const regulations = await rRes.json();
-
       setMetrics(computeMetrics(validations, regulations));
-      setUsingMock(false);
     } catch (e) {
-      console.error("[ComplyAIgent] API unreachable, using mock data:", e);
-      // Fallback to hardcoded mock data for the hackathon
-      setMetrics({
-        totalScans: 1247,
-        passRate: 94.2,
-        violationsToday: 12,
-        pendingApprovals: 3,
-        policiesIngested: 28,
-        avgScanTime: "1.2s",
-      });
-      setUsingMock(true);
+      console.error("[ComplyAIgent] API unavailable:", e);
+      setMetrics(null);
+      setError("Backend unavailable. Dashboard data cannot be loaded.");
     } finally {
       setRefreshing(false);
     }
@@ -109,10 +90,10 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-            System Online
-          </span>
+           {!error && <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+             System Online
+           </span>}
           <button
             onClick={load}
             disabled={refreshing}
@@ -124,21 +105,10 @@ export default function Home() {
       </header>
 
       <main className="space-y-6 p-6">
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — showing mock data
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Metrics derived from mock{" "}
-                <code className="font-mono">GET /validate</code> +{" "}
-                <code className="font-mono">GET /regulation</code> fallback.
-              </p>
-            </div>
-          </div>
-        )} */}
+        {error && <div role="alert" className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/10">
+          <WifiOff size={18} className="shrink-0 text-red-500" />
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        </div>}
 
         {/* KPI Cards */}
         {metrics ? (

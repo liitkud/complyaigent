@@ -10,7 +10,7 @@ import {
   type InfraRule,
   type SemanticRule,
 } from "@/services/api";
-import { ShieldCheck, Loader2, Send, WifiOff } from "lucide-react";
+import { ShieldCheck, Loader2, Send } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 
 const verdictVariant: Record<string, "success" | "warning" | "danger"> = {
@@ -18,36 +18,6 @@ const verdictVariant: Record<string, "success" | "warning" | "danger"> = {
   MID: "warning",
   HIGH: "danger",
 };
-
-const mockVerdicts: ValidationResult[] = [
-  {
-    validation_id: "",
-    verdict: "HIGH",
-    reasoning:
-      "Hardcoded AWS access key detected in source. This matches scannable rule A1-001. The key pattern AKIA[A-Z0-9]{16} was found in the submitted snippet, which poses a critical credential-leak risk.",
-    activity_logged: true,
-    created_at: "2026-05-09T14:40:00Z",
-    status: "complete",
-  },
-  {
-    validation_id: "",
-    verdict: "MID",
-    reasoning:
-      "The code uses a plaintext database connection string with embedded credentials. While not an AWS key, this violates the no-hardcoded-passwords policy (A1-003). Consider using environment variables or a secrets manager.",
-    activity_logged: true,
-    created_at: "2026-05-09T14:40:00Z",
-    status: "complete",
-  },
-  {
-    validation_id: "",
-    verdict: "LOW",
-    reasoning:
-      "No policy violations detected in the submitted code snippet. The code follows secure patterns and does not contain secrets, PII, or policy-violating constructs.",
-    activity_logged: true,
-    created_at: "2026-05-09T14:40:00Z",
-    status: "complete",
-  },
-];
 
 export default function ValidatePage() {
   const [codeSnippet, setCodeSnippet] = useState("");
@@ -61,7 +31,7 @@ export default function ValidatePage() {
   const [availableRules, setAvailableRules] = useState<
     (ScannableRule | ActionableRule | InfraRule | SemanticRule)[]
   >([]);
-  const [usingMock, setUsingMock] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loadingRules, setLoadingRules] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -77,9 +47,7 @@ export default function ValidatePage() {
         ];
         setAvailableRules(all);
       })
-      .catch(() => {
-        // Fallback or leave empty
-      })
+      .catch(() => setError("Backend unavailable. Governance rules cannot be loaded."))
       .finally(() => setLoadingRules(false));
   }, []);
 
@@ -96,8 +64,9 @@ export default function ValidatePage() {
         const r = await apiClient.getValidation(validationId);
         setResult(r);
         clearPoll();
-      } catch {
-        // keep polling — result might not be ready
+      } catch (err) {
+        clearPoll();
+        setError(err instanceof Error ? err.message : "Backend unavailable. Validation result cannot be loaded.");
       }
     }, 2000);
   }, []);
@@ -109,7 +78,7 @@ export default function ValidatePage() {
     setSubmitting(true);
     setResult(null);
     setSubmitResult(null);
-    setUsingMock(false);
+    setError(null);
     clearPoll();
 
     try {
@@ -120,21 +89,8 @@ export default function ValidatePage() {
       });
       setSubmitResult(res);
       pollResult(res.validation_id);
-    } catch {
-      // Fallback to mock
-      setUsingMock(true);
-      const mockId = `mock-val-${Date.now()}`;
-      setSubmitResult({ validation_id: mockId, status: "pending" });
-      // Simulate a 2s delay then return a mock verdict
-      setTimeout(() => {
-        const pick =
-          mockVerdicts[Math.floor(Math.random() * mockVerdicts.length)];
-        setResult({
-          ...pick,
-          validation_id: mockId,
-          created_at: new Date().toISOString(),
-        });
-      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Backend unavailable. Validation was not submitted.");
     } finally {
       setSubmitting(false);
     }
@@ -233,22 +189,7 @@ export default function ValidatePage() {
           </div>
         </form>
 
-        {/* Mock banner */}
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — mock validation
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach{" "}
-                <code className="font-mono">POST /validate</code>. Showing a
-                simulated verdict for UI preview.
-              </p>
-            </div>
-          </div>
-        )} */}
+        {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>}
 
         {/* Pending status */}
         {submitResult && !result && (

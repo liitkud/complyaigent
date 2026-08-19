@@ -26,9 +26,9 @@ class CategorizerService:
     async def categorize_rules(self, compacted_text: str) -> list[dict]:
         """
         Classifies rules into A1, A2, B, C buckets.
-        Retries once on failure with 2s delay.
+        Retries up to three total attempts with 2s delay.
         """
-        max_attempts = 2
+        max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             try:
                 prompt = f"""
@@ -119,7 +119,7 @@ class CategorizerService:
                     )
                 return rules
 
-            except (TimeoutError, Exception) as e:
+            except Exception as e:
                 if attempt < max_attempts:
                     logger.warning(
                         f"Categorizer attempt {attempt} failed: {e!s}. Retrying in 2s..."
@@ -130,7 +130,9 @@ class CategorizerService:
                         f"Categorizer failed after {max_attempts} attempts: {e!s}"
                     )
 
-        return []
+        raise RuntimeError(
+            f"Categorizer failed after {max_attempts} attempts"
+        ) from None
 
 
 categorizer = CategorizerService()

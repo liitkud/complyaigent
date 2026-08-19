@@ -3,13 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { apiClient, type IngestStatus } from "@/services/api";
-import {
-  Loader2,
-  CheckCircle2,
-  ArrowLeft,
-  WifiOff,
-  XCircle,
-} from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, XCircle } from "lucide-react";
 import Link from "next/link";
 
 const stageOrder = [
@@ -30,74 +24,17 @@ const stageLabels: Record<string, string> = {
   failed: "Ingestion failed",
 };
 
-// Mock: simulate progressing through stages
-const mockStages: IngestStatus[] = [
-  {
-    task_id: "",
-    status: "extracting",
-    progress_pct: 15,
-    current_stage: "Extracting text from document",
-    eta_seconds: 10,
-  },
-  {
-    task_id: "",
-    status: "comparing",
-    progress_pct: 40,
-    current_stage: "Comparing against existing rules",
-    eta_seconds: 8,
-  },
-  {
-    task_id: "",
-    status: "compacting",
-    progress_pct: 65,
-    current_stage: "Compacting & deduplicating",
-    eta_seconds: 5,
-  },
-  {
-    task_id: "",
-    status: "categorizing",
-    progress_pct: 85,
-    current_stage: "Categorizing into rule buckets",
-    eta_seconds: 3,
-  },
-  {
-    task_id: "",
-    status: "complete",
-    progress_pct: 100,
-    current_stage: "Ingestion complete",
-    eta_seconds: null,
-  },
-];
-
 export default function IngestStatusPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
   const [status, setStatus] = useState<IngestStatus | null>(null);
-  const [usingMock, setUsingMock] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mockIdxRef = useRef(0);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    let useMock = false;
-
     const poll = async () => {
-      if (useMock) {
-        // Advance through mock stages
-        if (cancelled) return;
-        const stage = mockStages[mockIdxRef.current];
-        setStatus({ ...stage, task_id: id });
-        if (stage.status === "complete" && intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-        mockIdxRef.current = Math.min(
-          mockIdxRef.current + 1,
-          mockStages.length - 1,
-        );
-        return;
-      }
       try {
         const s = await apiClient.getIngestStatus(id);
         if (cancelled) return;
@@ -109,14 +46,10 @@ export default function IngestStatusPage() {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
-      } catch {
+      } catch (err) {
         if (cancelled) return;
-        // Switch to mock mode on first failure
-        useMock = true;
-        setUsingMock(true);
-        const stage = mockStages[0];
-        setStatus({ ...stage, task_id: id });
-        mockIdxRef.current = 1;
+        setError(err instanceof Error ? err.message : "Backend unavailable. Ingestion status cannot be loaded.");
+        if (intervalRef.current) clearInterval(intervalRef.current);
       }
     };
     poll();
@@ -156,21 +89,7 @@ export default function IngestStatusPage() {
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 p-6">
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — simulating progress
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach{" "}
-                <code className="font-mono">GET /ingest/{"{id}"}</code>.
-                Displaying mock pipeline stages for UI preview.
-              </p>
-            </div>
-          </div>
-        )} */}
+        {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>}
 
         {/* Progress bar */}
         {/* Progress bar */}

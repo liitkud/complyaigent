@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  WifiOff,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -17,24 +16,17 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<IngestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [usingMock, setUsingMock] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
     setUploading(true);
     setResult(null);
     setError(null);
-    setUsingMock(false);
     try {
       const res = await apiClient.ingest(file);
       setResult(res);
-    } catch {
-      // Fallback to mock response
-      setUsingMock(true);
-      setResult({
-        task_id: `mock-task-${Date.now()}`,
-        status: "processing",
-      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reach the backend.");
     } finally {
       setUploading(false);
     }
@@ -74,20 +66,6 @@ export default function UploadPage() {
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 p-6">
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — mock response
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach <code className="font-mono">POST /ingest</code>.
-                Showing simulated task ID for UI preview.
-              </p>
-            </div>
-          </div>
-        )} */}
 
         {/* Hidden file input */}
         <input

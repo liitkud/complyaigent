@@ -1,24 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type IngestStatus } from "@/services/api";
-import { getApiBase } from "@/services/api-base.mjs";
+import { apiClient, type IngestStatus } from "@/services/api";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { Workflow } from "lucide-react";
-
-const mockData: IngestStatus[] = [
-  {
-    task_id: "demo-task",
-    status: "complete",
-    progress_pct: 100,
-    current_stage: "LLM Normalization",
-    eta_seconds: 0,
-  },
-];
 
 export default function PipelineActivity({ taskId }: { taskId?: string }) {
   const [status, setStatus] = useState<IngestStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!taskId) {
@@ -28,22 +18,14 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
 
     const poll = async () => {
       try {
-        const apiUrl = getApiBase({
-          configuredUrl: process.env.NEXT_PUBLIC_API_URL,
-          isBrowser: true,
-          hostname: window.location.hostname,
-        });
-        const res = await fetch(`${apiUrl}/ingest/${taskId}`);
-        if (!res.ok) throw new Error("API error");
-        const s: IngestStatus = await res.json();
+        const s: IngestStatus = await apiClient.getIngestStatus(taskId);
         setStatus(s);
         if (s.status !== "complete" && s.status !== "failed") {
           setTimeout(poll, 3000);
         }
       } catch (e) {
-        console.error("[PipelineActivity] Fetch failed, using mock:", e);
-        // Fallback to mock on error
-        setStatus(mockData[0]);
+        console.error("[PipelineActivity] Fetch failed:", e);
+        setError("Backend unavailable. Ingestion status cannot be loaded.");
       } finally {
         setLoading(false);
       }
@@ -65,6 +47,10 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
   }
 
   return (

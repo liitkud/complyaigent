@@ -16,12 +16,11 @@ import {
   RefreshCw,
   AlertCircle,
   ArrowRight,
-  WifiOff,
 } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-// ── Mock fallback data ─────────────────────────────────
+/* Legacy preview fixtures are intentionally disabled in the production path.
 
 const mockManifest: GovernanceManifest = {
   meta: {
@@ -207,6 +206,7 @@ const mockRegulations: RegulationSummary[] = [
     version: "2.0",
   },
 ];
+*/
 
 export default function DashboardPage() {
   const [manifest, setManifest] = useState<GovernanceManifest | null>(null);
@@ -214,7 +214,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [usingMock, setUsingMock] = useState(false);
 
   const load = async () => {
     setRefreshing(true);
@@ -226,12 +225,10 @@ export default function DashboardPage() {
       ]);
       setManifest(m);
       setRegulations(r);
-      setUsingMock(false);
-    } catch {
-      // Fallback to mock data
-      setManifest(mockManifest);
-      setRegulations(mockRegulations);
-      setUsingMock(true);
+    } catch (err) {
+      setManifest(null);
+      setRegulations([]);
+      setError(err instanceof Error ? err.message : "Backend unavailable. Policy data cannot be loaded.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -250,12 +247,11 @@ export default function DashboardPage() {
         if (cancelled) return;
         setManifest(m);
         setRegulations(r);
-        setUsingMock(false);
-      } catch {
-        if (cancelled) return;
-        setManifest(mockManifest);
-        setRegulations(mockRegulations);
-        setUsingMock(true);
+       } catch (err) {
+         if (cancelled) return;
+         setManifest(null);
+         setRegulations([]);
+         setError(err instanceof Error ? err.message : "Backend unavailable. Policy data cannot be loaded.");
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -299,23 +295,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="space-y-6 p-6">
-        {/* {usingMock && (
-          <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/10">
-            <WifiOff size={18} className="shrink-0 text-amber-500" />
-            <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                Backend unavailable — showing mock data
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Could not reach <code className="font-mono">GET /reg</code> and{" "}
-                <code className="font-mono">GET /regulation</code>. Displaying
-                fallback data for UI preview.
-              </p>
-            </div>
-          </div>
-        )} */}
-
-        {error && !usingMock && (
+         {error && (
           <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/10">
             <AlertCircle size={20} className="shrink-0 text-red-500" />
             <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
