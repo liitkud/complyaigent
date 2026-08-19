@@ -1,7 +1,6 @@
 import asyncio
 import json
 import re
-from re import _constants, _parser
 
 from langchain_openai import ChatOpenAI
 
@@ -10,6 +9,10 @@ from ..core.logging import logger
 
 MAX_A1_PATTERN_LENGTH = 500
 MAX_A1_TEST_LENGTH = 10_000
+PATHOLOGICAL_REPETITION = re.compile(
+    r"\((?:[^()\\]|\\.)*[+*](?:[^()\\]|\\.)*\)[+*]"
+    r"|\((?:[^()\\]|\\.)*\|(?:[^()\\]|\\.)*\)[+*]"
+)
 
 
 def validate_a1_rule(rule: dict) -> str | None:
@@ -32,47 +35,10 @@ def validate_a1_rule(rule: dict) -> str | None:
 
     try:
         compiled = re.compile(pattern)
-        parsed = _parser.parse(pattern, 0)
     except (re.error, ValueError) as error:
         return f"malformed regex: {error}"
 
-    def contains_token(tokens, wanted) -> bool:
-        for token, value in tokens:
-            if token == wanted:
-                return True
-            if token in (_constants.MAX_REPEAT, _constants.MIN_REPEAT):
-                if contains_token(value[2], wanted):
-                    return True
-            elif token == _constants.SUBPATTERN and contains_token(value[3], wanted):
-                return True
-            elif token == _constants.BRANCH and any(
-                contains_token(branch, wanted) for branch in value[1]
-            ):
-                return True
-        return False
-
-    def has_pathological_repetition(tokens) -> bool:
-        for token, value in tokens:
-            if token in (_constants.MAX_REPEAT, _constants.MIN_REPEAT):
-                children = value[2]
-                if contains_token(children, _constants.MAX_REPEAT) or contains_token(
-                    children, _constants.MIN_REPEAT
-                ):
-                    return True
-                if contains_token(children, _constants.BRANCH):
-                    return True
-                if has_pathological_repetition(children):
-                    return True
-            elif token == _constants.SUBPATTERN:
-                if has_pathological_repetition(value[3]):
-                    return True
-            elif token == _constants.BRANCH and any(
-                has_pathological_repetition(branch) for branch in value[1]
-            ):
-                return True
-        return False
-
-    if has_pathological_repetition(parsed):
+    if PATHOLOGICAL_REPETITION.search(pattern):
         return "pathological regex: nested or ambiguous repetition"
     if compiled.search(test_pass) is None:
         return "test_pass does not match pattern"
@@ -184,7 +150,7 @@ class CategorizerService:
                         raw_category, "org_guideline"
                     )
                     rem = rule.get("remediation")
-                    if isinstance(rem, (dict, list)):
+                    if isinstance(rem, dict | list):
                         rule["remediation"] = json.dumps(rem)
 
                 safe_rules = []

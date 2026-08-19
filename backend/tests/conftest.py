@@ -84,7 +84,7 @@ def test_runtime(monkeypatch):
         categorizer.categorizer,
     )
     for service in services:
-        service._llm = fake_llm
+        setattr(service, "_llm", fake_llm)  # noqa: B010
 
 
 @pytest.fixture(name="session")
