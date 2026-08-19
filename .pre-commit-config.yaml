@@ -39,13 +39,16 @@ repos:
         args: [--config, backend/pyproject.toml]
         files: ^backend
 
-  # web-related tests
-  - repo: https://github.com/allganize/ty-pre-commit
-    rev: v0.0.25
+  # Run ty from the locked backend environment. The external ty hook creates
+  # its own environment and does not use backend/uv.lock.
+  - repo: local
     hooks:
       - id: ty-check
-        args: [--project=backend]
+        name: ty check
+        entry: uv run --directory backend --frozen ty check
+        language: system
         files: ^backend
+        pass_filenames: false
   # - repo: https://github.com/pypa/pip-audit
   #   rev: v2.7.3
   #   hooks:

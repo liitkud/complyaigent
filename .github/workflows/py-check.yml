@@ -21,16 +21,20 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
+          version: "0.9.8"
           enable-cache: true
-          cache-dependency-glob: "uv.lock"
+          cache-dependency-glob: "backend/uv.lock"
 
       - name: Set up Python
         run: uv python install 3.12
 
       - name: Install checkers
         run: |
-          for tool in ty ruff semgrep detect-secrets pip-audit; do uv tool install $tool; done
+          tool_bin="$(uv tool dir --bin)"
+          echo "$tool_bin" >> "$GITHUB_PATH"
+          uv tool install "semgrep==1.173.0"
+          uv tool install "detect-secrets==1.5.0"
+          uv tool install "pip-audit==2.10.1"
 
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen
@@ -45,16 +49,16 @@ jobs:
         run: uv run ty check
 
       - name: Run pytest
-        run: uv run pytest
+        run: uv run python -m pytest -q
 
       - name: Security Scan (Semgrep)
         run: |
-          uv run semgrep --config p/python --error --skip-unknown-extensions .
+          semgrep --config p/python --error --skip-unknown-extensions .
 
       - name: Secret Detection
         run: |
-          uv run detect-secrets scan --baseline .secrets.baseline
+          detect-secrets scan --baseline .secrets.baseline
 
       - name: Security Audit (pip-audit)
         continue-on-error: true
-        run: uv run pip-audit --local
+        run: pip-audit --local
