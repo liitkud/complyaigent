@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 IMAGE_ONLY_PDF = Path(__file__).parents[3] / "docs/mvp/fixtures/image-only.pdf"
+TEXT_POLICY_PDF = Path(__file__).parents[3] / "docs/mvp/fixtures/text-policy.pdf"
 
 
 def test_ingest_document(client: TestClient):
@@ -65,3 +66,29 @@ def test_ingest_rejects_unsupported_file_type(client: TestClient):
     )
 
     assert response.status_code == 415
+
+
+def test_ingest_text_policy_reaches_manifest(client: TestClient):
+    response = client.post(
+        "/ingest",
+        files={
+            "file": (
+                "text-policy.pdf",
+                TEXT_POLICY_PDF.read_bytes(),
+                "application/pdf",
+            )
+        },
+    )
+    assert response.status_code == 202
+    task_id = response.json()["task_id"]
+
+    status = client.get(f"/ingest/{task_id}").json()
+    assert status["status"] == "complete"
+    assert status["manifest_url"] == f"/regulation/{task_id}"
+
+    manifest = client.get(status["manifest_url"])
+    assert manifest.status_code == 200
+    body = manifest.json()
+    assert body["meta"]["source_name"] == "text-policy.pdf"
+    assert body["meta"]["total_rules"] == 1
+    assert body["buckets"]["A1"][0]["content"]
