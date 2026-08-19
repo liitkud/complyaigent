@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: docker.io/pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: comply
       POSTGRES_PASSWORD: complyaigent2026 # pragma: allowlist secret
@@ -25,7 +25,7 @@ services:
     env_file:
       - ../.env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-sqlite:///./test.db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-comply}:${POSTGRES_PASSWORD:-complyaigent2026}@postgres:5432/${POSTGRES_DB:-complyaigent}
       PROJECT_NAME: ComplyAIgent
       LOG_LEVEL: INFO
       ENVIRONMENT: production

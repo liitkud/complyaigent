@@ -67,3 +67,25 @@ validation tests reached the configured Groq endpoint. With the current local
 credential value, those requests returned HTTP 401. The suite also exposed a
 detached `ActivityLog` instance failure. Future tests must inject a fake
 validator and use a test database explicitly.
+
+## Self-hosted Compose
+
+The development stack was started with rootless Podman after qualifying the
+pgvector image and forcing the backend to use the local Postgres service:
+
+```bash
+POSTGRES_USER=comply \
+POSTGRES_PASSWORD=complyaigent2026 \
+POSTGRES_DB=complyaigent \
+podman compose -f docker/docker-compose.build.yml up -d
+```
+
+Observed:
+
+- `docker_postgres_1` became healthy.
+- `docker_backend_1` initialized the database and returned HTTP 200 from `/health`.
+- `docker_frontend_1` returned HTTP 200 from `http://127.0.0.1:3000`.
+
+Podman failed before this fix because `pgvector/pgvector:pg16` was an
+unqualified image name and short-name resolution required an interactive
+prompt. Compose files now use `docker.io/pgvector/pgvector:pg16` explicitly.
