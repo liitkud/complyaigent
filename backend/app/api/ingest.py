@@ -11,6 +11,7 @@ from ..services.pipeline import start_ingestion_pipeline
 from ..worker.tasks import run_background_task
 
 router = APIRouter()
+SUPPORTED_EXTENSIONS = {".md", ".markdown", ".pdf"}
 
 
 @router.post("/ingest", status_code=202)
@@ -19,6 +20,14 @@ async def ingest_document(
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
 ):
+    suffix = os.path.splitext(file.filename or "")[1].lower()
+    if suffix not in SUPPORTED_EXTENSIONS:
+        supported = ", ".join(sorted(SUPPORTED_EXTENSIONS))
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported file type. Supported extensions: {supported}",
+        )
+
     content = await file.read()
     file_hash = calculate_sha256(content)
 
@@ -41,7 +50,7 @@ async def ingest_document(
 
     # Save file temporarily for processing
     temp_dir = tempfile.mkdtemp(prefix=f"ingest_{task.id}_")
-    temp_path = os.path.join(temp_dir, file.filename)
+    temp_path = os.path.join(temp_dir, f"upload{suffix}")
     with open(temp_path, "wb") as f:
         f.write(content)
 

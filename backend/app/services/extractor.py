@@ -3,19 +3,26 @@ import fitz  # PyMuPDF
 from ..core.logging import logger
 
 
+class EmptyDocumentError(ValueError):
+    """Raised when a supported document contains no extractable text."""
+
+
 def extract_text_from_pdf(file_path: str) -> str:
     """
     Extract raw text from PDF using PyMuPDF.
     """
     try:
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        return text
+        with fitz.open(file_path) as doc:
+            text = "\n".join(page.get_text("text", sort=True) for page in doc)
     except Exception as e:
         logger.error(f"PDF extraction failed: {e!s}")
         raise
+
+    if not text.strip():
+        raise EmptyDocumentError(
+            "PDF contains no extractable text; image-only PDFs are not supported"
+        )
+    return text
 
 
 def extract_text_from_markdown(file_path: str) -> str:
