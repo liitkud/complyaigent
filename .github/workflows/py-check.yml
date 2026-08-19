@@ -26,7 +26,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
-        run: uv python install 3.11
+        run: uv python install 3.12
 
       - name: Install checkers
         run: |
@@ -43,6 +43,9 @@ jobs:
 
       - name: Type Checking (ty)
         run: uv run ty check
+
+      - name: Run pytest
+        run: uv run pytest
 
       - name: Security Scan (Semgrep)
         run: |

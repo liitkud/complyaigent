@@ -33,7 +33,10 @@ jobs:
         run: go vet ./...
 
       - name: Run Tests
-        run: go test -v ./...
+        run: |
+          go test -v ./...
+          discovered_tests="$(go test -list '^Test' ./... | grep '^Test')"
+          test -n "$discovered_tests"
 
       - name: Build Check
         run: go build -v -o pg ./main.go

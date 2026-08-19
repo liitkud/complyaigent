@@ -45,7 +45,6 @@ repos:
     hooks:
       - id: ty-check
         args: [--project=backend]
-        language: system
         files: ^backend
   # - repo: https://github.com/pypa/pip-audit
   #   rev: v2.7.3

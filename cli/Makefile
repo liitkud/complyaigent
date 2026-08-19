@@ -14,7 +14,6 @@ check-quality:
 	make fmt
 	make vet
 	make tidy
-	`
 vet:
 	go vet ./...
 
