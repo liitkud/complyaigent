@@ -94,3 +94,24 @@ The frontend development container also failed once because Next.js 16
 inferred `/app/app` as the Turbopack workspace root. `frontend/next.config.ts`
 now sets `turbopack.root` to the project directory. After rebuilding the
 frontend service, both the frontend and backend returned HTTP 200.
+
+## Failure Modes Covered
+
+| Failure | Expected behavior | Verification |
+|---|---|---|
+| Image-only PDF | Task becomes `failed` with an explicit extraction reason | `backend/tests/test_extractor.py` and live fixture upload |
+| Unsupported upload extension | API returns HTTP 415 | `backend/tests/integration/test_ingestion.py` |
+| Duplicate policy bytes | Existing task ID is returned | `backend/tests/test_policy_versioning.py` |
+| Revised policy | New task keeps policy ID and previous-version lineage | `backend/tests/test_policy_versioning.py` |
+| Categorizer transient failure | Worker retries, bounded to three attempts | `backend/tests/test_retry_failures.py` |
+| Categorizer exhaustion / zero rules | Task becomes `failed`, never successful empty ingestion | `backend/tests/test_retry_failures.py` |
+| Email, phone, or Luhn-valid card in validation input | PII gate returns HIGH and skips the LLM validator | `backend/tests/integration/test_validation.py` |
+| MID validation | Only pending entries appear in HITL; approve/reject persists status | `backend/tests/integration/test_validation.py`, `frontend/tests/e2e/hitl.spec.ts` |
+| Backend unavailable | Dashboard shows an error and no fabricated metrics/approval state | `frontend/tests/e2e/local-runtime.spec.ts` |
+| Existing Postgres schema lacks new metadata columns | Additive startup migration repairs the local schema | `backend/app/core/db.py`, live `/regulation` check |
+| Podman short-name resolution | Compose uses explicit registry-qualified images | `scripts/compose-smoke.sh` |
+| LLM credential or plan failure | Test suite uses fakes; live provider probes remain bounded and separate | Provider probe baseline above |
+
+Known residual warnings are dependency/configuration warnings, not test
+failures: the backend reports an unsupported `asyncio_mode` pytest option and
+the frontend runtime reports Node's `module.register()` deprecation warning.
