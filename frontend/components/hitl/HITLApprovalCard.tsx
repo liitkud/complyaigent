@@ -1,6 +1,7 @@
 "use client";
 
 import { apiClient, type ValidationResult } from "@/services/api";
+import { getApiBase } from "@/services/api-base.mjs";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,8 +14,11 @@ export default function HITLApprovalCard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = getApiBase({
+          configuredUrl: process.env.NEXT_PUBLIC_API_URL,
+          isBrowser: true,
+          hostname: window.location.hostname,
+        });
         const res = await fetch(`${apiUrl}/validate`);
         if (!res.ok) throw new Error("API error");
         const data: ValidationResult[] = await res.json();

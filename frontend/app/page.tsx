@@ -6,6 +6,7 @@ import {
   type ValidationResult,
   type RegulationSummary,
 } from "@/services/api";
+import { getApiBase } from "@/services/api-base.mjs";
 import MetricCard from "@/components/ui/MetricCard";
 import ViolationsTable from "@/components/violations/ViolationsTable";
 import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
@@ -57,7 +58,11 @@ export default function Home() {
     setRefreshing(true);
     try {
       // Use raw fetch to ensure we see the calls in the network tab
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = getApiBase({
+        configuredUrl: process.env.NEXT_PUBLIC_API_URL,
+        isBrowser: true,
+        hostname: window.location.hostname,
+      });
       const [vRes, rRes] = await Promise.all([
         fetch(`${apiUrl}/validate`),
         fetch(`${apiUrl}/regulation`),

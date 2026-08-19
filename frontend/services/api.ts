@@ -1,3 +1,5 @@
+import { getApiBase } from "@/services/api-base.mjs";
+
 // ── Backend API Types (from spec) ──────────────────────
 
 // GET /health
@@ -198,10 +200,11 @@ export interface SystemHealth {
 }
 
 // ── API Wrapper ─────────────────────────────────────────
-const API_BASE =
-  typeof window !== "undefined"
-    ? process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-    : "https://aigent.kuyacarlo.dev";
+const API_BASE = getApiBase({
+  configuredUrl: process.env.NEXT_PUBLIC_API_URL,
+  isBrowser: typeof window !== "undefined",
+  hostname: typeof window !== "undefined" ? window.location.hostname : undefined,
+});
 
 export const apiFetch = async <T>(
   path: string,
@@ -223,7 +226,6 @@ export const api = async (path: string) => {
 // ── Helpers ────────────────────────────────────────────
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // ── API Client ─────────────────────────────────────────
 

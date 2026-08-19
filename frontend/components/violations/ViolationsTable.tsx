@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { type ValidationResult } from "@/services/api";
+import { getApiBase } from "@/services/api-base.mjs";
 import StatusBadge from "@/components/ui/StatusBadge";
 
 const mockData: ValidationResult[] = [
@@ -28,8 +29,11 @@ export default function ViolationsTable() {
   useEffect(() => {
     const load = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = getApiBase({
+          configuredUrl: process.env.NEXT_PUBLIC_API_URL,
+          isBrowser: true,
+          hostname: window.location.hostname,
+        });
         const res = await fetch(`${apiUrl}/validate`);
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
