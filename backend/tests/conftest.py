@@ -11,7 +11,7 @@ from sqlmodel import Session, SQLModel, create_engine
 os.environ.update(
     {
         "DATABASE_URL": "sqlite://",
-        "LLM_API_KEY": "test-only",
+        "LLM_API_KEY": "test-only",  # pragma: allowlist secret
         "LLM_ENDPOINT": "http://127.0.0.1:9/v1",
         "CHAT_MODEL": "test-only",
     }

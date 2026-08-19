@@ -54,13 +54,11 @@ The compose file uses the fully qualified image
 `docker.io/pgvector/pgvector:pg16`; this avoids Podman's interactive
 short-name resolution prompt. The backend environment overrides the `.env`
 value with the local service URL:
-`postgresql://comply:complyaigent2026@postgres:5432/complyaigent`.
+`postgresql://comply:complyaigent2026@postgres:5432/complyaigent` # pragma: allowlist secret
 
 ## Release workflow boundary
 
-The smoke procedure does not invoke GitHub Actions or any release command. The
-existing `.github/workflows/release.yml` is still deployment-capable: it logs
-into GHCR, pushes backend and frontend images, and creates GitHub releases for
-version tags. Treat that workflow as out of bounds for local verification and
-do not run it from this branch. Disabling it requires a separate workflow-owned
-change; no deployment workflow was invoked during this baseline.
+The smoke procedure does not invoke GitHub Actions or any release command.
+`.github/workflows/release.yml` is disabled during MVP work: it has no push/tag
+trigger, its jobs are hard-disabled, and its token permissions are read-only.
+Re-enabling it requires a human review.

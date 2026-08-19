@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 # Set mock env vars
 export PYTHONPATH="${PYTHONPATH:-}:.:backend"
 export DATABASE_URL="sqlite://"
-export LLM_API_KEY="test-only"
+export LLM_API_KEY="test-only" # pragma: allowlist secret
 export LLM_ENDPOINT="http://127.0.0.1:9/v1"
 export CHAT_MODEL="test-only"
 
