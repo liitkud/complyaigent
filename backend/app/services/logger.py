@@ -41,7 +41,7 @@ def log_activity(
     """
     Persist activity log to database.
     """
-    with Session(engine) as session:
+    with Session(engine, expire_on_commit=False) as session:
         log = ActivityLog(
             action=action, details=details, task_id=task_id, status=status
         )

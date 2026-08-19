@@ -73,7 +73,7 @@ def test_runtime(monkeypatch):
     monkeypatch.setattr(
         logger,
         "Session",
-        lambda bind: Session(bind, expire_on_commit=False),
+        lambda bind, **kwargs: Session(bind, **kwargs),
     )
     monkeypatch.setattr("app.services.pipeline.engine", engine)
     fake_llm = FakeLLM()
