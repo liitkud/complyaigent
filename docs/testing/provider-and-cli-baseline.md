@@ -115,3 +115,8 @@ frontend service, both the frontend and backend returned HTTP 200.
 Known residual warnings are dependency/configuration warnings, not test
 failures: the backend reports an unsupported `asyncio_mode` pytest option and
 the frontend runtime reports Node's `module.register()` deprecation warning.
+
+The first live self-hosted PII request initially returned HTTP 500 because the
+logger returned an expired detached SQLModel after commit. The logger now uses
+non-expiring sessions. A rebuilt backend returned HTTP 202 with `HIGH`, and the
+follow-up validation request returned HTTP 200 with the persisted verdict.
