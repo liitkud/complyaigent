@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
+from pydantic import Field as PydanticField
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, Session, SQLModel, create_engine
 
@@ -15,6 +17,16 @@ class ActivityLog(SQLModel, table=True):
     user_id: str | None = None
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
     task_id: UUID | None = None
+
+
+class VerdictEvent(BaseModel):
+    schema_version: int = 1
+    event_type: str = "validation.verdict"
+    decision: str
+    source: str
+    reasoning: str
+    remediation: str
+    pii_types: list[str] = PydanticField(default_factory=list)
 
 
 engine = create_engine(settings.DATABASE_URL)

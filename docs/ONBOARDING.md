@@ -95,6 +95,14 @@ To run tests:
 ./scripts/integration-test.sh
 ```
 
+For a local container smoke check, start the stack with cached images and run
+the no-pull check:
+```bash
+CONTAINER_ENGINE=podman ./scripts/compose-smoke.sh
+```
+Use `CONTAINER_ENGINE=docker` to verify the Docker-compatible command path.
+See [Local Compose Runtime Smoke](testing/compose-runtime-smoke.md).
+
 > [!NOTE]
 > LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md) and [Handover](handover/README.md).
 >

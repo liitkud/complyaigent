@@ -1,14 +1,11 @@
-name: Release Pipeline
+name: Release Pipeline (disabled)
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
+# Deployment and release publishing are intentionally disabled during MVP work.
+# Keep this workflow for later re-enablement after a human review.
 on:
-  push:
-    tags:
-      - "v*"
-    branches: [dev, main]
   workflow_dispatch:
 
 env:
@@ -17,6 +14,7 @@ env:
 
 jobs:
   docker:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -81,6 +79,7 @@ jobs:
           docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }} /bin/sh -c "sleep 5 && exit 0"
 
   cli:
+    if: ${{ false }}
     name: Build CLI (${{ matrix.os }})
     runs-on: ubuntu-latest
     strategy:

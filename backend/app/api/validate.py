@@ -7,7 +7,8 @@ from sqlmodel import Session, col, select
 
 from ..core.db import get_session
 from ..models.rule import GovernanceRule
-from ..services.logger import ActivityLog, log_activity
+from ..services.logger import ActivityLog, VerdictEvent, log_activity
+from ..services.pii import detect_pii
 from ..services.validator import validator
 
 router = APIRouter()
@@ -37,8 +38,27 @@ async def submit_validation(
 
     rule_content = rule.content if rule else "General guidance"
 
-    # Perform validation
-    result = await validator.validate_risk(request.code_snippet, rule_content)
+    pii_findings = detect_pii(request.code_snippet)
+    if pii_findings:
+        pii_types = [finding.entity_type for finding in pii_findings]
+        result = {
+            "verdict": "HIGH",
+            "reasoning": "Validation blocked because the input contains PII.",
+            "remediation": "Remove personal data before submitting for validation.",
+        }
+        verdict_source = "pii_gate"
+    else:
+        result = await validator.validate_risk(request.code_snippet, rule_content)
+        pii_types = []
+        verdict_source = "llm"
+
+    verdict_event = VerdictEvent(
+        decision=result.get("verdict", "HIGH"),
+        source=verdict_source,
+        reasoning=result.get("reasoning", "No reasoning provided"),
+        remediation=result.get("remediation", "Review manually."),
+        pii_types=pii_types,
+    ).model_dump()
 
     # Log activity
     log = log_activity(
@@ -47,12 +67,13 @@ async def submit_validation(
         details={
             "request": request.model_dump(),
             "result": result,
+            "verdict_event": verdict_event,
         },
     )
 
     return {
         "validation_id": str(log.id),
-        "status": "processing" if result["verdict"] == "MID" else "complete",
+        "status": log.status,
     }
 
 
@@ -90,7 +111,11 @@ async def hitl_action(
 
     session.add(log)
     session.commit()
-    return {"success": True, "status": log.status}
+    return {
+        "success": True,
+        "validation_id": str(log.id),
+        "status": log.status,
+    }
 
 
 @router.get("/validate")

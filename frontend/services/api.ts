@@ -109,7 +109,13 @@ export interface ValidateRequest {
 // POST /validate → response
 export interface ValidateResponse {
   validation_id: string;
-  status: "pending" | "processing";
+  status: "pending" | "complete";
+}
+
+export interface HITLActionResponse {
+  success: boolean;
+  validation_id: string;
+  status: "approved" | "rejected";
 }
 
 // GET /validate/{id}
@@ -669,15 +675,15 @@ export const apiClient = {
     ];
   },
 
-  approveHITL: (id: string): Promise<{ success: boolean }> =>
-    apiFetch<{ success: boolean }>(`/validate/${encodeURIComponent(id)}`, {
+  approveHITL: (id: string): Promise<HITLActionResponse> =>
+    apiFetch<HITLActionResponse>(`/validate/${encodeURIComponent(id)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "approve" }),
     }),
 
-  rejectHITL: (id: string): Promise<{ success: boolean }> =>
-    apiFetch<{ success: boolean }>(`/validate/${encodeURIComponent(id)}`, {
+  rejectHITL: (id: string): Promise<HITLActionResponse> =>
+    apiFetch<HITLActionResponse>(`/validate/${encodeURIComponent(id)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reject" }),
