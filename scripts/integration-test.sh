@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # purpose: MUST rule - one integration test for core user journey
 echo "Starting integration tests..."
@@ -8,11 +8,11 @@ echo "Starting integration tests..."
 cd "$(dirname "$0")/.."
 
 # Set mock env vars
-export PYTHONPATH=$PYTHONPATH:.:backend
-export DATABASE_URL="sqlite:///./test.db"
-export SUPABASE_URL="http://localhost:54321"
-export SUPABASE_KEY="test" # pragma: allowlist secret
-export GEMINI_API_KEY="test" # pragma: allowlist secret
+export PYTHONPATH="${PYTHONPATH:-}:.:backend"
+export DATABASE_URL="sqlite://"
+export LLM_API_KEY="test-only"
+export LLM_ENDPOINT="http://127.0.0.1:9/v1"
+export CHAT_MODEL="test-only"
 
 # Run pytest
 cd backend && uv run pytest tests/integration
