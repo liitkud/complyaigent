@@ -3,6 +3,7 @@
 import {
   LayoutDashboard,
   Shield,
+  FileCheck,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -12,13 +13,19 @@ import { usePathname } from "next/navigation";
 import { UploadCTA, ValidateCTA } from "./CTAButton";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Home", href: "/" },
-  { icon: Shield, label: "Dashboard", href: "/dashboard" },
+  { icon: LayoutDashboard, label: "Command Console", href: "/dashboard" },
+  { icon: Shield, label: "Policy Dashboard", href: "/policy" },
+  { icon: FileCheck, label: "Validate", href: "/validate" },
 ];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+
+  // Keep landing page completely fullscreen
+  if (pathname === "/" || pathname === "/landing") {
+    return null;
+  }
 
   return (
     <aside

@@ -53,7 +53,7 @@ export function CTAButton({
 
 export function UploadCTA(props: Omit<CTAButtonProps, "href" | "icon" | "label"> & { label?: string }) {
   const { label = "Upload Policy", ...rest } = props;
-  return <CTAButton href="/upload" icon={Upload} label={label} variant="primary" {...rest} />;
+  return <CTAButton href="/policy" icon={Upload} label={label} variant="primary" {...rest} />;
 }
 
 export function ValidateCTA(props: Omit<CTAButtonProps, "href" | "icon" | "label"> & { label?: string }) {

@@ -48,7 +48,7 @@ export default function LandingPage() {
             </Link>
             <Link
               className="text-sm text-[#adc6ff] transition-colors hover:text-white"
-              href="/"
+              href="/dashboard"
             >
               Open console <ArrowRight size={14} className="ml-1 inline" />
             </Link>
@@ -79,7 +79,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/upload"
+                  href="/policy"
                   className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#adc6ff] px-5 py-3 text-sm font-semibold text-[#10151f] transition-colors hover:bg-white"
                 >
                   <Upload size={16} /> Ingest a policy <ArrowRight size={15} />
@@ -280,11 +280,11 @@ export default function LandingPage() {
           <footer className="flex flex-col gap-5 pt-8 text-xs text-[#687071] sm:flex-row sm:items-center sm:justify-between">
             <p className="font-mono">FERRETOPS / COMPLIANCE OPERATIONS</p>
             <div className="flex flex-wrap gap-x-5 gap-y-2 font-medium">
-              <Link href="/" className="hover:text-[#adc6ff]">
+              <Link href="/dashboard" className="hover:text-[#adc6ff]">
                 Dashboard
               </Link>
-              <Link href="/upload" className="hover:text-[#adc6ff]">
-                Upload policy
+              <Link href="/policy" className="hover:text-[#adc6ff]">
+                Policy Dashboard
               </Link>
               <Link href="/validate" className="hover:text-[#adc6ff]">
                 Validate code
