@@ -4,19 +4,19 @@
 > **Date:** 2026-07-24  
 > **Repo:** [liitkud/complyaigent](https://github.com/liitkud/complyaigent) (`dev`)  
 > **Local:** `/home/kaoru/Projects/complyaigent`  
-> **Status:** Plan to build (MVP)  
+> **Status:** Complete (MVP Finalized)  
 > **Epic:** [#74 MVP: Continuous Compliance Gate](https://github.com/liitkud/complyaigent/issues/74)
 
 ## Definition of Done
 
-- [ ] `docker compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB
-- [ ] Officer uploads a sample policy → rules appear with **version metadata**
-- [ ] `pg init` + pre-push runs local A1 checks and successfully completes `/validate` poll flow
-- [ ] Dashboard HITL approve/reject works against the **live** API (not mock-only)
-- [ ] Every scan decision emits a **structured verdict log** (schema documented; Loki push if endpoint configured)
-- [ ] PII scan on validate path blocks obvious leaks (email / card / phone at minimum)
-- [ ] A1 regex rules are smoke-tested before serve (no unchecked ReDoS)
-- [ ] Handoff + onboarding docs match reality; CI green on `dev`
+- [x] `docker compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB
+- [x] Officer uploads a sample policy → rules appear with **version metadata**
+- [x] `pg init` + pre-push runs local A1 checks and successfully completes `/validate` poll flow
+- [x] Dashboard HITL approve/reject works against the **live** API (not mock-only)
+- [x] Every scan decision emits a **structured verdict log** (schema documented; Loki push if endpoint configured)
+- [x] PII scan on validate path blocks obvious leaks (email / card / phone at minimum)
+- [x] A1 regex rules are smoke-tested before serve (no unchecked ReDoS)
+- [x] Handoff + onboarding docs match reality; CI green on `dev`
 
 ## Workstreams → issues
 
