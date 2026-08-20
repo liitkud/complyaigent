@@ -20,7 +20,14 @@ os.environ.update(
 from app.core import db as db_module
 from app.core.cache import clear_manifest_cache
 from app.core.db import get_session
-from app.services import categorizer, compactor, comparator, logger, validator
+from app.services import (
+    categorizer,
+    compactor,
+    comparator,
+    logger,
+    simulator,
+    validator,
+)
 from main import app
 
 engine = create_engine(
@@ -83,6 +90,7 @@ def test_runtime(monkeypatch):
         comparator.comparator,
         compactor.compactor,
         categorizer.categorizer,
+        simulator.simulator,
     )
     for service in services:
         setattr(service, "_llm", fake_llm)  # noqa: B010

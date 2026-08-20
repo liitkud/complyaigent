@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import activity, ingest, manifest, validate
+from app.api import activity, ingest, manifest, simulate, validate
 from app.core.config import settings
 from app.core.db import init_db
 from app.core.logging import logger
@@ -39,6 +39,7 @@ app.include_router(ingest.router, tags=["Ingestion"])
 app.include_router(manifest.router, tags=["Manifest"])
 app.include_router(validate.router, tags=["Validation"])
 app.include_router(activity.router, tags=["Activity"])
+app.include_router(simulate.router, tags=["Simulation"])
 
 
 @app.get("/health")
