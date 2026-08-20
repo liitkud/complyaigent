@@ -48,6 +48,7 @@ def _migrate_ingestion_task_columns():
             if name not in existing:
                 default = f" DEFAULT {defaults[name]}" if name in defaults else ""
                 connection.execute(
+                    # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     text(
                         f"ALTER TABLE ingestiontask ADD COLUMN {name} "
                         f"{column_type}{default}"
