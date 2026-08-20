@@ -4,6 +4,7 @@ from uuid import UUID
 
 from sqlmodel import Session, col, select
 
+from ..core.cache import clear_manifest_cache
 from ..core.db import engine
 from ..core.logging import logger
 from ..models.rule import GovernanceRule
@@ -157,6 +158,7 @@ async def _run_pipeline(task_id: str, file_path: str):
             task.eta_seconds = 0
             session.add(task)
             session.commit()
+            clear_manifest_cache()
 
         except Exception as e:
             logger.error(

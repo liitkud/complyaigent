@@ -1,17 +1,45 @@
 from uuid import uuid4
 
-from sqlalchemy import inspect, text
+from sqlalchemy import event, inspect, text
 from sqlmodel import Session, SQLModel, create_engine
 
 from .config import settings
 
-engine = create_engine(
-    settings.DATABASE_URL or "sqlite:///./test.db",
-    echo=(settings.ENVIRONMENT == "development"),
-    connect_args={"timeout": 10}
-    if "sqlite" in (settings.DATABASE_URL or "sqlite")
-    else {},
-)
+db_url = settings.DATABASE_URL or "sqlite:///./test.db"
+is_sqlite = db_url.startswith("sqlite")
+
+if is_sqlite:
+    engine_kwargs = {
+        "echo": (settings.ENVIRONMENT == "development"),
+        "connect_args": {
+            "timeout": settings.DB_POOL_TIMEOUT,
+            "check_same_thread": False,
+        },
+    }
+else:
+    engine_kwargs = {
+        "echo": (settings.ENVIRONMENT == "development"),
+        "pool_size": settings.DB_POOL_SIZE,
+        "max_overflow": settings.DB_MAX_OVERFLOW,
+        "pool_timeout": settings.DB_POOL_TIMEOUT,
+        "pool_recycle": settings.DB_POOL_RECYCLE,
+        "pool_pre_ping": settings.DB_POOL_PRE_PING,
+    }
+
+engine = create_engine(db_url, **engine_kwargs)
+
+
+@event.listens_for(engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    if is_sqlite:
+        try:
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA busy_timeout=30000")
+            cursor.close()
+        except Exception:
+            pass
 
 
 def init_db():
@@ -83,4 +111,8 @@ def _migrate_ingestion_task_columns():
 
 def get_session():
     with Session(engine) as session:
-        yield session
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise

@@ -18,6 +18,7 @@ os.environ.update(
 )
 
 from app.core import db as db_module
+from app.core.cache import clear_manifest_cache
 from app.core.db import get_session
 from app.services import categorizer, compactor, comparator, logger, validator
 from main import app
@@ -89,10 +90,12 @@ def test_runtime(monkeypatch):
 
 @pytest.fixture(name="session")
 def session_fixture():
+    clear_manifest_cache()
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
     SQLModel.metadata.drop_all(engine)
+    clear_manifest_cache()
 
 
 @pytest.fixture(name="client")

@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, col, select
 
+from ..core.cache import manifest_cache
+from ..core.config import settings
 from ..core.db import get_session
 from ..models.rule import GovernanceRule, SourceCategory
 from ..models.task import IngestionTask
@@ -29,6 +31,11 @@ async def list_regulations(session: Session = Depends(get_session)):
     """
     List all ingested regulations.
     """
+    cache_key = ("regulation_list",)
+    cached = manifest_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     tasks = session.exec(
         select(IngestionTask).order_by(col(IngestionTask.created_at).desc())
     ).all()
@@ -50,12 +57,18 @@ async def list_regulations(session: Session = Depends(get_session)):
                 ),
             }
         )
+    manifest_cache.set(cache_key, results, ttl=settings.MANIFEST_CACHE_TTL)
     return results
 
 
 @router.get("/regulation/{id}")
 async def get_manifest(id: str, session: Session = Depends(get_session)):
     from uuid import UUID
+
+    cache_key = ("manifest", id)
+    cached = manifest_cache.get(cache_key)
+    if cached is not None:
+        return cached
 
     try:
         task_id = UUID(id)
@@ -64,6 +77,7 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
         try:
             rule = session.get(GovernanceRule, UUID(id))
             if rule:
+                manifest_cache.set(cache_key, rule, ttl=settings.MANIFEST_CACHE_TTL)
                 return rule
         except Exception:
             pass
@@ -92,7 +106,7 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
         if b_key:
             buckets[b_key].append(_serialize_rule(rule))
 
-    return {
+    manifest_data = {
         "meta": {
             "source_uuid": str(task.id),
             "policy_id": str(task.policy_id),
@@ -110,6 +124,8 @@ async def get_manifest(id: str, session: Session = Depends(get_session)):
         },
         "buckets": buckets,
     }
+    manifest_cache.set(cache_key, manifest_data, ttl=settings.MANIFEST_CACHE_TTL)
+    return manifest_data
 
 
 @router.get("/reg")
@@ -118,6 +134,18 @@ async def list_rules(
     source_category: SourceCategory | None = None,
     session: Session = Depends(get_session),
 ):
+    cat_str = (
+        source_category.value
+        if hasattr(source_category, "value")
+        else str(source_category)
+        if source_category
+        else None
+    )
+    cache_key = ("reg", bucket, cat_str)
+    cached = manifest_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     statement = select(GovernanceRule)
     if source_category:
         statement = statement.where(GovernanceRule.source_category == source_category)
@@ -145,9 +173,12 @@ async def list_rules(
 
     if bucket:
         # Even if filtered, return consistent structure but only with the requested bucket
-        return {"buckets": {bucket: buckets.get(bucket, [])}}
+        result = {"buckets": {bucket: buckets.get(bucket, [])}}
+    else:
+        result = {"buckets": buckets}
 
-    return {"buckets": buckets}
+    manifest_cache.set(cache_key, result, ttl=settings.MANIFEST_CACHE_TTL)
+    return result
 
 
 @router.get("/corp")

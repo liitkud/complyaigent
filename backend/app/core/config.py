@@ -16,6 +16,14 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = ""
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 1800
+    DB_POOL_PRE_PING: bool = True
+
+    # Manifest Cache
+    MANIFEST_CACHE_TTL: float = 60.0
 
     # Supabase
     SUPABASE_URL: str = ""
