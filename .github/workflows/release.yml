@@ -1,11 +1,13 @@
-name: Release Pipeline (disabled)
+name: Release Pipeline
 
 permissions:
-  contents: read
+  contents: write
+  packages: write
 
-# Deployment and release publishing are intentionally disabled during MVP work.
-# Keep this workflow for later re-enablement after a human review.
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 env:
@@ -14,7 +16,6 @@ env:
 
 jobs:
   docker:
-    if: ${{ false }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,7 +37,6 @@ jobs:
       - name: Set outputs
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      # https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
 
       - name: Determine tags
         id: tags
@@ -49,7 +49,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to container registry
         uses: docker/login-action@v3
@@ -79,7 +79,6 @@ jobs:
           docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }} /bin/sh -c "sleep 5 && exit 0"
 
   cli:
-    if: ${{ false }}
     name: Build CLI (${{ matrix.os }})
     runs-on: ubuntu-latest
     strategy:
