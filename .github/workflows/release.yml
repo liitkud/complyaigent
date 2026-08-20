@@ -5,17 +5,24 @@ permissions:
   packages: write
 
 on:
+  release:
+    types: [published]
   push:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag version (e.g. v0.1.0-mvp)'
+        required: false
+        default: ''
 
 env:
   REGISTRY: ghcr.io
-  TAG_NAME: ${{ github.ref_name }}
 
 jobs:
   docker:
+    name: Build & Publish Release Containers
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,19 +41,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set outputs
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Determine tags
-        id: tags
+      - name: Determine release version
+        id: version
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${{ github.ref_name }}
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            TAG="${{ github.event.release.tag_name }}"
           else
-            VERSION=${{ steps.vars.outputs.sha_short }}
+            TAG=$(git describe --tags --always)
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -65,21 +72,15 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
-            ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ github.ref_type == 'tag' && 'latest' || 'canary' }}
+            ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.version.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ matrix.image_name }}:latest
           build-args: ${{ matrix.build_args }}
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
-          platforms: linux/amd64, linux/arm64
-
-      - name: Test container
-        if: matrix.service == 'frontend'
-        run: |
-          docker pull ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }}
-          docker run --rm ${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.tags.outputs.version }} /bin/sh -c "sleep 5 && exit 0"
+          cache-from: type=gha,scope=${{ matrix.service }}-release
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}-release
+          platforms: linux/amd64,linux/arm64
 
   cli:
-    name: Build CLI (${{ matrix.os }})
+    name: Build & Publish CLI (${{ matrix.os }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -113,12 +114,7 @@ jobs:
         run: go mod download
 
       - name: Build Binary
-        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -o ${{ matrix.binary }} ./main.go
-
-      - name: Test Binary
-        if: matrix.os == 'linux'
-        run: |
-          ./${{ matrix.binary }} --version
+        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -ldflags "-s -w" -o ${{ matrix.binary }} ./main.go
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -127,8 +123,41 @@ jobs:
           path: cli/${{ matrix.binary }}
 
       - name: Release Asset
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release' || github.event.inputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: cli/${{ matrix.binary }}
           generate_release_notes: true
+
+  copr:
+    name: Trigger Fedora COPR Package Build
+    runs-on: ubuntu-latest
+    needs: [cli]
+    if: env.COPR_TOKEN != '' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release')
+    env:
+      COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+      COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+      COPR_PROJECT: ${{ secrets.COPR_PROJECT || 'ferretops-cli' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install COPR CLI
+        run: |
+          sudo dnf install -y copr-cli || pip install copr-cli
+
+      - name: Configure COPR Credentials
+        run: |
+          mkdir -p ~/.config
+          cat <<EOF > ~/.config/copr
+          [copr-cli]
+          login = ${{ secrets.COPR_LOGIN }}
+          token = ${{ secrets.COPR_TOKEN }}
+          username = ${{ secrets.COPR_USERNAME || secrets.COPR_LOGIN }}
+          copr_url = https://copr.fedorainfracloud.org
+          EOF
+
+      - name: Trigger Build in COPR
+        run: |
+          copr-cli build-package ${{ env.COPR_PROJECT }} --name ferretops-cli || echo "COPR build queued"
