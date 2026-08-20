@@ -95,6 +95,14 @@ const faqs = [
 export default function LandingPage() {
   return (
     <div className="min-w-0 flex-1 overflow-y-auto min-h-screen bg-[#111313] text-[#e7e7e7]">
+      {/* Skip to main content for screen readers & keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-[#4d8eff] focus:px-4 focus:py-2 focus:font-semibold focus:text-[#08101f] focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       <div className="relative isolate">
         {/* Background Grid Accent */}
         <div
@@ -105,7 +113,11 @@ export default function LandingPage() {
         {/* Top Navbar */}
         <header className="sticky top-0 z-30 border-b border-[#343434]/80 bg-[#111313]/90 px-5 py-4 backdrop-blur-md sm:px-8 lg:px-12">
           <div className="mx-auto flex max-w-7xl items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link
+              href="/"
+              aria-label="FerretOPS Home"
+              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff]"
+            >
               <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-[#4d8eff] bg-[#4d8eff]/15 font-mono text-sm font-bold text-[#adc6ff] shadow-sm shadow-[#4d8eff]/20">
                 F
               </div>
@@ -164,7 +176,7 @@ export default function LandingPage() {
         </header>
 
         {/* Hero Section */}
-        <main className="mx-auto max-w-7xl px-5 pb-24 pt-12 sm:px-8 sm:pt-16 lg:px-12 lg:pb-32">
+        <main id="main-content" className="mx-auto max-w-7xl px-5 pb-24 pt-12 sm:px-8 sm:pt-16 lg:px-12 lg:pb-32">
           <section
             aria-labelledby="hero-title"
             className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"

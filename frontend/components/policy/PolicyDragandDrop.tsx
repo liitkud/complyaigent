@@ -112,7 +112,11 @@ export default function PolicyDragAndDrop({
 
   if (loading) {
     return (
-      <div className="ops-panel p-4 sm:p-6">
+      <div
+        className="ops-panel p-4 sm:p-6"
+        aria-busy="true"
+        aria-label="Loading policy repository"
+      >
         <div className="animate-pulse space-y-3">
           {[...Array(3)].map((_, i) => (
             <div
@@ -126,7 +130,15 @@ export default function PolicyDragAndDrop({
   }
 
   if (error) {
-    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]"
+      >
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -143,7 +155,7 @@ export default function PolicyDragAndDrop({
             </p>
           </div>
         </div>
-          <span className="font-mono text-[10px] text-[#737373]">
+        <span className="font-mono text-[10px] text-[#737373]">
           {policies.length} sources
         </span>
       </div>
@@ -152,6 +164,7 @@ export default function PolicyDragAndDrop({
       <input
         ref={fileInputRef}
         type="file"
+        aria-label="Choose policy file to upload"
         accept=".pdf,.md,.markdown,.txt"
         className="hidden"
         onChange={handleFileInput}
@@ -167,23 +180,24 @@ export default function PolicyDragAndDrop({
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
+        aria-label="Upload policy document by dragging and dropping or clicking to browse"
         disabled={
           uploading ||
           (ingestStatus !== null &&
             ingestStatus.status !== "complete" &&
             ingestStatus.status !== "failed")
         }
-        className={`mx-5 mt-4 flex w-[calc(100%-2.5rem)] cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
+        className={`mx-5 mt-4 flex w-[calc(100%-2.5rem)] cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff] disabled:cursor-wait disabled:opacity-60 ${
           dragOver
-             ? "border-[#4d8eff] bg-[#4d8eff]/10"
-             : "border-[#343434] hover:border-[#4d8eff]/60 hover:bg-[#202020]"
+            ? "border-[#4d8eff] bg-[#4d8eff]/10"
+            : "border-[#343434] hover:border-[#4d8eff]/60 hover:bg-[#202020]"
         }`}
       >
         <Upload
           size={24}
-           className={`${dragOver ? "text-[#adc6ff]" : "text-[#737373]"}`}
+          className={`${dragOver ? "text-[#adc6ff]" : "text-[#737373]"}`}
         />
-         <p className="text-sm text-[#8e8e8e]">
+        <p className="text-sm text-[#8e8e8e]">
           {uploading
             ? "Uploading..."
             : ingestStatus &&
@@ -192,26 +206,33 @@ export default function PolicyDragAndDrop({
               ? `Processing: ${ingestStatus.current_stage}`
               : "Drag & drop policy files (PDF, Markdown)"}
         </p>
-         <p className="font-mono text-[10px] text-[#737373]">or click to browse</p>
+        <p className="font-mono text-[10px] text-[#737373]">or click to browse</p>
       </button>
 
       {/* Progress Stepper */}
       {ingestStatus &&
         ingestStatus.status !== "complete" &&
         ingestStatus.status !== "failed" && (
-           <div className="mx-5 mt-3 space-y-2 rounded-sm border border-[#4d8eff]/40 bg-[#4d8eff]/10 p-4">
+          <div
+            role="progressbar"
+            aria-valuenow={ingestStatus.progress_pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Policy ingestion progress: ${ingestStatus.current_stage}`}
+            className="mx-5 mt-3 space-y-2 rounded-sm border border-[#4d8eff]/40 bg-[#4d8eff]/10 p-4"
+          >
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400">
-                 <Loader2 size={14} className="animate-spin" />
+              <span className="flex items-center gap-2 text-xs font-semibold text-[#adc6ff]">
+                <Loader2 size={14} className="animate-spin text-[#4d8eff]" />
                 {ingestStatus.current_stage}
               </span>
-                 <span className="font-mono text-xs font-medium text-[#adc6ff]">
+              <span className="font-mono text-xs font-medium text-[#adc6ff]">
                 {ingestStatus.progress_pct}%
               </span>
             </div>
-             <div className="h-1.5 w-full overflow-hidden rounded-sm bg-[#343434]">
+            <div className="h-1.5 w-full overflow-hidden rounded-sm bg-[#343434]">
               <div
-                 className="h-full bg-[#4d8eff] transition-all duration-500"
+                className="h-full bg-[#4d8eff] transition-all duration-500 ease-out"
                 style={{ width: `${ingestStatus.progress_pct}%` }}
               />
             </div>

@@ -208,7 +208,7 @@ const mockRegulations: RegulationSummary[] = [
 ];
 */
 
-export default function DashboardPage() {
+export default function PolicyDashboardPage() {
   const [manifest, setManifest] = useState<GovernanceManifest | null>(null);
   const [regulations, setRegulations] = useState<RegulationSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -228,7 +228,11 @@ export default function DashboardPage() {
     } catch (err) {
       setManifest(null);
       setRegulations([]);
-      setError(err instanceof Error ? err.message : "Backend unavailable. Policy data cannot be loaded.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Backend unavailable. Policy data cannot be loaded.",
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -247,11 +251,15 @@ export default function DashboardPage() {
         if (cancelled) return;
         setManifest(m);
         setRegulations(r);
-       } catch (err) {
-         if (cancelled) return;
-         setManifest(null);
-         setRegulations([]);
-         setError(err instanceof Error ? err.message : "Backend unavailable. Policy data cannot be loaded.");
+      } catch (err) {
+        if (cancelled) return;
+        setManifest(null);
+        setRegulations([]);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Backend unavailable. Policy data cannot be loaded.",
+        );
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -268,46 +276,50 @@ export default function DashboardPage() {
   const buckets = manifest?.buckets;
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
+    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+      {/* Header */}
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-            Policy Dashboard
+          <p className="ops-label text-[#4d8eff]">FerretOPS / Governance</p>
+          <h1 className="mt-1 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
+            Policy Dashboard &amp; Manifest
           </h1>
-          <p className="text-xs text-slate-400">
-            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">
-              GET /reg
-            </code>{" "}
-            bucket panels +{" "}
-            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">
-              GET /regulation
-            </code>{" "}
-            recent list
+          <p className="mt-1 text-xs text-[#8e8e8e]">
+            Active rule buckets compiled from statutory laws and constitutional policies
           </p>
         </div>
         <button
           onClick={load}
           disabled={refreshing}
-          className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          aria-label="Refresh governance rules and regulations"
+          className="rounded-sm border border-[#343434] p-2 text-[#8e8e8e] transition-colors hover:border-[#4d8eff]/60 hover:bg-[#202020] hover:text-[#adc6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff] disabled:opacity-50"
         >
           <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
         </button>
       </header>
 
-      <main className="space-y-6 p-6">
-         {error && (
-          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/10">
-            <AlertCircle size={20} className="shrink-0 text-red-500" />
-            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+      <main className="space-y-6 p-4 sm:p-6">
+        {error && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="flex items-center gap-3 rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4"
+          >
+            <AlertCircle size={18} className="shrink-0 text-[#ff5451]" />
+            <p className="text-sm text-[#ffb3ad]">{error}</p>
           </div>
         )}
 
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div
+            className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            aria-busy="true"
+            aria-label="Loading governance policy rules"
+          >
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="h-64 animate-pulse rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+                className="h-64 animate-pulse rounded-sm border border-[#343434] bg-[#191919]"
               />
             ))}
           </div>
@@ -316,10 +328,10 @@ export default function DashboardPage() {
             <>
               {/* Meta summary */}
               {manifest?.meta && (
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <div className="ops-panel p-5">
                   <div className="flex flex-wrap items-center gap-4 text-sm">
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {manifest.meta.total_rules} total rules
+                    <span className="font-mono text-sm font-bold text-[#f1f1f1]">
+                      {manifest.meta.total_rules} total rules compiled
                     </span>
                     <StatusBadge
                       label={`A1: ${buckets.A1.length}`}
@@ -337,6 +349,9 @@ export default function DashboardPage() {
                       label={`C: ${buckets.C.length}`}
                       variant="processing"
                     />
+                    <span className="ml-auto font-mono text-xs text-[#737373]">
+                      Source: {manifest.meta.source_name} (v{manifest.meta.version})
+                    </span>
                   </div>
                 </div>
               )}
@@ -346,7 +361,7 @@ export default function DashboardPage() {
                 {/* A1 — Scannable / Code Rules */}
                 <BucketPanel
                   title="Code Rules (A1)"
-                  subtitle="Regex-enforceable"
+                  subtitle="Regex-enforceable in CLI"
                   icon={Code2}
                   color="blue"
                   items={buckets.A1.map((r) => ({
@@ -359,7 +374,7 @@ export default function DashboardPage() {
                 {/* A2 — Actionable */}
                 <BucketPanel
                   title="Actionable Rules (A2)"
-                  subtitle="Requires dev action"
+                  subtitle="Requires operator approval"
                   icon={Wrench}
                   color="amber"
                   items={buckets.A2.map((r) => ({
@@ -385,7 +400,7 @@ export default function DashboardPage() {
                 {/* C — Semantic */}
                 <BucketPanel
                   title="Semantic Rules (C)"
-                  subtitle="Human guidance"
+                  subtitle="Human guidance & directives"
                   icon={BookOpen}
                   color="violet"
                   items={buckets.C.map((r) => ({
@@ -402,25 +417,25 @@ export default function DashboardPage() {
 
         {/* Recent regulations */}
         {regulations.length > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-              <FileText size={16} className="text-blue-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                Recent Regulations
+          <div className="ops-panel overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-[#343434] px-5 py-4">
+              <FileText size={16} className="text-[#4d8eff]" />
+              <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
+                Recent Ingested Regulations
               </h3>
             </div>
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-[#343434]">
               {regulations.map((reg) => (
                 <Link
                   key={reg.id}
                   href={`/regulation/${reg.id}`}
-                  className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  className="flex items-center justify-between px-5 py-3.5 transition-colors duration-150 hover:bg-[#202020] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4d8eff]"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <p className="text-sm font-medium text-[#c5c5c5]">
                       {reg.source_name}
                     </p>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-[#737373]">
                       <StatusBadge
                         label={reg.source_type.replace(/_/g, " ")}
                         variant={
@@ -440,7 +455,7 @@ export default function DashboardPage() {
                   </div>
                   <ArrowRight
                     size={14}
-                    className="text-slate-300 dark:text-slate-600"
+                    className="text-[#737373] transition-transform group-hover:translate-x-0.5"
                   />
                 </Link>
               ))}
@@ -466,30 +481,28 @@ const colorMap: Record<
   { border: string; bg: string; icon: string; badge: string }
 > = {
   blue: {
-    border: "border-blue-200 dark:border-blue-800",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-500",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
+    border: "border-[#4d8eff]/30",
+    bg: "bg-[#4d8eff]/10",
+    icon: "text-[#adc6ff]",
+    badge: "bg-[#4d8eff]/20 text-[#adc6ff] border border-[#4d8eff]/30",
   },
   amber: {
-    border: "border-amber-200 dark:border-amber-800",
-    bg: "bg-amber-50 dark:bg-amber-900/20",
-    icon: "text-amber-500",
-    badge:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+    border: "border-[#f0c674]/30",
+    bg: "bg-[#f0c674]/10",
+    icon: "text-[#f0c674]",
+    badge: "bg-[#f0c674]/20 text-[#f0c674] border border-[#f0c674]/30",
   },
   slate: {
-    border: "border-slate-200 dark:border-slate-700",
-    bg: "bg-slate-50 dark:bg-slate-800/50",
-    icon: "text-slate-500",
-    badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400",
+    border: "border-[#4edea3]/30",
+    bg: "bg-[#4edea3]/10",
+    icon: "text-[#4edea3]",
+    badge: "bg-[#4edea3]/20 text-[#4edea3] border border-[#4edea3]/30",
   },
   violet: {
-    border: "border-violet-200 dark:border-violet-800",
-    bg: "bg-violet-50 dark:bg-violet-900/20",
-    icon: "text-violet-500",
-    badge:
-      "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400",
+    border: "border-[#c58fff]/30",
+    bg: "bg-[#c58fff]/10",
+    icon: "text-[#c58fff]",
+    badge: "bg-[#c58fff]/20 text-[#c58fff] border border-[#c58fff]/30",
   },
 };
 
@@ -508,36 +521,39 @@ function BucketPanel({
 }) {
   const c = colorMap[color] ?? colorMap.slate;
   return (
-    <div
-      className={`rounded-xl border ${c.border} bg-white shadow-sm dark:bg-slate-900`}
-    >
-      <div className={`flex items-center gap-2 rounded-t-xl px-4 py-3 ${c.bg}`}>
+    <div className={`ops-panel overflow-hidden border ${c.border}`}>
+      <div className={`flex items-center gap-2 px-4 py-3 border-b border-[#343434] ${c.bg}`}>
         <Icon size={16} className={c.icon} />
         <div>
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+          <h4 className="text-sm font-semibold text-[#f1f1f1]">
             {title}
           </h4>
-          <p className="text-[10px] text-slate-400">{subtitle}</p>
+          <p className="text-[10px] text-[#8e8e8e]">{subtitle}</p>
         </div>
         <span
-          className={`ml-auto rounded-full px-2 py-0.5 text-xs font-bold ${c.badge}`}
+          className={`ml-auto rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold ${c.badge}`}
         >
           {items.length}
         </span>
       </div>
-      <div className="max-h-56 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800">
+      <div
+        className="max-h-56 divide-y divide-[#343434] overflow-y-auto focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4d8eff]"
+        tabIndex={0}
+        role="region"
+        aria-label={`${title} rules list`}
+      >
         {items.length === 0 ? (
-          <p className="px-4 py-6 text-center text-xs text-slate-400">
-            No rules
+          <p className="px-4 py-6 text-center text-xs text-[#737373]">
+            No rules in this bucket
           </p>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="px-4 py-2.5">
-              <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <div key={item.id} className="px-4 py-2.5 transition-colors hover:bg-[#202020]">
+              <p className="text-xs font-medium text-[#c5c5c5]">
                 {item.name}
               </p>
-              <div className="mt-0.5 flex items-center gap-2 text-[10px] text-slate-400">
-                <span className="rounded bg-slate-100 px-1 py-0.5 font-mono dark:bg-slate-800">
+              <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-[#737373]">
+                <span className="rounded bg-[#202020] px-1 py-0.5 text-[#adc6ff]">
                   {item.detail}
                 </span>
                 <span>{item.impact.replace(/_/g, " ")}</span>

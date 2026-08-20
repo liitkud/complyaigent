@@ -147,37 +147,49 @@ export default function RegulationDetailPage() {
   }, [id]);
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
+    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+      <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            href="/policy"
+            aria-label="Back to policy dashboard"
+            className="rounded-sm p-1.5 text-[#8e8e8e] transition-colors hover:bg-[#202020] hover:text-[#f1f1f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff]"
           >
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-              Rule Detail
+            <p className="ops-label text-[#4d8eff]">FerretOPS / Regulation Manifest</p>
+            <h1 className="mt-0.5 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
+              Regulation Rule Detail
             </h1>
-            <p className="text-xs text-slate-400">
-              <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">
-                GET /regulation/{id}
-              </code>
+            <p className="font-mono text-xs text-[#737373]">
+              ID: {id}
             </p>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 p-6">
-        {error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">Backend unavailable. {error}</div>}
+      <main className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+        {error && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4 text-sm text-[#ffb3ad]"
+          >
+            Backend unavailable. {error}
+          </div>
+        )}
 
         {loading ? (
-          <div className="space-y-4">
+          <div
+            className="space-y-4"
+            aria-busy="true"
+            aria-label="Loading regulation details"
+          >
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="h-32 animate-pulse rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+                className="h-32 animate-pulse rounded-sm border border-[#343434] bg-[#191919]"
               />
             ))}
           </div>
@@ -185,16 +197,16 @@ export default function RegulationDetailPage() {
           manifest && (
             <>
               {/* Meta card */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <div className="ops-panel p-5">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-50 p-2.5 dark:bg-blue-900/30">
-                    <Shield size={20} className="text-blue-500" />
+                  <div className="rounded-sm border border-[#4d8eff]/40 bg-[#4d8eff]/15 p-2.5 text-[#adc6ff]">
+                    <Shield size={20} />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                    <h2 className="text-base font-bold text-[#f1f1f1]">
                       {manifest.meta.source_name}
                     </h2>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-[#737373]">
                       <StatusBadge
                         label={manifest.meta.source_type.replace(/_/g, " ")}
                         variant="info"
@@ -225,26 +237,26 @@ export default function RegulationDetailPage() {
                 {manifest.buckets.A1.map((r) => (
                   <div
                     key={r.id}
-                    className="space-y-1 border-b border-slate-100 px-5 py-3 last:border-0 dark:border-slate-800"
+                    className="space-y-1.5 border-b border-[#343434] px-5 py-3.5 last:border-0"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                      <p className="text-sm font-medium text-[#f1f1f1]">
                         {r.rule_name}
                       </p>
                       <StatusBadge label={r.logic} variant="info" />
                     </div>
-                    <code className="block rounded bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    <code className="block rounded-sm bg-[#121415] px-2.5 py-1.5 font-mono text-xs text-[#adc6ff] border border-[#2a2a2a]">
                       {r.pattern}
                     </code>
-                    <p className="text-xs text-slate-400">{r.remediation}</p>
-                    <div className="flex gap-2 text-[10px] text-slate-400">
-                      <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                    <p className="text-xs text-[#8e8e8e]">{r.remediation}</p>
+                    <div className="flex flex-wrap gap-2 font-mono text-[10px] text-[#737373]">
+                      <span className="rounded-sm bg-[#4edea3]/10 px-1.5 py-0.5 text-[#4edea3] border border-[#4edea3]/30">
                         pass: {r.test_pass}
                       </span>
-                      <span className="rounded bg-red-50 px-1.5 py-0.5 text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                      <span className="rounded-sm bg-[#ff5451]/10 px-1.5 py-0.5 text-[#ffb3ad] border border-[#ff5451]/30">
                         fail: {r.test_fail}
                       </span>
-                      <span>{r.impact_radius.replace(/_/g, " ")}</span>
+                      <span className="self-center">{r.impact_radius.replace(/_/g, " ")}</span>
                     </div>
                   </div>
                 ))}
@@ -253,7 +265,7 @@ export default function RegulationDetailPage() {
               {/* A2 — Actionable */}
               <RuleSection
                 title="Bucket A2 — Actionable Rules"
-                subtitle="Requires developer action"
+                subtitle="Requires developer/operator action"
                 icon={Wrench}
                 color="amber"
                 count={manifest.buckets.A2.length}
@@ -261,18 +273,18 @@ export default function RegulationDetailPage() {
                 {manifest.buckets.A2.map((r) => (
                   <div
                     key={r.id}
-                    className="space-y-1 border-b border-slate-100 px-5 py-3 last:border-0 dark:border-slate-800"
+                    className="space-y-1.5 border-b border-[#343434] px-5 py-3.5 last:border-0"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <p className="text-sm font-medium text-[#f1f1f1]">
                       {r.rule_name}
                     </p>
-                    <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                    <p className="text-xs font-medium text-[#f0c674]">
                       ❓ {r.verification_question}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-[#c5c5c5]">
                       {r.instructions}
                     </p>
-                    <p className="text-xs text-slate-400">{r.remediation}</p>
+                    <p className="text-xs text-[#8e8e8e]">{r.remediation}</p>
                   </div>
                 ))}
               </RuleSection>
@@ -288,21 +300,21 @@ export default function RegulationDetailPage() {
                 {manifest.buckets.B.map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between border-b border-slate-100 px-5 py-3 last:border-0 dark:border-slate-800"
+                    className="flex items-center justify-between border-b border-[#343434] px-5 py-3.5 last:border-0"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                      <p className="text-sm font-medium text-[#f1f1f1]">
                         {r.rule_name}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="font-mono text-xs text-[#737373]">
                         {r.impact_radius.replace(/_/g, " ")}
                       </p>
                     </div>
                     <div className="text-right">
-                      <code className="text-xs font-mono text-slate-600 dark:text-slate-400">
+                      <code className="text-xs font-mono text-[#adc6ff]">
                         {r.key}
                       </code>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="font-mono text-[10px] text-[#737373]">
                         {JSON.stringify(r.value)}
                       </p>
                     </div>
@@ -313,7 +325,7 @@ export default function RegulationDetailPage() {
               {/* C — Semantic */}
               <RuleSection
                 title="Bucket C — Semantic Guidance"
-                subtitle="Human guidance"
+                subtitle="Human guidance & policies"
                 icon={BookOpen}
                 color="violet"
                 count={manifest.buckets.C.length}
@@ -321,15 +333,15 @@ export default function RegulationDetailPage() {
                 {manifest.buckets.C.map((r) => (
                   <div
                     key={r.id}
-                    className="border-b border-slate-100 px-5 py-3 last:border-0 dark:border-slate-800"
+                    className="border-b border-[#343434] px-5 py-3.5 last:border-0"
                   >
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <p className="text-sm font-medium text-[#f1f1f1]">
                       {r.rule_name}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-xs leading-relaxed text-[#c5c5c5]">
                       {r.summary}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="mt-1 font-mono text-[10px] text-[#737373]">
                       {r.impact_radius.replace(/_/g, " ")}
                     </p>
                   </div>
@@ -337,11 +349,11 @@ export default function RegulationDetailPage() {
               </RuleSection>
 
               {/* Raw JSON */}
-              <details className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                <summary className="cursor-pointer px-5 py-3 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400">
+              <details className="ops-panel overflow-hidden">
+                <summary className="cursor-pointer px-5 py-3.5 font-mono text-xs text-[#8e8e8e] transition-colors hover:text-[#adc6ff]">
                   Raw API Response
                 </summary>
-                <pre className="max-h-96 overflow-auto border-t border-slate-100 px-5 py-3 font-mono text-[11px] whitespace-pre-wrap break-all text-slate-600 dark:border-slate-800 dark:text-slate-400">
+                <pre className="max-h-96 overflow-auto border-t border-[#343434] bg-[#121415] px-5 py-3 font-mono text-[11px] whitespace-pre-wrap break-all text-[#8e8e8e]">
                   {JSON.stringify(manifest, null, 2)}
                 </pre>
               </details>
@@ -371,31 +383,31 @@ function RuleSection({
   children: React.ReactNode;
 }) {
   const iconColors: Record<string, string> = {
-    blue: "text-blue-500",
-    amber: "text-amber-500",
-    slate: "text-slate-500",
-    violet: "text-violet-500",
+    blue: "text-[#adc6ff]",
+    amber: "text-[#f0c674]",
+    slate: "text-[#4edea3]",
+    violet: "text-[#c58fff]",
   };
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-        <Icon size={16} className={iconColors[color] ?? "text-slate-500"} />
+    <div className="ops-panel overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-[#343434] bg-[#1a1e20] px-5 py-4">
+        <Icon size={16} className={iconColors[color] ?? "text-[#737373]"} />
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+          <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             {title}
           </h3>
-          <p className="text-[10px] text-slate-400">{subtitle}</p>
+          <p className="text-[10px] text-[#8e8e8e]">{subtitle}</p>
         </div>
-        <span className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+        <span className="ml-auto rounded-sm border border-[#343434] bg-[#202020] px-2 py-0.5 font-mono text-xs font-bold text-[#f1f1f1]">
           {count}
         </span>
       </div>
       {count === 0 ? (
-        <p className="px-5 py-6 text-center text-xs text-slate-400">
+        <p className="px-5 py-6 text-center text-xs text-[#737373]">
           No rules in this bucket
         </p>
       ) : (
-        <div>{children}</div>
+        <div className="divide-y divide-[#343434]">{children}</div>
       )}
     </div>
   );

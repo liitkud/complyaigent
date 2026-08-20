@@ -99,8 +99,8 @@ export default function DashboardPage() {
           <button
             onClick={load}
             disabled={refreshing}
-            aria-label="Refresh dashboard"
-            className="rounded-sm border border-[#343434] p-2 text-[#8e8e8e] transition-colors hover:border-[#4d8eff]/60 hover:bg-[#202020] hover:text-[#adc6ff] disabled:opacity-50"
+            aria-label="Refresh dashboard metrics and violations"
+            className="rounded-sm border border-[#343434] p-2 text-[#8e8e8e] transition-colors hover:border-[#4d8eff]/60 hover:bg-[#202020] hover:text-[#adc6ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff] disabled:opacity-50"
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
           </button>
@@ -111,6 +111,7 @@ export default function DashboardPage() {
         {error && (
           <div
             role="alert"
+            aria-live="assertive"
             className="flex items-center gap-3 rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4"
           >
             <WifiOff size={18} className="shrink-0 text-[#ff5451]" />
@@ -153,7 +154,11 @@ export default function DashboardPage() {
             />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
+          <div
+            className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5"
+            aria-busy="true"
+            aria-label="Loading dashboard metrics"
+          >
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}

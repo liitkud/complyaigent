@@ -52,25 +52,25 @@ export default function UploadPage() {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-950/80">
-        <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-          Upload Policy
-        </h1>
-        <p className="text-xs text-slate-400">
-          Upload a PDF or Markdown file to{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:bg-slate-800">
-            POST /ingest
-          </code>
-        </p>
+    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+      <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
+        <div>
+          <p className="ops-label text-[#4d8eff]">FerretOPS / Pipeline</p>
+          <h1 className="mt-1 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
+            Upload &amp; Ingest Policy
+          </h1>
+          <p className="mt-1 text-xs text-[#8e8e8e]">
+            Upload a statutory PDF or markdown constitution to compile into the governance manifest
+          </p>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-6 p-6">
-
+      <main className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
+          aria-label="Choose policy document file to upload"
           accept=".pdf,.md,.markdown,.txt"
           className="hidden"
           onChange={handleFileInput}
@@ -87,77 +87,80 @@ export default function UploadPage() {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           disabled={uploading}
-          className={`flex w-full cursor-pointer flex-col items-center gap-4 rounded-xl border-2 border-dashed p-12 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
+          aria-label="Upload policy document by dragging and dropping or clicking to browse"
+          className={`flex w-full cursor-pointer flex-col items-center gap-4 rounded-sm border-2 border-dashed p-12 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff] disabled:cursor-wait disabled:opacity-60 ${
             dragOver
-              ? "border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10"
-              : "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5"
+              ? "border-[#4d8eff] bg-[#4d8eff]/10"
+              : "border-[#343434] hover:border-[#4d8eff]/60 hover:bg-[#202020]"
           }`}
         >
           {uploading ? (
-            <Loader2 size={40} className="animate-spin text-blue-500" />
+            <Loader2 size={40} className="animate-spin text-[#4d8eff]" />
           ) : (
             <Upload
               size={40}
               className={
-                dragOver
-                  ? "text-blue-500"
-                  : "text-slate-300 dark:text-slate-600"
+                dragOver ? "text-[#adc6ff]" : "text-[#737373]"
               }
             />
           )}
           <div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            <p className="text-sm font-medium text-[#f1f1f1]">
               {uploading
-                ? "Uploading to /ingest..."
-                : "Drag & drop a policy document"}
+                ? "Uploading document to ingestion pipeline..."
+                : "Drag & drop a statutory policy document"}
             </p>
-            <p className="mt-1 text-xs text-slate-400">
-              PDF, Markdown, or plain text — or click to browse
+            <p className="mt-1 text-xs text-[#8e8e8e]">
+              PDF, Markdown, or plain text — or click to browse files
             </p>
           </div>
         </button>
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/10">
-            <AlertCircle size={20} className="shrink-0 text-red-500" />
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="flex items-center gap-3 rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4"
+          >
+            <AlertCircle size={20} className="shrink-0 text-[#ff5451]" />
             <div>
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">
+              <p className="text-sm font-medium text-[#ffb3ad]">
                 Upload failed
               </p>
-              <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+              <p className="text-xs text-[#ff5451]">{error}</p>
             </div>
           </div>
         )}
 
         {/* Success */}
         {result && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-emerald-800 dark:bg-emerald-900/10">
+          <div className="ops-panel border-[#4edea3]/40 bg-[#4edea3]/5 p-5">
             <div className="flex items-center gap-3">
               <CheckCircle2
                 size={20}
-                className="text-emerald-600 dark:text-emerald-400"
+                className="text-[#4edea3]"
               />
               <div>
-                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                  Ingestion started
+                <p className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
+                  Ingestion pipeline initialized
                 </p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                  Task ID: <code className="font-mono">{result.task_id}</code> —
-                  Status: {result.status}
+                <p className="font-mono text-xs text-[#8e8e8e]">
+                  Task ID: <code className="text-[#adc6ff]">{result.task_id}</code> —
+                  Status: <span className="text-[#4edea3]">{result.status}</span>
                 </p>
               </div>
             </div>
             <div className="mt-4">
               <Link
                 href={`/ingest/${result.task_id}`}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                className="inline-flex items-center gap-2 rounded-sm bg-[#4edea3] px-4 py-2 text-xs font-bold text-[#08101f] transition-colors hover:bg-white"
               >
                 <FileText size={14} />
-                Track Progress
+                Track Ingestion Progress
               </Link>
             </div>
-            <pre className="mt-4 max-h-48 overflow-auto rounded-lg bg-emerald-100/50 p-3 font-mono text-[11px] text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <pre className="mt-4 max-h-48 overflow-auto rounded-sm border border-[#343434] bg-[#121415] p-3 font-mono text-[11px] text-[#8e8e8e]">
               {JSON.stringify(result, null, 2)}
             </pre>
           </div>

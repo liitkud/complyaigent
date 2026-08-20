@@ -31,7 +31,11 @@ export default function ViolationsTable() {
 
   if (loading) {
     return (
-      <div className="ops-panel p-4 sm:p-6">
+      <div
+        className="ops-panel p-4 sm:p-6"
+        aria-busy="true"
+        aria-label="Loading recent compliance violations"
+      >
         <div className="animate-pulse space-y-3">
           {[...Array(4)].map((_, i) => (
             <div
@@ -45,7 +49,15 @@ export default function ViolationsTable() {
   }
 
   if (error) {
-    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]"
+      >
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -61,23 +73,46 @@ export default function ViolationsTable() {
           {violations.length} found
         </span>
       </div>
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto focus-visible:ring-1 focus-visible:ring-[#4d8eff] focus-visible:outline-none"
+        tabIndex={0}
+        role="region"
+        aria-label="Recent violations data table, horizontally scrollable"
+      >
         <table className="w-full text-left text-sm">
+          <caption className="sr-only">
+            Recent compliance violations detected in the last 24 hours
+          </caption>
           <thead className="border-b border-[#343434] bg-[#202020]">
             <tr>
-                <th className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]">
+              <th
+                scope="col"
+                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+              >
                 Time
               </th>
-                <th className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]">
+              <th
+                scope="col"
+                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+              >
                 Validation ID
               </th>
-                <th className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]">
+              <th
+                scope="col"
+                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+              >
                 Description / Reasoning
               </th>
-                <th className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]">
+              <th
+                scope="col"
+                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+              >
                 Verdict
               </th>
-                <th className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]">
+              <th
+                scope="col"
+                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+              >
                 Logged
               </th>
             </tr>
@@ -86,7 +121,7 @@ export default function ViolationsTable() {
             {violations.map((v) => (
               <tr
                 key={v.validation_id}
-                className="transition-colors hover:bg-[#202020]"
+                className="transition-colors duration-150 hover:bg-[#202020]"
               >
                 <td className="whitespace-nowrap px-5 py-3 font-mono text-xs text-[#8e8e8e]">
                   {new Date(v.created_at).toLocaleTimeString([], {

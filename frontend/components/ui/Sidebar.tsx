@@ -29,6 +29,7 @@ export default function Sidebar() {
 
   return (
     <aside
+      aria-label="Sidebar navigation"
       className={`ops-sidebar flex shrink-0 flex-col border-r border-[#343434] bg-[#171717] transition-all duration-300 ${
         collapsed ? "w-16" : "w-60"
       }`}
@@ -49,7 +50,7 @@ export default function Sidebar() {
       </div>
 
       {/* Nav (analytics / read-only) */}
-      <nav className="sidebar-nav flex flex-1 flex-col space-y-1 px-2 py-4">
+      <nav aria-label="Main console navigation" className="sidebar-nav flex flex-1 flex-col space-y-1 px-2 py-4">
         {!collapsed && (
           <p className="ops-label px-3 pb-1 font-semibold text-[#737373]">
             Analytics
@@ -63,7 +64,8 @@ export default function Sidebar() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-3 rounded-sm border px-3 py-2 text-sm font-medium transition-colors ${
+              aria-current={isActive ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-sm border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff] ${
                 isActive
                   ? "border-[#4d8eff]/40 bg-[#4d8eff]/10 text-[#adc6ff]"
                   : "border-transparent text-[#8e8e8e] hover:border-[#343434] hover:bg-[#202020] hover:text-[#f1f1f1]"
@@ -100,8 +102,9 @@ export default function Sidebar() {
       <div className="sidebar-toggle border-t border-[#343434] p-2">
         <button
           onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
-          className="flex w-full items-center justify-center rounded-sm p-2 text-[#737373] transition-colors hover:bg-[#202020] hover:text-[#f1f1f1]"
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Expand sidebar navigation" : "Collapse sidebar navigation"}
+          className="flex w-full items-center justify-center rounded-sm p-2 text-[#737373] transition-colors hover:bg-[#202020] hover:text-[#f1f1f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff]"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

@@ -36,7 +36,11 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
 
   if (loading) {
     return (
-      <div className="ops-panel p-4 sm:p-6">
+      <div
+        className="ops-panel p-4 sm:p-6"
+        aria-busy="true"
+        aria-label="Loading pipeline activity"
+      >
         <div className="animate-pulse space-y-3">
           {[...Array(4)].map((_, i) => (
             <div
@@ -50,7 +54,15 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
   }
 
   if (error) {
-    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]"
+      >
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -61,13 +73,14 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
           <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             Pipeline Activity
           </h3>
-        <p className="ops-label mt-1 text-[#737373]">Real-time event stream</p>
+          <p className="ops-label mt-1 text-[#737373]">Real-time event stream</p>
         </div>
       </div>
       <div className="divide-y divide-[#343434]">
         {status ? (
           <div className="flex items-start gap-3 px-5 py-3">
             <div
+              aria-hidden="true"
               className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
               style={{
                 background:
@@ -84,7 +97,7 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#c5c5c5]">
+                <span className="text-sm font-medium text-[#c5c5c5]">
                   {status.current_stage}
                 </span>
                 <StatusBadge
@@ -98,9 +111,16 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
                   }
                 />
               </div>
-              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-sm bg-[#343434]">
+              <div
+                role="progressbar"
+                aria-valuenow={status.progress_pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Pipeline progress: ${status.current_stage}`}
+                className="mt-1.5 h-1 w-full overflow-hidden rounded-sm bg-[#343434]"
+              >
                 <div
-                  className="h-full bg-[#4d8eff] transition-all duration-500"
+                  className="h-full bg-[#4d8eff] transition-all duration-500 ease-out"
                   style={{ width: `${status.progress_pct}%` }}
                 />
               </div>

@@ -47,7 +47,11 @@ export default function HITLApprovalCard() {
 
   if (loading) {
     return (
-      <div className="ops-panel p-4 sm:p-6">
+      <div
+        className="ops-panel p-4 sm:p-6"
+        aria-busy="true"
+        aria-label="Loading pending HITL approvals"
+      >
         <div className="animate-pulse space-y-4">
           {[...Array(2)].map((_, i) => (
             <div
@@ -61,7 +65,15 @@ export default function HITLApprovalCard() {
   }
 
   if (error) {
-    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]"
+      >
+        {error}
+      </div>
+    );
   }
 
   const pending = requests.filter((r) => r.status === "pending");
@@ -115,14 +127,16 @@ export default function HITLApprovalCard() {
                 <button
                   onClick={() => handleAction(r.validation_id, "approve")}
                   disabled={actioning === r.validation_id}
-                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#4edea3]/60 bg-[#4edea3]/10 px-3 py-1.5 text-xs font-medium text-[#4edea3] transition-colors hover:bg-[#4edea3]/20 disabled:opacity-50"
+                  aria-label={`Approve validation request ${r.validation_id}`}
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#4edea3]/60 bg-[#4edea3]/10 px-3 py-1.5 text-xs font-medium text-[#4edea3] transition-colors hover:bg-[#4edea3]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4edea3] disabled:opacity-50"
                 >
                   <CheckCircle size={13} /> Approve
                 </button>
                 <button
                   onClick={() => handleAction(r.validation_id, "reject")}
                   disabled={actioning === r.validation_id}
-                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#ff5451]/60 bg-[#ff5451]/10 px-3 py-1.5 text-xs font-medium text-[#ffb3ad] transition-colors hover:bg-[#ff5451]/20 disabled:opacity-50"
+                  aria-label={`Reject validation request ${r.validation_id}`}
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#ff5451]/60 bg-[#ff5451]/10 px-3 py-1.5 text-xs font-medium text-[#ffb3ad] transition-colors hover:bg-[#ff5451]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff5451] disabled:opacity-50"
                 >
                   <XCircle size={13} /> Reject
                 </button>
