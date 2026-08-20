@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
-  CircleDot,
   Code2,
   FileCheck2,
   FileText,
@@ -24,25 +23,29 @@ const guardrails = [
 
 export default function LandingPage() {
   return (
-    <div className="min-w-0 flex-1 overflow-hidden bg-[#111313]">
-      <div className="relative isolate overflow-hidden">
+    <div className="min-w-0 flex-1 overflow-y-auto min-h-screen bg-[#111313]">
+      <div className="relative isolate">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 opacity-50 [background-image:linear-gradient(rgba(77,142,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(77,142,255,0.06)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]"
         />
 
         <header className="mx-auto flex max-w-7xl items-center justify-between border-b border-[#343434]/70 px-5 py-5 sm:px-8 lg:px-12">
-          <div className="flex items-center gap-2 text-xs font-medium text-[#8e8e8e]">
-            <CircleDot size={13} className="text-[#4edea3]" />
-            <span className="font-mono tracking-[0.18em]">LOCAL.RUNTIME</span>
-          </div>
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-sm border border-[#4d8eff] bg-[#4d8eff]/15 font-mono text-xs font-bold text-[#adc6ff]">
+              F
+            </div>
+            <span className="font-mono text-sm font-bold tracking-wide text-[#f1f1f1]">
+              FerretOPS
+            </span>
+          </Link>
           <nav
             aria-label="Landing page"
             className="flex items-center gap-4 sm:gap-7"
           >
             <Link
               className="hidden text-sm text-[#8e8e8e] transition-colors hover:text-white sm:block"
-              href="/dashboard"
+              href="#how-it-works"
             >
               How it works
             </Link>
@@ -154,8 +157,9 @@ export default function LandingPage() {
           </section>
 
           <section
+            id="how-it-works"
             aria-labelledby="flow-title"
-            className="mt-28 border-t border-[#343434] pt-10 sm:mt-36"
+            className="mt-28 scroll-mt-10 border-t border-[#343434] pt-10 sm:mt-36"
           >
             <div className="mb-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
