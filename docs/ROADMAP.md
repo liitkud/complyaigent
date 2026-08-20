@@ -1,4 +1,4 @@
-# ComplyAIgent Roadmap
+# FerretOPS Roadmap
 
 > **Goal right now:** ship an **MVP** — a working continuous compliance gate, not a hackathon demo pack.
 > **Tracking:** GitHub Project [ComplyAIgent Roadmap](https://github.com/orgs/liitkud/projects/2) · Epic [#74](https://github.com/liitkud/complyaigent/issues/74) · [`docs/mvp/`](mvp/).

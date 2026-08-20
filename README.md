@@ -1,4 +1,4 @@
-# 🛡️ ComplyAIgent
+# FerretOPS
 
 **"From Periodic Audit to Continuous Certainty."**
 *Agentic DevSecOps compliance platform — policies to guardrails, built on AMD.*
@@ -10,7 +10,7 @@
 
 ## Overview
 
-ComplyAIgent ingests internal policies and external regulations, normalises them into machine‑readable guardrails, and enforces them automatically across your delivery pipeline. *Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point‑in‑time panic to always‑on certainty.*
+FerretOPS ingests internal policies and external regulations, normalises them into machine-readable guardrails, and enforces them automatically across your delivery pipeline. *Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point-in-time panic to always-on certainty.*
 
 **Built in 5 days for the AMD Developer Hackathon 2026.**
 

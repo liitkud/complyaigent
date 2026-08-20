@@ -45,7 +45,7 @@ func Scan(args []string) error {
 	}
 
 	if !*jsonOutput {
-		fmt.Println("[*] ComplyAIgent scan")
+		fmt.Println("[*] FerretOPS scan")
 	}
 
 	diff, err := getGitDiff(cfg.Mode)

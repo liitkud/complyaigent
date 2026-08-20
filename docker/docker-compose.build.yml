@@ -26,7 +26,7 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-comply}:${POSTGRES_PASSWORD:-complyaigent2026}@postgres:5432/${POSTGRES_DB:-complyaigent}
-      PROJECT_NAME: ComplyAIgent
+      PROJECT_NAME: FerretOPS
       LOG_LEVEL: INFO
       ENVIRONMENT: production
     volumes:

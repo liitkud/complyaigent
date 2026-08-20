@@ -1,6 +1,6 @@
-# Developer Onboarding Guide
+# FerretOPS Developer Onboarding Guide
 
-Welcome to **ComplyAIgent**! This guide will walk you through setting up your local environment for development and testing.
+Welcome to **FerretOPS**! This guide will walk you through setting up your local environment for development and testing.
 
 ## 📁 Codebase Architecture
 

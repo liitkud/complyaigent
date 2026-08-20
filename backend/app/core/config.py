@@ -10,7 +10,7 @@ ENV_PATH = ROOT / ".env"
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ComplyAIgent"
+    PROJECT_NAME: str = "FerretOPS"
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "DEBUG"
 

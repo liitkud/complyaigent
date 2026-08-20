@@ -112,12 +112,12 @@ export default function PolicyDragAndDrop({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+      <div className="ops-panel p-4 sm:p-6">
         <div className="animate-pulse space-y-3">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="h-14 rounded bg-slate-100 dark:bg-slate-800"
+              className="h-14 rounded-sm bg-[#202020]"
             />
           ))}
         </div>
@@ -126,24 +126,24 @@ export default function PolicyDragAndDrop({
   }
 
   if (error) {
-    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
+    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+    <div className="ops-panel overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[#343434] px-4 py-4 sm:px-5">
         <div className="flex items-center gap-2">
-          <Database size={16} className="text-blue-500" />
+          <Database size={16} className="text-[#4d8eff]" />
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
               Policy Repository
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="ops-label mt-1 text-[#737373]">
               Active regulations in manifest
             </p>
           </div>
         </div>
-        <span className="text-xs text-slate-400">
+          <span className="font-mono text-[10px] text-[#737373]">
           {policies.length} sources
         </span>
       </div>
@@ -175,15 +175,15 @@ export default function PolicyDragAndDrop({
         }
         className={`mx-5 mt-4 flex w-[calc(100%-2.5rem)] cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors disabled:cursor-wait disabled:opacity-60 ${
           dragOver
-            ? "border-blue-400 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10"
-            : "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 dark:border-slate-700 dark:hover:border-blue-600 dark:hover:bg-blue-900/5"
+             ? "border-[#4d8eff] bg-[#4d8eff]/10"
+             : "border-[#343434] hover:border-[#4d8eff]/60 hover:bg-[#202020]"
         }`}
       >
         <Upload
           size={24}
-          className={`${dragOver ? "text-blue-500" : "text-slate-300 dark:text-slate-600"}`}
+           className={`${dragOver ? "text-[#adc6ff]" : "text-[#737373]"}`}
         />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+         <p className="text-sm text-[#8e8e8e]">
           {uploading
             ? "Uploading..."
             : ingestStatus &&
@@ -192,26 +192,26 @@ export default function PolicyDragAndDrop({
               ? `Processing: ${ingestStatus.current_stage}`
               : "Drag & drop policy files (PDF, Markdown)"}
         </p>
-        <p className="text-[10px] text-slate-400">or click to browse</p>
+         <p className="font-mono text-[10px] text-[#737373]">or click to browse</p>
       </button>
 
       {/* Progress Stepper */}
       {ingestStatus &&
         ingestStatus.status !== "complete" &&
         ingestStatus.status !== "failed" && (
-          <div className="mx-5 mt-3 space-y-2 rounded-lg border border-blue-100 bg-blue-50/30 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
+           <div className="mx-5 mt-3 space-y-2 rounded-sm border border-[#4d8eff]/40 bg-[#4d8eff]/10 p-4">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-xs font-semibold text-blue-700 dark:text-blue-400">
-                <Loader2 size={14} className="animate-spin" />
+                 <Loader2 size={14} className="animate-spin" />
                 {ingestStatus.current_stage}
               </span>
-              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                 <span className="font-mono text-xs font-medium text-[#adc6ff]">
                 {ingestStatus.progress_pct}%
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100 dark:bg-blue-900/30">
+             <div className="h-1.5 w-full overflow-hidden rounded-sm bg-[#343434]">
               <div
-                className="h-full bg-blue-500 transition-all duration-500"
+                 className="h-full bg-[#4d8eff] transition-all duration-500"
                 style={{ width: `${ingestStatus.progress_pct}%` }}
               />
             </div>
@@ -220,11 +220,11 @@ export default function PolicyDragAndDrop({
 
       {/* Ingest result JSON panel */}
       {ingestStatus && ingestStatus.status === "complete" && (
-        <div className="mx-5 mt-3 rounded-lg border border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-900/10">
+         <div className="mx-5 mt-3 rounded-sm border border-[#4edea3]/40 bg-[#4edea3]/10">
           <div className="flex items-center justify-between px-3 py-2">
             <button
               onClick={() => setJsonExpanded((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
+               className="flex items-center gap-1.5 text-xs font-semibold text-[#4edea3]"
             >
               {jsonExpanded ? (
                 <ChevronDown size={14} />
@@ -235,13 +235,14 @@ export default function PolicyDragAndDrop({
             </button>
             <button
               onClick={() => setIngestStatus(null)}
-              className="rounded p-0.5 text-emerald-400 transition-colors hover:text-emerald-600 dark:hover:text-emerald-300"
+               aria-label="Dismiss ingestion result"
+               className="rounded-sm p-0.5 text-[#4edea3] transition-colors hover:text-white"
             >
               <X size={14} />
             </button>
           </div>
           {jsonExpanded && (
-            <div className="border-t border-emerald-200 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-800 dark:text-emerald-300">
+             <div className="border-t border-[#4edea3]/40 px-3 py-2 text-xs text-[#4edea3]">
               Policy has been processed and is now active in the repository.
             </div>
           )}
@@ -250,15 +251,16 @@ export default function PolicyDragAndDrop({
 
       {/* Ingest failed panel */}
       {ingestStatus && ingestStatus.status === "failed" && (
-        <div className="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/10">
+         <div className="mx-5 mt-3 rounded-sm border border-[#ff5451]/40 bg-[#ff5451]/10">
           <div className="flex items-center justify-between px-3 py-2">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-400">
+             <span className="flex items-center gap-1.5 text-xs font-semibold text-[#ffb3ad]">
               <X size={14} />
               Ingestion failed at: {ingestStatus.current_stage}
             </span>
             <button
               onClick={() => setIngestStatus(null)}
-              className="rounded p-0.5 text-red-400 transition-colors hover:text-red-600 dark:hover:text-red-300"
+               aria-label="Dismiss ingestion failure"
+               className="rounded-sm p-0.5 text-[#ffb3ad] transition-colors hover:text-white"
             >
               <X size={14} />
             </button>
@@ -267,21 +269,21 @@ export default function PolicyDragAndDrop({
       )}
 
       {/* Policy list */}
-      <div className="divide-y divide-slate-100 p-5 dark:divide-slate-800">
+       <div className="divide-y divide-[#343434] p-4 sm:p-5">
         {policies.map((p) => (
           <div
             key={p.id}
             className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-slate-100 p-2 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+               <div className="rounded-sm border border-[#343434] bg-[#202020] p-2 text-[#8e8e8e]">
                 <FileText size={16} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                 <p className="text-sm font-medium text-[#c5c5c5]">
                   {p.source_name}
                 </p>
-                <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                 <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#737373]">
                   <span className="inline-flex items-center gap-1">
                     <Globe size={11} /> {p.source_type}
                   </span>

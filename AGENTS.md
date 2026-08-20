@@ -1,4 +1,4 @@
-# Agent notes — ComplyAIgent
+# Agent notes — FerretOPS
 
 ## Read first
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases and non-goals

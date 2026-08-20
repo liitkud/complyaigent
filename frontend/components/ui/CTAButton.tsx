@@ -8,18 +8,15 @@ type Variant = "primary" | "secondary" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
-  primary:
-    "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600",
-  secondary:
-    "bg-violet-600 text-white hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600",
-  ghost:
-    "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800",
+  primary: "border border-[#4d8eff] bg-[#4d8eff] text-[#08101f] hover:bg-[#adc6ff]",
+  secondary: "border border-[#4edea3]/60 bg-[#4edea3]/10 text-[#4edea3] hover:bg-[#4edea3]/20",
+  ghost: "border border-[#343434] bg-transparent text-[#c5c5c5] hover:border-[#4d8eff]/60 hover:bg-[#202020]",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-xs gap-1.5",
-  md: "px-4 py-2 text-sm gap-2",
-  lg: "px-5 py-2.5 text-sm gap-2",
+  sm: "gap-1.5 px-3 py-1.5 text-xs",
+  md: "gap-2 px-4 py-2 text-sm",
+  lg: "gap-2 px-5 py-2.5 text-sm",
 };
 
 interface CTAButtonProps {
@@ -46,7 +43,7 @@ export function CTAButton({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center rounded-lg font-medium transition-colors ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center rounded-sm font-medium transition-colors ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       <Icon size={resolvedIconSize} className="shrink-0" />
       <span>{label}</span>

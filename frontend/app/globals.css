@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #131313;
+  --foreground: #e7e7e7;
+  --panel: #191919;
+  --panel-raised: #202020;
+  --line: #343434;
+  --muted: #8e8e8e;
+  --cobalt: #adc6ff;
+  --cobalt-strong: #4d8eff;
+  --emerald: #4edea3;
+  --breach: #ffb3ad;
+  --breach-strong: #ff5451;
 }
 
 @theme inline {
@@ -12,15 +21,67 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.ops-panel {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+}
+
+.ops-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 767px) {
+  .ops-sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ops-sidebar .sidebar-brand {
+    border-bottom: 0;
+  }
+
+  .ops-sidebar .sidebar-nav {
+    flex-direction: row;
+    gap: 2px;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  .ops-sidebar .sidebar-actions,
+  .ops-sidebar .sidebar-toggle {
+    display: none;
+  }
 }

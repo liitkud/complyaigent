@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/ui/Sidebar";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ComplyAIgent — Compliance Dashboard",
-  description: "Agentic DevSecOps compliance platform — policies to guardrails",
+  title: "FerretOPS — Compliance Operations",
+  description: "Compliance operations console for policies, verdicts, and guardrails",
 };
 
 export default function RootLayout({
@@ -26,9 +31,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="flex h-full min-h-screen bg-slate-50 dark:bg-slate-950">
+      <body className="flex h-full min-h-screen flex-col bg-[#131313] text-[#e7e7e7] md:flex-row">
         <Sidebar />
         {children}
       </body>

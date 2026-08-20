@@ -8,7 +8,7 @@ import (
 )
 
 func Init(args []string) error {
-	fmt.Println("🚀 Initializing ComplyAIgent in this repository...")
+	fmt.Println("🚀 Initializing FerretOPS in this repository...")
 
 	// 1. Create .pg.yaml if it doesn't exist
 	if _, err := os.Stat(".pg.yaml"); os.IsNotExist(err) {
@@ -43,12 +43,12 @@ exclude:
 		return err
 	}
 
-	fmt.Println("\n✨ Initialization complete! Your pushes are now protected by ComplyAIgent.")
+	fmt.Println("\n✨ Initialization complete! Your pushes are now protected by FerretOPS.")
 	return nil
 }
 
 func Check(args []string) error {
-	fmt.Println("🔍 Checking ComplyAIgent environment...")
+	fmt.Println("🔍 Checking FerretOPS environment...")
 
 	cfg, err := internal.LoadConfig("", "")
 	if err != nil {

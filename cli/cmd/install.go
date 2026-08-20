@@ -29,7 +29,7 @@ func Install(args []string) error {
 if command -v pg >/dev/null 2>&1; then
   exec pg scan
 else
-  echo "✗ pg command not found. Install the ComplyAIgent CLI and ensure it is on PATH."
+  echo "✗ pg command not found. Install the FerretOPS CLI and ensure it is on PATH."
   exit 1
 fi
 `

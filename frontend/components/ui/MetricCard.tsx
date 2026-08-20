@@ -12,13 +12,10 @@ interface MetricCardProps {
 }
 
 const variantStyles = {
-  default:
-    "bg-slate-50 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400",
-  success:
-    "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",
-  warning:
-    "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400",
-  danger: "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400",
+  default: "border-[#4d8eff]/40 bg-[#4d8eff]/10 text-[#adc6ff]",
+  success: "border-[#4edea3]/40 bg-[#4edea3]/10 text-[#4edea3]",
+  warning: "border-[#adc6ff]/40 bg-[#adc6ff]/10 text-[#adc6ff]",
+  danger: "border-[#ff5451]/40 bg-[#ff5451]/10 text-[#ffb3ad]",
 };
 
 export default function MetricCard({
@@ -30,33 +27,33 @@ export default function MetricCard({
   variant = "default",
 }: MetricCardProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+    <div className="ops-panel p-4 transition-colors hover:border-[#4d8eff]/40">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          <p className="ops-label text-[#8e8e8e]">
             {title}
           </p>
-          <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <p className="mt-2 font-mono text-2xl font-bold tracking-tight text-[#f1f1f1]">
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs text-slate-400 dark:text-slate-500">
+            <p className="text-xs text-[#737373]">
               {subtitle}
             </p>
           )}
         </div>
-        <div className={`rounded-lg p-2.5 ${variantStyles[variant]}`}>
+        <div className={`rounded-sm border p-2 ${variantStyles[variant]}`}>
           <Icon size={20} />
         </div>
       </div>
       {trend && (
         <div className="mt-3 flex items-center gap-1 text-xs">
           <span
-            className={trend.value >= 0 ? "text-emerald-600" : "text-red-500"}
+            className={trend.value >= 0 ? "text-[#4edea3]" : "text-[#ff5451]"}
           >
             {trend.value >= 0 ? "↑" : "↓"} {Math.abs(trend.value)}%
           </span>
-          <span className="text-slate-400">{trend.label}</span>
+          <span className="text-[#737373]">{trend.label}</span>
         </div>
       )}
     </div>

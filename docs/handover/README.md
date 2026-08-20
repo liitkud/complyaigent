@@ -1,4 +1,4 @@
-# ComplyAIgent Handover
+# FerretOPS Handover
 
 Handoff notes for engineers picking up **MVP** work. For the plan and checklists, see [docs/mvp/README.md](../mvp/README.md) and [docs/ROADMAP.md](../ROADMAP.md).
 

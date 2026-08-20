@@ -36,12 +36,12 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+      <div className="ops-panel p-4 sm:p-6">
         <div className="animate-pulse space-y-3">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="h-10 rounded bg-slate-100 dark:bg-slate-800"
+              className="h-10 rounded-sm bg-[#202020]"
             />
           ))}
         </div>
@@ -50,21 +50,21 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
   }
 
   if (error) {
-    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
+    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-700">
-        <Workflow size={16} className="text-violet-500" />
+    <div className="ops-panel overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-[#343434] px-4 py-4 sm:px-5">
+        <Workflow size={16} className="text-[#4d8eff]" />
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+          <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             Pipeline Activity
           </h3>
-          <p className="text-xs text-slate-400">Real-time event stream</p>
+        <p className="ops-label mt-1 text-[#737373]">Real-time event stream</p>
         </div>
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="divide-y divide-[#343434]">
         {status ? (
           <div className="flex items-start gap-3 px-5 py-3">
             <div
@@ -84,7 +84,7 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <span className="text-sm font-medium text-[#c5c5c5]">
                   {status.current_stage}
                 </span>
                 <StatusBadge
@@ -98,29 +98,29 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
                   }
                 />
               </div>
-              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-sm bg-[#343434]">
                 <div
-                  className="h-full bg-indigo-500 transition-all duration-500"
+                  className="h-full bg-[#4d8eff] transition-all duration-500"
                   style={{ width: `${status.progress_pct}%` }}
                 />
               </div>
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 font-mono text-[10px] text-[#737373]">
                 Task ID: {status.task_id} • {status.progress_pct}% complete
               </p>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="rounded-full bg-slate-50 p-3 dark:bg-slate-800/50">
+            <div className="rounded-sm border border-[#343434] bg-[#202020] p-3">
               <Workflow
                 size={24}
-                className="text-slate-300 dark:text-slate-600"
+                className="text-[#737373]"
               />
             </div>
-            <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <p className="mt-3 text-sm font-medium text-[#8e8e8e]">
               System Idle
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#737373]">
               No active ingestion pipeline
             </p>
           </div>

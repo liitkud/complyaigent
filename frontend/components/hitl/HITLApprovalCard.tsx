@@ -47,12 +47,12 @@ export default function HITLApprovalCard() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+      <div className="ops-panel p-4 sm:p-6">
         <div className="animate-pulse space-y-4">
           {[...Array(2)].map((_, i) => (
             <div
               key={i}
-              className="h-32 rounded-lg bg-slate-100 dark:bg-slate-800"
+              className="h-32 rounded-sm bg-[#202020]"
             />
           ))}
         </div>
@@ -61,43 +61,43 @@ export default function HITLApprovalCard() {
   }
 
   if (error) {
-    return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">{error}</div>;
+    return <div role="alert" className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-6 text-sm text-[#ffb3ad]">{error}</div>;
   }
 
   const pending = requests.filter((r) => r.status === "pending");
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+    <div className="ops-panel overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[#343434] px-4 py-4 sm:px-5">
         <div className="flex items-center gap-2">
-          <Clock size={16} className="text-amber-500" />
+          <Clock size={16} className="text-[#adc6ff]" />
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
               HITL Pending Approvals
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="ops-label mt-1 text-[#737373]">
               LangGraph interrupt — awaiting manager decision
             </p>
           </div>
         </div>
         {pending.length > 0 && (
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <span className="rounded-sm border border-[#adc6ff]/40 bg-[#adc6ff]/10 px-2 py-1 font-mono text-[10px] text-[#adc6ff]">
             {pending.length} pending
           </span>
         )}
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="divide-y divide-[#343434]">
         {requests.map((r) => (
-          <div key={r.validation_id} className="p-5">
+          <div key={r.validation_id} className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle size={14} className="text-amber-500" />
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                  <AlertTriangle size={14} className="text-[#adc6ff]" />
+                  <span className="text-sm font-medium text-[#f1f1f1]">
                     {r.reasoning}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#737373]">
                   <span>
                     ID: <strong>{r.validation_id}</strong>
                   </span>
@@ -115,14 +115,14 @@ export default function HITLApprovalCard() {
                 <button
                   onClick={() => handleAction(r.validation_id, "approve")}
                   disabled={actioning === r.validation_id}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#4edea3]/60 bg-[#4edea3]/10 px-3 py-1.5 text-xs font-medium text-[#4edea3] transition-colors hover:bg-[#4edea3]/20 disabled:opacity-50"
                 >
                   <CheckCircle size={13} /> Approve
                 </button>
                 <button
                   onClick={() => handleAction(r.validation_id, "reject")}
                   disabled={actioning === r.validation_id}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-[#ff5451]/60 bg-[#ff5451]/10 px-3 py-1.5 text-xs font-medium text-[#ffb3ad] transition-colors hover:bg-[#ff5451]/20 disabled:opacity-50"
                 >
                   <XCircle size={13} /> Reject
                 </button>
@@ -131,7 +131,7 @@ export default function HITLApprovalCard() {
           </div>
         ))}
         {requests.length === 0 && (
-          <div className="p-8 text-center text-sm text-slate-400">
+          <div className="p-8 text-center text-sm text-[#737373]">
             No pending approvals
           </div>
         )}
