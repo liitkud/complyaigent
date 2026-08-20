@@ -69,7 +69,9 @@ def test_activity_logging(client: TestClient, session: Session):
     assert logs[0].action == "risk_validation"
 
 
-@pytest.mark.parametrize("action, expected_status", [("approve", "approved"), ("reject", "rejected")])
+@pytest.mark.parametrize(
+    "action, expected_status", [("approve", "approved"), ("reject", "rejected")]
+)
 def test_hitl_lifecycle_uses_stable_statuses(
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -83,9 +85,7 @@ def test_hitl_lifecycle_uses_stable_statuses(
             "remediation": "Review the change.",
         }
 
-    monkeypatch.setattr(
-        "app.api.validate.validator.validate_risk", fake_mid_validation
-    )
+    monkeypatch.setattr("app.api.validate.validator.validate_risk", fake_mid_validation)
 
     submitted = client.post(
         "/validate",
@@ -106,9 +106,7 @@ def test_hitl_lifecycle_uses_stable_statuses(
         "status": "pending",
     }
 
-    updated = client.patch(
-        f"/validate/{validation_id}", json={"action": action}
-    )
+    updated = client.patch(f"/validate/{validation_id}", json={"action": action})
     assert updated.status_code == 200
     assert updated.json() == {
         "success": True,

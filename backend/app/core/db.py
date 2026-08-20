@@ -55,9 +55,13 @@ def _migrate_ingestion_task_columns():
                 )
 
         if "policy_id" not in existing:
-            rows = connection.execute(
-                text("SELECT id FROM ingestiontask WHERE policy_id IS NULL")
-            ).scalars().all()
+            rows = (
+                connection.execute(
+                    text("SELECT id FROM ingestiontask WHERE policy_id IS NULL")
+                )
+                .scalars()
+                .all()
+            )
             for task_id in rows:
                 connection.execute(
                     text(

@@ -62,7 +62,13 @@ def test_ingest_image_only_pdf_fails_explicitly(client: TestClient):
 def test_ingest_rejects_unsupported_file_type(client: TestClient):
     response = client.post(
         "/ingest",
-        files={"file": ("policy.docx", io.BytesIO(b"not supported"), "application/octet-stream")},
+        files={
+            "file": (
+                "policy.docx",
+                io.BytesIO(b"not supported"),
+                "application/octet-stream",
+            )
+        },
     )
 
     assert response.status_code == 415

@@ -46,9 +46,7 @@ async def list_regulations(session: Session = Depends(get_session)):
                 "version_number": task.version_number,
                 "source_hash": task.source_hash,
                 "previous_version_id": (
-                    str(task.previous_version_id)
-                    if task.previous_version_id
-                    else None
+                    str(task.previous_version_id) if task.previous_version_id else None
                 ),
             }
         )
