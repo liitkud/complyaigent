@@ -99,3 +99,21 @@ The account ID and approved account name must be supplied through the
 deployment environment or the provider's local configuration. Do not commit an
 account ID, token, or authenticated state. This repository does not run the
 guard or a deploy as part of its compatibility check.
+
+## Verified Worker
+
+The frontend Worker is deployed at:
+
+```text
+https://ferretops-frontend.kuyacarlo.workers.dev
+```
+
+Verified after deployment:
+
+- `/` returns HTTP 200.
+- `/landing` returns HTTP 200.
+- `/dashboard` returns HTTP 200.
+
+The backend remains self-hosted. `/api/health` returns HTTP 404 until a backend
+origin or same-origin proxy is configured for the Worker. Do not treat the
+public dashboard shell as proof that the remote API is connected.
