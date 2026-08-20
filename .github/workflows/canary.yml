@@ -80,7 +80,7 @@ jobs:
             ${{ github.event_name != 'pull_request' && format('{0}/liitkud/ferretops-backend:{1}', env.REGISTRY, steps.vars.outputs.sha_short) || '' }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
-          platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          platforms: linux/amd64
 
       - name: Test backend container
         if: github.event_name == 'pull_request'
@@ -123,7 +123,7 @@ jobs:
           build-args: "NEXT_PUBLIC_API_URL=http://backend:8000"
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
-          platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          platforms: linux/amd64
 
       - name: Test frontend container
         if: github.event_name == 'pull_request'
