@@ -105,7 +105,7 @@ guard or a deploy as part of its compatibility check.
 The frontend Worker is deployed at:
 
 ```text
-https://ferretops-frontend.kuyacarlo.workers.dev
+https://ferretops.kuyacarlo.workers.dev
 ```
 
 Verified after deployment:
