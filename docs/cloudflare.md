@@ -83,18 +83,19 @@ The existing `pnpm build` remains the provider-neutral local build. The
 `cloudflare:build` adapter build is an additional command and must not replace
 it.
 
-## Required `magallanes` Account Guard
+## Required Account Guard
 
 Any future Workers deployment command must fail closed unless the operator has
-explicitly selected the `magallanes` Cloudflare account. The guard is required
-before any `wrangler` or adapter deploy command:
+explicitly selected the approved Cloudflare account. Keep the approved account
+name in local environment configuration, not in source code. The guard is
+required before any `wrangler` or adapter deploy command:
 
 ```bash
-test "${CLOUDFLARE_ACCOUNT_NAME:-}" = "magallanes" \
-  || { echo "Refusing Cloudflare deploy: set CLOUDFLARE_ACCOUNT_NAME=magallanes" >&2; exit 1; }
+test -n "${CLOUDFLARE_ACCOUNT_NAME:-}" \
+  || { echo "Refusing Cloudflare deploy: set CLOUDFLARE_ACCOUNT_NAME" >&2; exit 1; }
 ```
 
-The account ID must be supplied through the deployment environment or the
-provider's local configuration. Do not commit an account ID, token, or
-authenticated state. This repository does not run the guard or a deploy as
-part of its compatibility check.
+The account ID and approved account name must be supplied through the
+deployment environment or the provider's local configuration. Do not commit an
+account ID, token, or authenticated state. This repository does not run the
+guard or a deploy as part of its compatibility check.
