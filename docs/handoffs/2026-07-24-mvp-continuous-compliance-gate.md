@@ -1,9 +1,10 @@
 # HANDOFF — MVP: Continuous Compliance Gate
 
-**Status:** In progress  
-**Branch:** `docs/mvp-handoffs` (planning); implementation on `feat/<issue>-*` / `mvp/<issue>-*`  
-**Issue(s):** Epic [#74](https://github.com/liitkud/complyaigent/issues/74) · sub-issues #75–#81 (#82 docs done)  
-**Last updated:** 2026-07-24
+**Status:** Done  
+**Branch:** `dev`  
+**Issue(s):** Epic [#74](https://github.com/liitkud/complyaigent/issues/74) (Closed) · sub-issues #75–#81 (Closed)  
+**Release:** `v0.1.0-mvp`  
+**Last updated:** 2026-08-21
 
 ## Bottom line
 
@@ -46,5 +47,7 @@ See DoD checklist on #74 and `docs/mvp/README.md`.
 
 ## Done means
 
-- [ ] All MVP sub-issues closed with their own handoff updated to Done
-- [ ] Epic #74 DoD checkboxes complete
+- [x] All MVP sub-issues closed with their own handoff updated to Done
+- [x] Epic #74 DoD checkboxes complete
+- [x] Signed release tag `v0.1.0-mvp` pushed to origin
+- [x] All tests green (55 pytest tests, Next.js build, CLI test suite)

@@ -37,4 +37,8 @@ Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and
 | Date | Handoff | Branch / issue | Status |
 |------|---------|----------------|--------|
 | 2026-07-24 | [stabilize-contracts-and-ci](2026-07-24-stabilize-contracts-and-ci.md) | `dev` / #61–#64, #73, #84 | Done |
-| 2026-07-24 | [mvp-continuous-compliance-gate](2026-07-24-mvp-continuous-compliance-gate.md) | `docs/mvp-handoffs` / #74 | In progress |
+| 2026-07-24 | [mvp-continuous-compliance-gate](2026-07-24-mvp-continuous-compliance-gate.md) | `dev` / #74–#81 (`v0.1.0-mvp`) | Done |
+| 2026-08-21 | [pr88-regintel-connection-refactor](2026-08-21-pr88-regintel-connection-refactor.md) | `chore/regintel-init-connection` / PR #88 | Planned |
+| 2026-08-21 | [copr-release-automation](2026-08-21-copr-release-automation.md) | `dev` / Fedora COPR | In progress |
+| 2026-08-21 | [prod-promotion-and-release](2026-08-21-prod-promotion-and-release.md) | `dev` → `main` / `v0.1.0` | Planned |
+| 2026-08-21 | [webhooks-and-vector-clustering](2026-08-21-webhooks-and-vector-clustering.md) | `feat/webhooks-and-vector-clustering` | Planned |
