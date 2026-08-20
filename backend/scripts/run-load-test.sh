@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-echo "=== ComplyAIgent 5s SLA Load Test Runner ==="
+echo "=== FerretOPS 5s SLA Load Test Runner ==="
 echo "Backend directory: ${BACKEND_DIR}"
 
 # Set deterministic mock environment variables for test execution

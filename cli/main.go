@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/liitkud/complyaigent/cli/cmd"
+	"github.com/liitkud/ferretops-cli/cmd"
 )
 
 func main() {

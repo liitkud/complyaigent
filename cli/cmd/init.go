@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/liitkud/complyaigent/cli/internal"
+	"github.com/liitkud/ferretops-cli/internal"
 )
 
 func Init(args []string) error {

@@ -2,15 +2,15 @@ services:
   postgres:
     image: docker.io/pgvector/pgvector:pg16
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-comply}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-complyaigent2026}
-      POSTGRES_DB: ${POSTGRES_DB:-complyaigent}
+      POSTGRES_USER: ${POSTGRES_USER:-ferret}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ferretops2026}
+      POSTGRES_DB: ${POSTGRES_DB:-ferretops}
     ports:
       - "5432:5432"
     volumes:
       - pgdata_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-comply} -d ${POSTGRES_DB:-complyaigent}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ferret} -d ${POSTGRES_DB:-ferretops}"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -19,14 +19,14 @@ services:
       - shared_apps
 
   backend:
-    image: ghcr.io/liitkud/complyaigent-backend:canary
+    image: ghcr.io/liitkud/ferretops-backend:canary
     ports:
       - "8000:8000"
     user: root
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-comply}:${POSTGRES_PASSWORD:-complyaigent2026}@postgres:5432/${POSTGRES_DB:-complyaigent}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ferret}:${POSTGRES_PASSWORD:-ferretops2026}@postgres:5432/${POSTGRES_DB:-ferretops}
       PROJECT_NAME: FerretOPS
       LOG_LEVEL: INFO
       ENVIRONMENT: production

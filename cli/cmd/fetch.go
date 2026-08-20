@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/liitkud/complyaigent/cli/internal"
+	"github.com/liitkud/ferretops-cli/internal"
 )
 
 func Fetch(args []string) error {

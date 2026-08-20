@@ -3,7 +3,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/liitkud/complyaigent/cli/internal"
+	"github.com/liitkud/ferretops-cli/internal"
 )
 
 func TestDetermineLocalVerdictPrioritizesHighSeverity(t *testing.T) {

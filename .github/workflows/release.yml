@@ -23,11 +23,11 @@ jobs:
         include:
           - service: backend
             dockerfile: ./backend/Dockerfile
-            image_name: liitkud/complyaigent-backend
+            image_name: liitkud/ferretops-backend
             build_args: ""
           - service: frontend
             dockerfile: ./frontend/Dockerfile
-            image_name: liitkud/complyaigent-frontend
+            image_name: liitkud/ferretops-frontend
             build_args: "NEXT_PUBLIC_API_URL=http://backend:8000"
 
     steps:

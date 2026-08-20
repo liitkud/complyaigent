@@ -1,4 +1,4 @@
-module github.com/liitkud/complyaigent/cli
+module github.com/liitkud/ferretops-cli
 
 go 1.22
 

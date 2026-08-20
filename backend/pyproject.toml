@@ -1,7 +1,7 @@
 [project]
-name = "complyaigent-backend"
+name = "ferretops-backend"
 version = "0.1.0"
-description = "..."
+description = "FerretOPS Continuous Compliance Engine & Rule Compiler"
 dependencies = [
     "datasketch>=1.10.0",
     "fastapi[standard]>=0.136.1",

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liitkud/complyaigent/cli/internal"
+	"github.com/liitkud/ferretops-cli/internal"
 )
 
 type ValidateRequest struct {
