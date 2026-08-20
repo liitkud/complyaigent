@@ -64,7 +64,8 @@ coverage_report.txt
 # Test files
 *.db
 *.sh
-!scripts/compose-smoke.sh
+!scripts/*.sh
+!backend/scripts/*.sh
 scratch/
 # Compiled files
 *pg*
