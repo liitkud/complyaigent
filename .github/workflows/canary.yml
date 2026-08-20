@@ -76,16 +76,15 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           load: ${{ github.event_name == 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/liitkud/ferretops-backend:canary
-            ${{ env.REGISTRY }}/liitkud/ferretops-backend:${{ steps.vars.outputs.sha_short }}
-            liitkud/ferretops-backend:latest
+            ${{ github.event_name != 'pull_request' && format('{0}/liitkud/ferretops-backend:canary', env.REGISTRY) || 'ferretops-backend:test' }}
+            ${{ github.event_name != 'pull_request' && format('{0}/liitkud/ferretops-backend:{1}', env.REGISTRY, steps.vars.outputs.sha_short) || '' }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
           platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
 
       - name: Test backend container
         if: github.event_name == 'pull_request'
-        run: docker run --rm liitkud/ferretops-backend:latest uv --version
+        run: docker run --rm ferretops-backend:test uv --version
 
   frontend-canary:
     name: Frontend Canary Build
@@ -119,9 +118,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           load: ${{ github.event_name == 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/liitkud/ferretops-frontend:canary
-            ${{ env.REGISTRY }}/liitkud/ferretops-frontend:${{ steps.vars.outputs.sha_short }}
-            liitkud/ferretops-frontend:latest
+            ${{ github.event_name != 'pull_request' && format('{0}/liitkud/ferretops-frontend:canary', env.REGISTRY) || 'ferretops-frontend:test' }}
+            ${{ github.event_name != 'pull_request' && format('{0}/liitkud/ferretops-frontend:{1}', env.REGISTRY, steps.vars.outputs.sha_short) || '' }}
           build-args: "NEXT_PUBLIC_API_URL=http://backend:8000"
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
@@ -129,7 +127,7 @@ jobs:
 
       - name: Test frontend container
         if: github.event_name == 'pull_request'
-        run: docker run --rm liitkud/ferretops-frontend:latest node -v
+        run: docker run --rm ferretops-frontend:test node -v
 
   cli-canary:
     name: CLI Check & Build
