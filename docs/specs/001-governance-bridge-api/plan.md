@@ -1,6 +1,6 @@
 # Implementation Plan: Governance Bridge API
 
-**Branch**: `001-governance-bridge-api` | **Date**: 2026-05-10 | **Spec**: [spec.md](file:///home/kaoru/complyaigent/specs/001-governance-bridge-api/spec.md)
+**Branch**: `001-governance-bridge-api` | **Date**: 2026-05-10 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification for compliance pipeline ingestion and classification.
 
 ## Summary
@@ -32,7 +32,7 @@ Build a FastAPI-based compliance pipeline that ingests organizational documents 
 ### Documentation (this feature)
 
 ```text
-specs/001-governance-bridge-api/
+docs/specs/001-governance-bridge-api/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output
 ├── data-model.md        # Phase 1 output
