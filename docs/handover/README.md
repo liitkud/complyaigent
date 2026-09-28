@@ -75,7 +75,7 @@ cd frontend && pnpm install && pnpm dev
 cd cli && make build && make install
 ```
 
-Or use root `docker-compose.yml` when bringing up DB-backed stacks.
+Or use root `docker-compose.yml` with `podman compose` when bringing up DB-backed stacks.
 
 ---
 

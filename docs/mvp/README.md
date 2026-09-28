@@ -8,7 +8,7 @@
 
 ## Definition of Done
 
-- [x] `docker compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB
+- [x] `podman compose up` (or documented uv/pnpm/go path) runs backend + frontend + DB
 - [x] Officer uploads a sample policy → rules appear with **version metadata**
 - [x] `pg init` + pre-push runs local A1 checks and successfully completes `/validate` poll flow
 - [x] Dashboard HITL approve/reject works against the **live** API (not mock-only)

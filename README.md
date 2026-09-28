@@ -119,8 +119,8 @@ See [`docs/ONBOARDING.md`](docs/ONBOARDING.md) for full local developer setup an
 # 1. Clone and enter the repo
 git clone https://github.com/liitkud/complyaigent.git && cd complyaigent
 
-# 2. Start all services
-docker compose -f docker/docker-compose.yml up --build -d
+# 2. Start all services with Podman
+podman compose -f docker/docker-compose.yml up --build -d
 
 # 3. Verify
 curl http://localhost:8000/health          # → {"status":"healthy"}

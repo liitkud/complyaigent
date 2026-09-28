@@ -17,7 +17,7 @@ Ensure you have the following installed on your system:
 * **Go** (v1.20 or newer)
 * **Python** (v3.11 or newer) and **uv** (fast Python package installer/manager)
 * **Node.js** (v18 or newer) and **npm** or **pnpm**
-* **Docker** & **docker-compose** (optional, for local postgres/services container setup)
+* **Podman** with its Compose provider (optional, for local PostgreSQL/services containers)
 
 ---
 
@@ -95,12 +95,12 @@ To run tests:
 ./scripts/integration-test.sh
 ```
 
-For a local container smoke check, start the stack with cached images and run
-the no-pull check:
+Podman is the default container runtime. For a local container smoke check,
+start the stack with cached images and run the no-pull check:
 ```bash
 CONTAINER_ENGINE=podman ./scripts/compose-smoke.sh
 ```
-Use `CONTAINER_ENGINE=docker` to verify the Docker-compatible command path.
+Use `CONTAINER_ENGINE=docker` only when you need the Docker-compatible command path.
 See [Local Compose Runtime Smoke](testing/compose-runtime-smoke.md).
 
 > [!NOTE]
