@@ -1,189 +1,41 @@
 # FerretOPS
 
-**"From Periodic Audit to Continuous Certainty."**
-*Agentic DevSecOps compliance platform — policies to guardrails, built on AMD.*
+FerretOPS turns organizational policies into guardrails that teams can check before code reaches a remote repository. Developers scan changes with the `pg` CLI; uncertain findings go to the backend for validation and, when required, human review. Decisions produce structured verdict records.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![AMD Hackathon 2026](https://img.shields.io/badge/AMD-Developer%20Hackathon%202026-ED1C24)](https://www.amd.com/en/corporate/hackathon.html)
-
----
-
-## Overview
-
-FerretOPS ingests internal policies and external regulations, normalises them into machine-readable guardrails, and enforces them automatically across your delivery pipeline. *Audits shrink from weeks to hours. Every commit is checked. Compliance shifts from point-in-time panic to always-on certainty.*
-
-**Built in 5 days for the AMD Developer Hackathon 2026.**
-
----
-
-## Architecture
+## Workflow
 
 ```mermaid
-flowchart TB
-    DEV["👤 Developer\n(git push)"] --> CLI["🖥️ pg CLI\n(pre‑push hook)"]
-    CLI --> VALIDATE["/validate"]
-
-    CO["👤 Compliance Officer\n(upload policy)"] --> INGEST["/ingest"]
-    SCRAPE["🌐 Regulatory Scraper\n(daily cron)"] --> INGEST
-
-    subgraph RegIntel ["📥 RegIntel Agent"]
-        INGEST --> COMPARATOR["Comparator\n(dedup: anchors → MinHash → LLM)"]
-        COMPARATOR --> COMPACTOR["Compactor\n(strip preamble, inline context)"]
-        COMPACTOR --> CATEGORIZER["Categorizer\n(A1/A2/B/C buckets)"]
-    end
-
-    subgraph PolicyGate ["🛡️ PolicyGate Agent"]
-        VALIDATE --> SCAN["Pattern Scanner\n(Gitleaks + regex)"]
-        SCAN --> HITL["LangGraph HITL\n(interrupt → approve)"]
-    end
-
-    LLM["🧠 LLM\nGroq API + Qwen"] --- CATEGORIZER
-    PG["🗄️ PostgreSQL\n(policies, rules, logs)"] --- RegIntel
-    PG --- PolicyGate
-    PG --> DASHBOARD["🖥️ Next.js Dashboard"]
-    DASHBOARD --> CO
-    CLI --> DEV
+flowchart LR
+  OFFICER[Compliance officer] -->|Upload policy| DASH[Dashboard]
+  DASH --> INGEST[FastAPI ingestion]
+  INGEST --> RULES[(Versioned rules)]
+  DEV[Developer] -->|Pre-push| CLI[pg CLI]
+  RULES --> CLI
+  CLI -->|Uncertain change| VALIDATE[Backend validation]
+  VALIDATE -->|Needs decision| HITL[Dashboard review]
+  VALIDATE --> LOG[(Structured verdicts)]
+  HITL --> LOG
 ```
 
-1. **RegIntel** ingests policies (PDF/Markdown upload or scraper), deduplicates via three‑tier Comparator, compacts via LLM, and categorizes rules into A1 (Scannable), A2 (Actionable), B (Infra), C (Semantic) buckets — stored in PostgreSQL.
-2. **PolicyGate** serves rules to the CLI and validates flagged code via the `/validate` endpoint with LLM‑backed reasoning.
-3. **The `pg` CLI** fetches A1 regex rules, scans staged diffs locally with Gitleaks + built‑in patterns + entropy scoring, and blocks high‑risk pushes before they reach remote.
-4. **Human‑in‑the‑Loop** pauses medium‑risk validations for manager approval via LangGraph interrupts — fully logged.
+## Components
 
----
+| Component | Purpose |
+|---|---|
+| `backend/` | Policy ingestion, rule processing, validation, approval flow, and verdict logging. |
+| `cli/` | Go pre-push scanner that checks local changes and submits uncertain findings. |
+| `frontend/` | Next.js dashboard for policy management and human review. |
+| `docs/` | Product roadmap, onboarding, MVP definition, specifications, and workstream handoffs. |
 
-## Features
+## Project status
 
-- 🔍 **Pre‑push secret & pattern detection** — Gitleaks + custom regex + entropy scoring
-- 📥 **Policy intake** — PDF / Markdown upload and regulatory website scraping
-- 🧠 **AI‑powered classification** — LLM extracts rules into A1/A2/B/C buckets with regex generation
-- 🛡️ **Automatic enforcement** — CLI blocks high‑risk commits before push; backend validates uncertain cases
-- 🧑‍⚖️ **Human‑in‑the‑loop approval** — LangGraph interrupts for medium‑risk decisions with full audit trail
-- 📊 **Real‑time dashboard** — compliance health, violation history, pending approvals, policy inventory
+The continuous compliance gate MVP is complete and tagged `v0.1.0-mvp`. Current hardening and release work, plus future capabilities, are tracked in the [roadmap](docs/ROADMAP.md). The [MVP definition](docs/mvp/README.md) records its completion criteria.
 
-> **Roadmap:** AuditGen (one‑click SOC2/GDPR evidence packs), insider threat guardrails, enterprise multi‑tenancy.
+## Start locally
 
----
+Read [developer onboarding](docs/ONBOARDING.md) for prerequisites, environment setup, service startup, and the integration workflow. Podman is the default container runtime. For an image-backed local stack, use `podman compose -f docker/docker-compose.yml up --build -d`.
 
-## Tech Stack
-
-| Layer             | Technology                                  |
-| :---------------- | :------------------------------------------ |
-| AI Model          | Qwen 3.5 (via Groq API)                     |
-| Agent Framework   | LangGraph (Python)                          |
-| Backend           | FastAPI, Docker                             |
-| Database          | PostgreSQL                                  |
-| Frontend          | Next.js, TailwindCSS                        |
-| CLI               | Go (`pg`)                                   |
-| CI/CD             | GitHub Actions, Docker Compose              |
-
----
-
-## Repository Structure
-
-```
-complyaigent/
-├── backend/
-│   ├── app/
-│   │   ├── api/               # REST endpoints (ingest, manifest, validate, simulate)
-│   │   ├── models/            # SQLModel entities (task, rule)
-│   │   ├── services/          # Extractor, Comparator, Compactor, Categorizer, Validator, Simulator
-│   │   ├── core/              # Config, DB, logging, cache, rate limiting
-│   │   └── worker/            # Background task orchestration
-│   └── tests/
-├── cli/                       # Go CLI (pg) — pre‑push hook & scanner
-├── frontend/                  # Next.js dashboard
-├── docker/
-│   ├── docker-compose.yml     # Development stack
-│   └── docker-compose.build.yml # Build / smoke test stack
-├── docs/                      # Canonical documentation, specs, handoffs, roadmap
-│   ├── constitution.md        # Canonical project constitution & governance rules
-│   ├── handoffs/              # Per-feature handoffs & workstream records
-│   ├── specs/                 # Feature specifications & SDD artifacts
-│   ├── mvp/                   # MVP definition of done & workstreams
-│   ├── testing/               # Runtime smoke & testing baselines
-│   ├── ONBOARDING.md          # Local developer setup guide
-│   └── ROADMAP.md             # Project roadmap & milestones
-├── .github/workflows/         # CI/CD workflows
-├── README.md
-└── LICENSE
-```
-
----
-
-## Getting Started
-
-See [`docs/ONBOARDING.md`](docs/ONBOARDING.md) for full local developer setup and testing workflows.
-
-```bash
-# 1. Clone and enter the repo
-git clone https://github.com/liitkud/complyaigent.git && cd complyaigent
-
-# 2. Start all services with Podman
-podman compose -f docker/docker-compose.yml up --build -d
-
-# 3. Verify
-curl http://localhost:8000/health          # → {"status":"healthy"}
-curl http://localhost:8000/reg             # → {"buckets": {"A1": [...], ...}}
-
-# 4. Ingest a policy
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@docs/constitution.md"
-
-# 5. Poll until complete
-curl http://localhost:8000/ingest/{task_id}
-
-# 6. Fetch rules with the CLI
-cd cli && go build -o pg . && ./pg fetch
-
-# 7. Scan a commit
-./pg scan
-```
-
-### Frontend Development
-
-```bash
-cd frontend
-pnpm install  # or npm install
-pnpm dev      # or npm run dev
-# → http://localhost:3000
-```
-
----
-
-## Team
-
-| Name | Role |
-| :--- | :--- |
-| @kuya-carlo | Infra/DevOps Lead, CLI, system glue |
-| @NanaMein | RegIntel backend (FastAPI, RAG, LangGraph) |
-| @donutellah | AI & data engineering, prompt design |
-| @itsm3Glenn | Frontend lead (Next.js, TailwindCSS) |
-| @Polqt | PolicyGate backend (scanning, validation) |
-
----
-
-## Hackathon Context
-
-**AMD Developer Hackathon — May 4–10, 2026**
-*Submission deadline: May 10, 5:00 AM PHT*
-
-Built with AMD-ready architecture. LLM workloads run via API (Groq) during the hackathon; the stack is containerized and deployable to AMD MI300X instances for full‑precision inference with ROCm and vLLM.
-
----
-
-## Roadmap
-
-- [ ] **AuditGen** — auto‑generate framework‑mapped evidence packs (SOC2, GDPR, PCI‑DSS)
-- [ ] **Insider threat guardrails** — ephemeral credentials, access anomaly detection
-- [ ] **Enterprise SaaS** — SSO, dedicated tenants, on‑premise deployment
-
----
+The repository integration command is `./scripts/integration-test.sh`. For local configuration and governance rules, see the [constitution](docs/constitution.md).
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
----
-
-*Built with ❤️, caffeine, and a lot of `--no-verify`.*
+MIT. See [LICENSE](LICENSE).
