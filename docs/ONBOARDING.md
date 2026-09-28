@@ -4,7 +4,7 @@ Welcome to **FerretOPS**! This guide will walk you through setting up your local
 
 ## 📁 Codebase Architecture
 
-ComplyAIgent is composed of three primary components:
+FerretOPS is composed of three primary components:
 1. **Backend (`/backend`)**: A FastAPI service powering rule ingestion, classification pipelines (via LangChain), and policy validation logs. Powered by SQLModel/SQLAlchemy (configured with SQLite or PostgreSQL).
 2. **Frontend (`/frontend`)**: A Next.js (App Router) dashboard to upload policies, track compliance history, and approve/reject medium-risk pushes paused by LangGraph.
 3. **CLI (`/cli`)**: A Go command-line tool (`pg`) serving as a git pre-push hook. It executes fast, local-first scans (Gitleaks, regex, and entropy check) and offloads complex validation to the backend.
@@ -17,7 +17,7 @@ Ensure you have the following installed on your system:
 * **Go** (v1.20 or newer)
 * **Python** (v3.11 or newer) and **uv** (fast Python package installer/manager)
 * **Node.js** (v18 or newer) and **npm** or **pnpm**
-* **Docker** & **docker-compose** (optional, for local postgres/services container setup)
+* **Podman** with its Compose provider (optional, for local PostgreSQL/services containers)
 
 ---
 
@@ -54,10 +54,10 @@ The frontend is a Next.js client.
 cd frontend
 
 # Install packages
-npm install  # or pnpm install
+pnpm install  # or npm install
 
 # Start the dev server
-npm run dev
+pnpm dev      # or npm run dev
 ```
 The client runs on `http://localhost:3000`. It communicates with the backend API on `http://localhost:8000`. If the backend is down, the frontend automatically falls back to static mock data so you can preview the UI.
 
@@ -76,7 +76,7 @@ make install
 ```
 *Note: Make sure `~/.local/bin` is in your `$PATH`.*
 
-To initialize ComplyAIgent in a repository:
+To initialize FerretOPS in a repository:
 ```bash
 # In the root of the repository you want to monitor
 pg init
@@ -95,15 +95,15 @@ To run tests:
 ./scripts/integration-test.sh
 ```
 
-For a local container smoke check, start the stack with cached images and run
-the no-pull check:
+Podman is the default container runtime. For a local container smoke check,
+start the stack with cached images and run the no-pull check:
 ```bash
 CONTAINER_ENGINE=podman ./scripts/compose-smoke.sh
 ```
-Use `CONTAINER_ENGINE=docker` to verify the Docker-compatible command path.
+Use `CONTAINER_ENGINE=docker` only when you need the Docker-compatible command path.
 See [Local Compose Runtime Smoke](testing/compose-runtime-smoke.md).
 
 > [!NOTE]
-> LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md) and [Handover](handover/README.md).
+> LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md), [Handover](handover/README.md), [Constitution](constitution.md), and [Specifications](specs/001-governance-bridge-api/plan.md).
 >
 > **MVP context:** [docs/mvp/README.md](mvp/README.md) · [ROADMAP](ROADMAP.md)

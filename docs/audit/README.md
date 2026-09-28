@@ -1,6 +1,6 @@
-# ComplyAIgent Audit Log
+# FerretOPS Audit Log
 
-Original audit: **2026-07-19** (`dev`).  
+Original audit: **2026-07-19** (`dev`).
 Status update: **2026-07-24**.
 
 This file is a **historical + status** record. Open work lives in the [MVP plan](../mvp/README.md).
@@ -21,11 +21,11 @@ Corrected to `go fmt ./...` (PR #61).
 ### 4. Import-time LangChain / missing credentials — ✅ Fixed
 LLM clients lazy-loaded (PR #63).
 
-### 5. Broken `docs/constitution.md` symlink — ⚠️ Open
-Symlink to `.specify/memory/constitution.md` may still be empty/missing. Fix under docs hygiene / MVP docs sync.
+### 5. Broken `docs/constitution.md` symlink — ✅ Fixed
+Replaced symlink with canonical `docs/constitution.md` and updated all repository references.
 
-### 6. Unvalidated LLM-generated A1 regex (ReDoS) — ⚠️ Open (MVP P1)
-Categorizer still stores/serves regex without `test_pass` / `test_fail` execution or ReDoS checks. Tracked under MVP A1 regex validation.
+### 6. Unvalidated LLM-generated A1 regex (ReDoS) — ✅ Fixed
+Categorizer validates regex compilability, executes `test_pass`/`test_fail` verification, and guards against ReDoS vulnerabilities before serving (PR #80, `backend/tests/test_regex_safety.py`).
 
 ---
 

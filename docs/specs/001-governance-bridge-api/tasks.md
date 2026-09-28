@@ -1,6 +1,6 @@
 # Tasks: Governance Bridge API
 
-**Input**: Design documents from `specs/001-governance-bridge-api/`
+**Input**: Design documents from `docs/specs/001-governance-bridge-api/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
@@ -109,7 +109,7 @@
 
 **Purpose**: Final stabilization and documentation.
 
-- [X] T030 Documentation updates (quickstart.md) in specs/001-governance-bridge-api/quickstart.md
+- [X] T030 Documentation updates (quickstart.md) in docs/specs/001-governance-bridge-api/quickstart.md
 - [X] T031 Final code cleanup and performance tuning
 - [X] T032 Run full integration test suite via scripts/integration-test.sh
 
