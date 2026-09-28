@@ -85,20 +85,26 @@ flowchart TB
 complyaigent/
 ├── backend/
 │   ├── app/
-│   │   ├── api/               # REST endpoints (ingest, manifest, validate)
-│   │   ├── models/            # SQLModel entities
-│   │   ├── services/          # Comparator, Compactor, Categorizer, Validator
-│   │   ├── core/              # Config, DB, logging
+│   │   ├── api/               # REST endpoints (ingest, manifest, validate, simulate)
+│   │   ├── models/            # SQLModel entities (task, rule)
+│   │   ├── services/          # Extractor, Comparator, Compactor, Categorizer, Validator, Simulator
+│   │   ├── core/              # Config, DB, logging, cache, rate limiting
 │   │   └── worker/            # Background task orchestration
 │   └── tests/
-├── cli/                       # Go CLI (pg) — pre‑push hook
+├── cli/                       # Go CLI (pg) — pre‑push hook & scanner
 ├── frontend/                  # Next.js dashboard
 ├── docker/
 │   ├── docker-compose.yml     # Development stack
-│   └── docker-compose.prod.yml # Production‑like stack
-├── docs/                      # PRD, architecture diagrams, pitch deck
-├── specs/                     # spec‑kit artifacts (spec, plan, tasks)
-├── .github/workflows/         # CI
+│   └── docker-compose.build.yml # Build / smoke test stack
+├── docs/                      # Canonical documentation, specs, handoffs, roadmap
+│   ├── constitution.md        # Canonical project constitution & governance rules
+│   ├── handoffs/              # Per-feature handoffs & workstream records
+│   ├── specs/                 # Feature specifications & SDD artifacts
+│   ├── mvp/                   # MVP definition of done & workstreams
+│   ├── testing/               # Runtime smoke & testing baselines
+│   ├── ONBOARDING.md          # Local developer setup guide
+│   └── ROADMAP.md             # Project roadmap & milestones
+├── .github/workflows/         # CI/CD workflows
 ├── README.md
 └── LICENSE
 ```
@@ -107,9 +113,11 @@ complyaigent/
 
 ## Getting Started
 
+See [`docs/ONBOARDING.md`](docs/ONBOARDING.md) for full local developer setup and testing workflows.
+
 ```bash
 # 1. Clone and enter the repo
-git clone https://github.com/kuya-carlo/complyaigent.git && cd complyaigent
+git clone https://github.com/liitkud/complyaigent.git && cd complyaigent
 
 # 2. Start all services
 docker compose -f docker/docker-compose.yml up --build -d
@@ -136,9 +144,9 @@ cd cli && go build -o pg . && ./pg fetch
 
 ```bash
 cd frontend
-npm install
-npm run dev
-# → http://localhost:3001
+pnpm install  # or npm install
+pnpm dev      # or npm run dev
+# → http://localhost:3000
 ```
 
 ---

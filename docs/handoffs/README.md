@@ -10,9 +10,9 @@ Pattern inspired by Millia’s `docs/handoffs/` + feature branches: each meaning
 |------|--------|------------|
 | Docs / planning stream | `docs/<topic>-handoffs` | One or more files under `docs/handoffs/` |
 | Feature implementation | `feat/<issue>-<slug>` or `mvp/<issue>-<slug>` | Code **plus** an updated handoff for that issue |
-| Quick spike | `chore/<slug>` | Optional short `docs/handoffs/YYYY-MM-DD-<slug>.md` |
+| Quick spike / chore | `chore/<slug>` | Optional short `docs/handoffs/YYYY-MM-DD-<slug>.md` |
 
-Examples: `docs/mvp-handoffs`, `feat/75-policy-versioning`, `mvp/79-presidio-pii`.
+Examples: `docs/mvp-handoffs`, `feat/75-policy-versioning`, `chore/codebase-docs-consolidation`.
 
 ## File naming
 
@@ -30,7 +30,7 @@ Use the template: [`_TEMPLATE.md`](_TEMPLATE.md).
 
 ## Skill
 
-Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and `.cursor/skills/feature-plan/`).
+Contributors and agents follow the handoff structure in [`_TEMPLATE.md`](_TEMPLATE.md). If installed, the central `feature-plan` skill can also be used optionally.
 
 ## Index
 
@@ -42,3 +42,4 @@ Agents: use project skill **`feature-plan`** (`.agents/skills/feature-plan/` and
 | 2026-08-21 | [copr-release-automation](2026-08-21-copr-release-automation.md) | `dev` / Fedora COPR | In progress |
 | 2026-08-21 | [prod-promotion-and-release](2026-08-21-prod-promotion-and-release.md) | `dev` → `main` / `v0.1.0` | Planned |
 | 2026-08-21 | [webhooks-and-vector-clustering](2026-08-21-webhooks-and-vector-clustering.md) | `feat/webhooks-and-vector-clustering` | Planned |
+| 2026-09-28 | [codebase-docs-consolidation](2026-09-28-codebase-docs-consolidation.md) | `chore/codebase-docs-consolidation` | Done |

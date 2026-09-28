@@ -54,10 +54,10 @@ The frontend is a Next.js client.
 cd frontend
 
 # Install packages
-npm install  # or pnpm install
+pnpm install  # or npm install
 
 # Start the dev server
-npm run dev
+pnpm dev      # or npm run dev
 ```
 The client runs on `http://localhost:3000`. It communicates with the backend API on `http://localhost:8000`. If the backend is down, the frontend automatically falls back to static mock data so you can preview the UI.
 
@@ -104,6 +104,6 @@ Use `CONTAINER_ENGINE=docker` to verify the Docker-compatible command path.
 See [Local Compose Runtime Smoke](testing/compose-runtime-smoke.md).
 
 > [!NOTE]
-> LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md) and [Handover](handover/README.md).
+> LLM clients are lazy-loaded (PR #63), so missing API keys should no longer crash import/startup. You still need real or mock credentials for paths that *call* the LLM. See [Audit](audit/README.md), [Handover](handover/README.md), [Constitution](constitution.md), and [Specifications](specs/001-governance-bridge-api/plan.md).
 >
 > **MVP context:** [docs/mvp/README.md](mvp/README.md) · [ROADMAP](ROADMAP.md)

@@ -23,27 +23,32 @@ Handoff notes for engineers picking up **MVP** work. For the plan and checklists
 
 ---
 
-## What’s already fixed (do not re-open as blockers)
+## Completed MVP milestone (`v0.1.0-mvp`)
 
-| Item | PR / notes |
-|------|------------|
-| CLI polls `/validate/{id}` after 202 | #64 |
-| Lazy `ChatOpenAI` clients | #63 |
-| Integration test payload schema | #62 |
-| CLI Makefile `go fmt ./...` | #61 |
-| Backend ruff/ty CI | #73 |
+| Item | Details |
+|------|---------|
+| CLI polls `/validate/{id}` after 202 | PR #64 |
+| Lazy `ChatOpenAI` clients | PR #63 |
+| Integration test payload schema | PR #62 |
+| CLI Makefile `go fmt ./...` | PR #61 |
+| Backend ruff/ty CI | PR #73 |
+| Policy storage schema & versioning | PR #75 (`backend/app/models/task.py`, `services/pipeline.py`) |
+| Structured verdict logging | PR #76, #77 (`backend/app/core/logging.py`, `services/logger.py`) |
+| Live E2E / HITL flow | PR #78 (Live API proxy & HITL approval) |
+| Presidio PII filter on `/validate` | PR #79 (`backend/app/services/pii.py`) |
+| A1 regex safety gate (ReDoS check) | PR #80 (`backend/app/services/categorizer.py`) |
+| Regulatory change simulator | Issue #13 (`backend/app/api/simulate.py`, `services/simulator.py`) |
+| Ingestion token compaction & batch cache | Issue #14 (`backend/app/services/extractor.py`, `core/cache.py`) |
+| Load testing baseline (<5s) | Issue #22 (`backend/scripts/run-load-test.sh`, `tests/load/`) |
 
 ---
 
-## Current MVP priorities
+## Current active & post-MVP priorities
 
-1. **Policy versioning** — durable policy metadata + history ([#10](https://github.com/liitkud/complyaigent/issues/10) / MVP sub-issue).
-2. **Structured verdict logging** — schema + emit on every decision ([#4](https://github.com/liitkud/complyaigent/issues/4), [#20](https://github.com/liitkud/complyaigent/issues/20)).
-3. **Live E2E / HITL** — dashboard against real API; compose path documented.
-4. **PII gate** — Presidio (or equivalent) on validate ([#17](https://github.com/liitkud/complyaigent/issues/17)).
-5. **A1 regex safety** — validate generated patterns before serving to CLI (see audit §6).
-
-Deferred: load test (#22), RAG tune (#14), reg simulator (#13).
+1. **COPR release automation** — Fedora COPR package builds for CLI `pg` ([handoff](../handoffs/2026-08-21-copr-release-automation.md)).
+2. **PR #88 reconciliation** — rebase and merge contributor connection refactor ([handoff](../handoffs/2026-08-21-pr88-regintel-connection-refactor.md)).
+3. **Webhooks & vector clustering** — outgoing HITL alerts and distributed vector store support ([handoff](../handoffs/2026-08-21-webhooks-and-vector-clustering.md)).
+4. **Production release promotion** — promote `dev` baseline to `main` for `v0.1.0` tag ([handoff](../handoffs/2026-08-21-prod-promotion-and-release.md)).
 
 ---
 
@@ -82,4 +87,4 @@ Or use root `docker-compose.yml` when bringing up DB-backed stacks.
 
 ## Per-feature handoffs
 
-Feature-level continuity lives in [`docs/handoffs/`](../handoffs/) (see skill `feature-plan`). This page stays project-wide.
+Feature-level continuity lives in [`docs/handoffs/`](../handoffs/) using [`docs/handoffs/_TEMPLATE.md`](../handoffs/_TEMPLATE.md) (or central `feature-plan` skill). This page stays project-wide.
