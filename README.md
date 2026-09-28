@@ -32,6 +32,8 @@ The continuous compliance gate MVP is complete and tagged `v0.1.0-mvp`. Current 
 
 ## Start locally
 
+Read [contributor guidance](docs/CONTRIBUTING.md) for the project workflow and documentation layout.
+
 Read [developer onboarding](docs/ONBOARDING.md) for prerequisites, environment setup, service startup, and the integration workflow. Podman is the default container runtime. For an image-backed local stack, use `podman compose -f docker/docker-compose.yml up --build -d`.
 
 The repository integration command is `./scripts/integration-test.sh`. For local configuration and governance rules, see the [constitution](docs/constitution.md).

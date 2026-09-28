@@ -1,16 +1,4 @@
-<!--
-Version change: [INITIAL] → 1.0.0
-List of modified principles:
-- Initial adoption of "The Startup Constitution"
-Added sections:
-- Phase Enforcement
-- Core Principles (MUST, SHOULD, COULD)
-- Git & Attribution
-- Success Criteria
-- Agent Instructions
--->
-
-# Complyaigent Constitution
+# FerretOPS Constitution
 
 *For building fast, staying safe, and growing without rewriting everything.*
 
@@ -52,7 +40,7 @@ Default: `hackathon`.
 
 **4. Data purpose annotation**
 * Any variable storing user data (email, name, ID, location) → comment: `# purpose: why`
-* Agent adds automatically.
+* Include the annotation when introducing the variable.
 
 **5. Log scrub warning**
 * Before push: `grep -l "password\|token\|secret" *.log` → print warning if found.
@@ -104,7 +92,7 @@ Default: `hackathon`.
 
 ## Governance
 
-### Agent Instructions
+### Implementation workflow
 1. Read `PROJECT_PHASE`.
 2. Implement **MUST** rules first (secrets scanner, integration test, flag support).
 3. Build the actual feature.
@@ -114,9 +102,9 @@ Default: `hackathon`.
 *This constitution is the minimal set of constraints to prevent disaster while shipping fast. Upgrade to a full enterprise constitution when you have customers who pay.*
 
 ### Amendment Procedure
-Amendments to this constitution require a version bump and an update to the Sync Impact Report. The `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
+Amendments to this constitution require a version bump and a summary of the changes in the pull request. The `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
 - MAJOR: Backward incompatible governance/principle removals or redefinitions.
 - MINOR: New principle/section added or materially expanded guidance.
 - PATCH: Clarifications, wording, typo fixes, non-semantic refinements.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-10 | **Last Amended**: 2026-05-10
+**Version**: 1.0.1 | **Ratified**: 2026-05-10 | **Last Amended**: 2026-09-28

@@ -1,9 +1,9 @@
 # HANDOFF — Codebase Docs & Spec Consolidation
 
-**Status:** Done  
-**Branch:** `chore/codebase-docs-consolidation`  
-**Issue(s):** Docs hygiene & repo-local scaffolding cleanup  
-**Owner / next reader:** All engineers / maintainers  
+**Status:** Done
+**Branch:** `chore/codebase-docs-consolidation`
+**Issue(s):** Docs hygiene & repo-local scaffolding cleanup
+**Owner / next reader:** All engineers / maintainers
 **Last updated:** 2026-09-28
 
 ## Bottom line
@@ -60,3 +60,16 @@ ls -la docs/specs/001-governance-bridge-api/
 - [x] `docs/ROADMAP.md` reconciled with code and handoffs without fictitious claims.
 - [x] `AGENTS.md`, `README.md`, `docs/handover/`, `docs/mvp/`, and `docs/ONBOARDING.md` links made truthful.
 - [x] Dated handoff record created and added to `docs/handoffs/README.md`.
+
+## Follow-up: tool-agnostic contributor documentation
+
+Removed the remaining root and frontend agent instruction files. Shared project
+guidance now lives in `docs/CONTRIBUTING.md`, linked from the README. Living
+documentation and the handoff template no longer require an agent, skill, or
+host-specific runner. The constitution uses contributor-neutral wording, and
+the secrets hook no longer excludes the removed spec-kit directory.
+
+Validation covers documentation links, absence of tracked agent scaffolding,
+whitespace, and the repository hooks for changed files. Application code and
+visual branding are outside this follow-up. The branch is being submitted as a
+PR against `dev`; merging and branch deletion are left to review.

@@ -1,6 +1,6 @@
-# ComplyAIgent Audit Log
+# FerretOPS Audit Log
 
-Original audit: **2026-07-19** (`dev`).  
+Original audit: **2026-07-19** (`dev`).
 Status update: **2026-07-24**.
 
 This file is a **historical + status** record. Open work lives in the [MVP plan](../mvp/README.md).

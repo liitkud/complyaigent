@@ -54,8 +54,8 @@ Handoff notes for engineers picking up **MVP** work. For the plan and checklists
 
 ## Key files
 
-**CLI:** `cli/cmd/scan.go`, `cli/internal/rules.go`  
-**Backend:** `backend/main.py`, `app/api/validate.py`, `app/services/pipeline.py`, `app/services/validator.py`  
+**CLI:** `cli/cmd/scan.go`, `cli/internal/rules.go`
+**Backend:** `backend/main.py`, `app/api/validate.py`, `app/services/pipeline.py`, `app/services/validator.py`
 **Frontend:** `frontend/services/api.ts`, `frontend/components/hitl/`, `frontend/app/page.tsx`
 
 ---
@@ -79,12 +79,12 @@ Or use root `docker-compose.yml` with `podman compose` when bringing up DB-backe
 
 ---
 
-## Agent / contributor notes
+## Contributor notes
 
 - Default branch for work: `dev`
 - Prefer small PRs mapped to MVP sub-issues
-- `agy` is available on the `idea` host for implementation jobs; keep changes scoped to the issue
+- Keep changes scoped to the issue; see [contributor guidance](../CONTRIBUTING.md).
 
 ## Per-feature handoffs
 
-Feature-level continuity lives in [`docs/handoffs/`](../handoffs/) using [`docs/handoffs/_TEMPLATE.md`](../handoffs/_TEMPLATE.md) (or central `feature-plan` skill). This page stays project-wide.
+Feature-level continuity lives in [`docs/handoffs/`](../handoffs/) using [`docs/handoffs/_TEMPLATE.md`](../handoffs/_TEMPLATE.md). This page stays project-wide.

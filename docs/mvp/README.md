@@ -1,9 +1,9 @@
 # MVP Plan: Continuous Compliance Gate
 
 > [!IMPORTANT]
-> **Date:** 2026-07-24 (Finalized: 2026-08-21)  
-> **Repo:** [liitkud/complyaigent](https://github.com/liitkud/complyaigent) (`dev`)  
-> **Status:** Complete (MVP Finalized, tag `v0.1.0-mvp`)  
+> **Date:** 2026-07-24 (Finalized: 2026-08-21)
+> **Repo:** [liitkud/complyaigent](https://github.com/liitkud/complyaigent) (`dev`)
+> **Status:** Complete (MVP Finalized, tag `v0.1.0-mvp`)
 > **Epic:** [#74 MVP: Continuous Compliance Gate](https://github.com/liitkud/complyaigent/issues/74)
 
 ## Definition of Done

@@ -4,7 +4,7 @@ Welcome to **FerretOPS**! This guide will walk you through setting up your local
 
 ## 📁 Codebase Architecture
 
-ComplyAIgent is composed of three primary components:
+FerretOPS is composed of three primary components:
 1. **Backend (`/backend`)**: A FastAPI service powering rule ingestion, classification pipelines (via LangChain), and policy validation logs. Powered by SQLModel/SQLAlchemy (configured with SQLite or PostgreSQL).
 2. **Frontend (`/frontend`)**: A Next.js (App Router) dashboard to upload policies, track compliance history, and approve/reject medium-risk pushes paused by LangGraph.
 3. **CLI (`/cli`)**: A Go command-line tool (`pg`) serving as a git pre-push hook. It executes fast, local-first scans (Gitleaks, regex, and entropy check) and offloads complex validation to the backend.
@@ -76,7 +76,7 @@ make install
 ```
 *Note: Make sure `~/.local/bin` is in your `$PATH`.*
 
-To initialize ComplyAIgent in a repository:
+To initialize FerretOPS in a repository:
 ```bash
 # In the root of the repository you want to monitor
 pg init

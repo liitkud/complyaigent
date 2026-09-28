@@ -2,7 +2,7 @@
 
 Per-feature (or per-workstream) handover docs — **not** the project-wide overview in [`docs/handover/`](../handover/README.md).
 
-Pattern inspired by Millia’s `docs/handoffs/` + feature branches: each meaningful slice of work gets a dated handoff on a sensible branch, so the next agent/human can pick up without re-deriving context.
+Each meaningful slice of work gets a dated handoff on a feature branch, so the next contributor can pick up without re-deriving context.
 
 ## Branch naming
 
@@ -27,10 +27,6 @@ Use the template: [`_TEMPLATE.md`](_TEMPLATE.md).
 - Starting a feature plan (MVP sub-issue or new epic slice) → create the handoff **before** large code moves
 - After a mergeable chunk ships → update “What shipped” / “Open follow-ups”
 - Closing an issue → handoff should say Done / residual debt
-
-## Skill
-
-Contributors and agents follow the handoff structure in [`_TEMPLATE.md`](_TEMPLATE.md). If installed, the central `feature-plan` skill can also be used optionally.
 
 ## Index
 
