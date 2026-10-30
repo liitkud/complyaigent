@@ -1,9 +1,9 @@
 # HANDOFF — <short title>
 
-**Status:** Planned | In progress | Done  
-**Branch:** `<branch>`  
-**Issue(s):** #<n>  
-**Owner / next reader:** <who>  
+**Status:** Planned | In progress | Done
+**Branch:** `<branch>`
+**Issue(s):** #<n>
+**Owner / next reader:** <who>
 **Last updated:** YYYY-MM-DD
 
 ## Bottom line
@@ -33,7 +33,7 @@ One paragraph: what this workstream is, why it exists, and what “done” means
 ## How to verify
 
 ```bash
-# commands a fresh agent can run
+# commands a contributor can run
 ```
 
 ## Done means
