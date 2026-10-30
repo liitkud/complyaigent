@@ -148,6 +148,73 @@ a:focus-visible {
   }
 }
 
+/* Mobile-only scan demo: a scan line sweeps the document, each clause's box
+   lights up in its bucket color as the line passes, then the boxes fade and
+   a stack of bucket piles lands below — "scan, box, collate" in one loop. */
+@keyframes hero-scan-sweep {
+  0% {
+    top: 0%;
+    opacity: 1;
+  }
+  58% {
+    top: 100%;
+    opacity: 1;
+  }
+  64%,
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.hero-scan-line {
+  top: 0%;
+  animation: hero-scan-sweep 9.5s ease-in-out infinite;
+}
+
+@keyframes hero-scan-box {
+  0%,
+  100% {
+    border-color: transparent;
+    box-shadow: none;
+  }
+  10%,
+  55% {
+    border-color: var(--box-color);
+    box-shadow: 0 0 0 1px var(--box-color) inset;
+  }
+  70% {
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.hero-scan-box {
+  animation: hero-scan-box 9.5s ease-in-out infinite;
+}
+
+@keyframes hero-stack-reveal {
+  0%,
+  66% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  76%,
+  92% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+
+.hero-stack-pile {
+  opacity: 0;
+  animation: hero-stack-reveal 9.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -159,9 +226,19 @@ a:focus-visible {
   }
 
   .hero-extract-line,
-  .hero-extract-tag {
+  .hero-extract-tag,
+  .hero-stack-pile {
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .hero-scan-line {
+    display: none;
+  }
+
+  .hero-scan-box {
+    border-color: var(--box-color) !important;
+    box-shadow: 0 0 0 1px var(--box-color) inset !important;
   }
 }
 
