@@ -103,116 +103,89 @@ a:focus-visible {
   }
 }
 
-/* Hero document-extraction demo (landing page): each clause line and its
-   bucket tag cascade in, hold, then fade — animation-delay staggers which
-   clause is "being read" at any moment. Reduced-motion below pins every
-   line to its fully-labelled end state instead of freezing mid-fade. */
-@keyframes hero-extract-reveal {
-  0% {
-    opacity: 0;
-  }
-  6% {
-    opacity: 1;
-  }
-  72% {
-    opacity: 1;
-  }
-  88% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
+/* pdf.js real text layer for the hero document demo: invisible, selectable
+   text positioned exactly over the canvas render. */
+.pdf-text-layer {
+  line-height: 1;
+  text-align: initial;
+  overflow: clip;
+  color-scheme: only light;
 }
 
-.hero-extract-line {
-  opacity: 0;
-  animation: hero-extract-reveal 9.5s ease-in-out infinite;
+.pdf-text-layer span,
+.pdf-text-layer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
 }
 
-.hero-extract-tag {
-  opacity: 0;
-  transform: scale(0.92);
-  animation:
-    hero-extract-reveal 9.5s ease-in-out infinite,
-    hero-extract-tag-pop 9.5s ease-in-out infinite;
+.pdf-text-layer ::selection {
+  background: rgba(78, 222, 163, 0.35);
 }
 
-@keyframes hero-extract-tag-pop {
-  0%,
-  6% {
-    transform: scale(0.92);
-  }
-  14% {
-    transform: scale(1);
-  }
-}
-
-/* Mobile-only scan demo: a scan line sweeps the document, each clause's box
-   lights up in its bucket color as the line passes, then the boxes fade and
-   a stack of bucket piles lands below — "scan, box, collate" in one loop. */
-@keyframes hero-scan-sweep {
-  0% {
-    top: 0%;
-    opacity: 1;
-  }
-  58% {
-    top: 100%;
-    opacity: 1;
-  }
-  64%,
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-.hero-scan-line {
-  top: 0%;
-  animation: hero-scan-sweep 9.5s ease-in-out infinite;
-}
-
-@keyframes hero-scan-box {
+/* Hero document demo: essence boxes "detect" each clause in sequence —
+   border + glow cascades in, holds, fades, then loops to the next box.
+   Shares the extraction demo's cadence (hold, soft fade, loop). */
+@keyframes hero-doc-box-reveal {
   0%,
   100% {
+    opacity: 0;
     border-color: transparent;
     box-shadow: none;
   }
-  10%,
-  55% {
+  4% {
+    opacity: 1;
     border-color: var(--box-color);
     box-shadow: 0 0 0 1px var(--box-color) inset;
   }
-  70% {
+  68% {
+    opacity: 1;
+    border-color: var(--box-color);
+    box-shadow: 0 0 0 1px var(--box-color) inset;
+  }
+  84% {
+    opacity: 0;
     border-color: transparent;
     box-shadow: none;
   }
 }
 
-.hero-scan-box {
-  animation: hero-scan-box 9.5s ease-in-out infinite;
+.hero-doc-box {
+  border: 1px solid transparent;
+  opacity: 0;
+  animation: hero-doc-box-reveal 8s ease-in-out infinite;
 }
 
-@keyframes hero-stack-reveal {
+@keyframes hero-doc-box-tag-reveal {
   0%,
-  66% {
+  100% {
     opacity: 0;
-    transform: translateY(6px) scale(0.92);
+    transform: translateY(2px) scale(0.94);
   }
-  76%,
-  92% {
+  4% {
+    opacity: 0;
+    transform: translateY(2px) scale(0.94);
+  }
+  10% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-  100% {
+  68% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  84% {
     opacity: 0;
-    transform: translateY(6px) scale(0.92);
+    transform: translateY(2px) scale(0.94);
   }
 }
 
-.hero-stack-pile {
+.hero-doc-box-tag {
   opacity: 0;
-  animation: hero-stack-reveal 9.5s ease-in-out infinite;
+  animation: hero-doc-box-tag-reveal 8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -225,20 +198,15 @@ a:focus-visible {
     scroll-behavior: auto !important;
   }
 
-  .hero-extract-line,
-  .hero-extract-tag,
-  .hero-stack-pile {
+  .hero-doc-box {
     opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .hero-scan-line {
-    display: none;
-  }
-
-  .hero-scan-box {
     border-color: var(--box-color) !important;
     box-shadow: 0 0 0 1px var(--box-color) inset !important;
+  }
+
+  .hero-doc-box-tag {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

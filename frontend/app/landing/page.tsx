@@ -13,6 +13,7 @@ import {
   Upload,
   UserCheck,
 } from "lucide-react";
+import { DpaDocumentDemo } from "./dpa-document-demo";
 
 const metrics = [
   { value: "< 50ms", label: "Local A1 Evaluation", desc: "Instant pre-push feedback before code leaves the machine" },
@@ -63,48 +64,6 @@ const buckets = [
     icon: FileText,
   },
 ];
-
-// Verbatim text of RA 10173 (Philippine Data Privacy Act of 2012), §20(c) — the
-// provision listing required organizational security measures. Bucket/color
-// assignments are illustrative of how FerretOPS's categorizer would route each
-// clause, not a claim about a specific compiled rule ID.
-const dpaClauses = [
-  {
-    id: "1",
-    text: "Safeguards to protect its computer network against accidental, unlawful or unauthorized usage or interference with or hindering of their functioning or availability.",
-    bucket: "B · Infra Metadata",
-    color: "#4edea3",
-  },
-  {
-    id: "2",
-    text: "A security policy with respect to the processing of personal information.",
-    bucket: "C · Semantic Guidance",
-    color: "#a78bc9",
-  },
-  {
-    id: "3",
-    text: "A process for identifying and accessing reasonably foreseeable vulnerabilities in its computer networks, and for taking preventive, corrective and mitigating action against security incidents that can lead to a security breach.",
-    bucket: "A2 · Actionable",
-    color: "#f0c674",
-  },
-  {
-    id: "4",
-    text: "Regular monitoring for security breaches and a process for taking preventive, corrective and mitigating action against security incidents that can lead to a security breach.",
-    bucket: "B · Infra Metadata",
-    color: "#4edea3",
-  },
-];
-
-// Mobile scan demo: how dpaClauses collate once sorted by bucket.
-const bucketStacks = dpaClauses.reduce<{ bucket: string; color: string; count: number }[]>(
-  (acc, c) => {
-    const existing = acc.find((b) => b.bucket === c.bucket);
-    if (existing) existing.count += 1;
-    else acc.push({ bucket: c.bucket, color: c.color, count: 1 });
-    return acc;
-  },
-  [],
-);
 
 const frameworks = [
   { name: "SOC 2 Type II", focus: "Security, Availability & Confidentiality" },
@@ -255,156 +214,7 @@ export default function LandingPage() {
           </section>
 
           {/* Document → Manifest live extraction visualization */}
-          <section
-            aria-label="Live demonstration: a real Data Privacy Act excerpt being categorized into FerretOPS rule buckets"
-            className="mt-14 overflow-hidden rounded-md border border-[#343434] bg-[#141718] shadow-2xl shadow-black/60"
-          >
-            {/* Desktop/tablet: side-by-side source + live-labelled manifest */}
-            <div className="hidden divide-y divide-[#282d2f] lg:grid lg:grid-cols-2 lg:divide-x lg:divide-y-0">
-              {/* Left: source document */}
-              <div>
-                <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3 sm:px-6">
-                  <div className="flex items-center gap-2 font-mono text-xs text-[#8d9697]">
-                    <FileText size={14} />
-                    <span className="font-semibold text-[#f1f1f1]">RA-10173.pdf</span>
-                  </div>
-                  <span className="font-mono text-[11px] text-[#8a8a8a]">Source document</span>
-                </div>
-                <div className="p-5 font-mono text-[13px] leading-relaxed text-[#c3c7c6] sm:p-6">
-                  <p className="mb-4 text-[11px] uppercase tracking-[0.12em] text-[#8a8a8a]">
-                    Sec. 20(c) — Security of Personal Information
-                  </p>
-                  {dpaClauses.map((c) => (
-                    <p key={c.id} className="mb-3">
-                      <span className="text-[#8a8a8a]">({c.id})</span> {c.text}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: live-labelled manifest */}
-              <div>
-                <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3 sm:px-6">
-                  <div className="flex items-center gap-2 font-mono text-xs text-[#8d9697]">
-                    <Shield size={14} />
-                    <span className="font-semibold text-[#f1f1f1]">Governance Manifest</span>
-                  </div>
-                  <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#4edea3]">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
-                    Extracting
-                  </span>
-                </div>
-                <div className="p-5 font-mono text-[13px] leading-relaxed sm:p-6">
-                  {dpaClauses.map((c, i) => (
-                    <p
-                      key={c.id}
-                      className="hero-extract-line mb-3 text-[#c3c7c6]"
-                      style={{ animationDelay: `${i * 1.6}s` }}
-                    >
-                      <span className="text-[#8a8a8a]">({c.id})</span> {c.text}{" "}
-                      <span
-                        className="hero-extract-tag ml-1 inline-flex items-center rounded-sm border px-1.5 py-0.5 align-middle font-mono text-[11px] font-bold uppercase tracking-wide"
-                        style={{
-                          animationDelay: `${i * 1.6 + 0.9}s`,
-                          borderColor: `${c.color}66`,
-                          backgroundColor: `${c.color}1a`,
-                          color: c.color,
-                        }}
-                      >
-                        {c.bucket}
-                      </span>
-                    </p>
-                  ))}
-                  <p className="hero-extract-line mt-4 border-t border-[#22282a] pt-3 text-[11px] text-[#8a8a8a]" style={{ animationDelay: `${dpaClauses.length * 1.6 + 0.6}s` }}>
-                    4 clauses routed · 0 discarded · compiled into active manifest
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile: a scan line sweeps the document, boxing each clause as it
-                passes, then the boxes collate into bucket stacks below. */}
-            <div className="lg:hidden">
-              <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3">
-                <div className="flex items-center gap-2 font-mono text-xs text-[#8d9697]">
-                  <FileText size={14} />
-                  <span className="font-semibold text-[#f1f1f1]">RA-10173.pdf</span>
-                </div>
-                <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#4edea3]">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
-                  Scanning
-                </span>
-              </div>
-
-              <div className="relative overflow-hidden p-5 font-mono text-[13px] leading-relaxed text-[#c3c7c6]">
-                <div
-                  aria-hidden="true"
-                  className="hero-scan-line pointer-events-none absolute left-0 right-0 h-px"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, transparent, #4edea3 20%, #4edea3 80%, transparent)",
-                    boxShadow: "0 0 12px 1px #4edea3aa",
-                  }}
-                />
-                <p className="mb-4 text-[11px] uppercase tracking-[0.12em] text-[#8a8a8a]">
-                  Sec. 20(c) — Security of Personal Information
-                </p>
-                {dpaClauses.map((c, i) => (
-                  <div
-                    key={c.id}
-                    className="hero-scan-box mb-3 rounded-sm border p-2.5"
-                    style={{
-                      animationDelay: `${i * 1.3}s`,
-                      borderColor: "transparent",
-                      // @ts-expect-error -- CSS custom property for the keyframe to read
-                      "--box-color": c.color,
-                    }}
-                  >
-                    <p>
-                      <span className="text-[#8a8a8a]">({c.id})</span> {c.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-[#282d2f] bg-[#1a1e20] p-5">
-                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[#8a8a8a]">
-                  Sorted into
-                </p>
-                <div className="flex flex-wrap gap-5">
-                  {bucketStacks.map((b, i) => {
-                    const [code] = b.bucket.split(" · ");
-                    return (
-                      <div
-                        key={b.bucket}
-                        className="hero-stack-pile relative w-16"
-                        style={{ animationDelay: `${i * 0.25}s` }}
-                        title={b.bucket}
-                      >
-                        <div className="relative h-9 w-12">
-                          {Array.from({ length: Math.min(b.count, 3) }).map((_, layer) => (
-                            <span
-                              key={layer}
-                              className="absolute inset-x-0 h-7 rounded-sm border"
-                              style={{
-                                bottom: `${layer * 4}px`,
-                                borderColor: `${b.color}80`,
-                                backgroundColor: `${b.color}1f`,
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <p className="mt-1.5 font-mono text-[11px] font-bold" style={{ color: b.color }}>
-                          {code}
-                        </p>
-                        <p className="font-mono text-[11px] text-[#8a8a8a]">{b.count} clause{b.count !== 1 ? "s" : ""}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </section>
+          <DpaDocumentDemo />
 
           {/* Compliance frameworks, surfaced early */}
           <section aria-label="Compliance frameworks FerretOPS compiles against" className="mt-8 flex flex-wrap items-center gap-2.5">
