@@ -40,11 +40,11 @@ export default function Sidebar() {
           F
         </div>
         {!collapsed && (
-          <div className="overflow-hidden">
+          <div className="sidebar-brand-text overflow-hidden">
             <p className="font-mono text-sm font-bold tracking-wide text-[#f1f1f1]">
               FerretOPS
             </p>
-            <p className="ops-label text-[#737373]">Operations Console</p>
+            <p className="ops-label text-[#8a8a8a]">Operations Console</p>
           </div>
         )}
       </div>
@@ -52,7 +52,7 @@ export default function Sidebar() {
       {/* Nav (analytics / read-only) */}
       <nav aria-label="Main console navigation" className="sidebar-nav flex flex-1 flex-col space-y-1 px-2 py-4">
         {!collapsed && (
-          <p className="ops-label px-3 pb-1 font-semibold text-[#737373]">
+          <p className="ops-label px-3 pb-1 font-semibold text-[#8a8a8a]">
             Analytics
           </p>
         )}
@@ -82,7 +82,7 @@ export default function Sidebar() {
       {/* Action CTAs */}
       <div className="sidebar-actions space-y-2 border-t border-[#343434] px-2 py-3">
         {!collapsed && (
-          <p className="ops-label px-1 pb-1 font-semibold text-[#737373]">
+          <p className="ops-label px-1 pb-1 font-semibold text-[#8a8a8a]">
             Actions
           </p>
         )}
@@ -104,7 +104,7 @@ export default function Sidebar() {
           onClick={() => setCollapsed((c) => !c)}
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Expand sidebar navigation" : "Collapse sidebar navigation"}
-          className="flex w-full items-center justify-center rounded-sm p-2 text-[#737373] transition-colors hover:bg-[#202020] hover:text-[#f1f1f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff]"
+          className="flex w-full items-center justify-center rounded-sm p-2 text-[#8a8a8a] transition-colors hover:bg-[#202020] hover:text-[#f1f1f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4d8eff]"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

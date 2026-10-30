@@ -164,7 +164,7 @@ export default function RegulationDetailPage() {
             <h1 className="mt-0.5 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
               Regulation Rule Detail
             </h1>
-            <p className="font-mono text-xs text-[#737373]">
+            <p className="font-mono text-xs text-[#8a8a8a]">
               ID: {id}
             </p>
           </div>
@@ -223,7 +223,7 @@ export default function RegulationDetailPage() {
                     <h2 className="text-base font-bold text-[#f1f1f1]">
                       {manifest.meta.source_name}
                     </h2>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-[#737373]">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-[#8a8a8a]">
                       <StatusBadge
                         label={manifest.meta.source_type.replace(/_/g, " ")}
                         variant="info"
@@ -266,7 +266,7 @@ export default function RegulationDetailPage() {
                       {r.pattern}
                     </code>
                     <p className="text-xs text-[#8e8e8e]">{r.remediation}</p>
-                    <div className="flex flex-wrap gap-2 font-mono text-[10px] text-[#737373]">
+                    <div className="flex flex-wrap gap-2 font-mono text-[11px] text-[#8a8a8a]">
                       <span className="rounded-sm bg-[#4edea3]/10 px-1.5 py-0.5 text-[#4edea3] border border-[#4edea3]/30">
                         pass: {r.test_pass}
                       </span>
@@ -323,7 +323,7 @@ export default function RegulationDetailPage() {
                       <p className="text-sm font-medium text-[#f1f1f1]">
                         {r.rule_name}
                       </p>
-                      <p className="font-mono text-xs text-[#737373]">
+                      <p className="font-mono text-xs text-[#8a8a8a]">
                         {r.impact_radius.replace(/_/g, " ")}
                       </p>
                     </div>
@@ -331,7 +331,7 @@ export default function RegulationDetailPage() {
                       <code className="text-xs font-mono text-[#adc6ff]">
                         {r.key}
                       </code>
-                      <p className="font-mono text-[10px] text-[#737373]">
+                      <p className="font-mono text-[11px] text-[#8a8a8a]">
                         {JSON.stringify(r.value)}
                       </p>
                     </div>
@@ -358,7 +358,7 @@ export default function RegulationDetailPage() {
                     <p className="mt-1 text-xs leading-relaxed text-[#c5c5c5]">
                       {r.summary}
                     </p>
-                    <p className="mt-1 font-mono text-[10px] text-[#737373]">
+                    <p className="mt-1 font-mono text-[11px] text-[#8a8a8a]">
                       {r.impact_radius.replace(/_/g, " ")}
                     </p>
                   </div>
@@ -409,19 +409,19 @@ function RuleSection({
   return (
     <div className="ops-panel overflow-hidden">
       <div className="flex items-center gap-2 border-b border-[#343434] bg-[#1a1e20] px-5 py-4">
-        <Icon size={16} className={iconColors[color] ?? "text-[#737373]"} />
+        <Icon size={16} className={iconColors[color] ?? "text-[#8a8a8a]"} />
         <div>
           <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             {title}
           </h3>
-          <p className="text-[10px] text-[#8e8e8e]">{subtitle}</p>
+          <p className="text-[11px] text-[#8e8e8e]">{subtitle}</p>
         </div>
         <span className="ml-auto rounded-sm border border-[#343434] bg-[#202020] px-2 py-0.5 font-mono text-xs font-bold text-[#f1f1f1]">
           {count}
         </span>
       </div>
       {count === 0 ? (
-        <p className="px-5 py-6 text-center text-xs text-[#737373]">
+        <p className="px-5 py-6 text-center text-xs text-[#8a8a8a]">
           No rules in this bucket
         </p>
       ) : (

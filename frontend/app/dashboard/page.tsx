@@ -92,7 +92,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           {!error && (
-            <span className="flex items-center gap-1.5 rounded-sm border border-[#4edea3]/40 bg-[#4edea3]/10 px-2 py-1 font-mono text-[10px] text-[#4edea3]">
+            <span className="flex items-center gap-1.5 rounded-sm border border-[#4edea3]/40 bg-[#4edea3]/10 px-2 py-1 font-mono text-[11px] text-[#4edea3]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
               System Online
             </span>

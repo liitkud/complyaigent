@@ -73,7 +73,7 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
           <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             Pipeline Activity
           </h3>
-          <p className="ops-label mt-1 text-[#737373]">Real-time event stream</p>
+          <p className="ops-label mt-1 text-[#8a8a8a]">Real-time event stream</p>
         </div>
       </div>
       <div className="divide-y divide-[#343434]">
@@ -124,7 +124,7 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
                   style={{ width: `${status.progress_pct}%` }}
                 />
               </div>
-              <p className="mt-1 font-mono text-[10px] text-[#737373]">
+              <p className="mt-1 font-mono text-[11px] text-[#8a8a8a]">
                 Task ID: {status.task_id} • {status.progress_pct}% complete
               </p>
             </div>
@@ -134,13 +134,13 @@ export default function PipelineActivity({ taskId }: { taskId?: string }) {
             <div className="rounded-sm border border-[#343434] bg-[#202020] p-3">
               <Workflow
                 size={24}
-                className="text-[#737373]"
+                className="text-[#8a8a8a]"
               />
             </div>
             <p className="mt-3 text-sm font-medium text-[#8e8e8e]">
               System Idle
             </p>
-            <p className="text-xs text-[#737373]">
+            <p className="text-xs text-[#8a8a8a]">
               No active ingestion pipeline
             </p>
           </div>

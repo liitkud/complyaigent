@@ -101,7 +101,7 @@ export default function UploadPage() {
             <Upload
               size={40}
               className={
-                dragOver ? "text-[#adc6ff]" : "text-[#737373]"
+                dragOver ? "text-[#adc6ff]" : "text-[#8a8a8a]"
               }
             />
           )}

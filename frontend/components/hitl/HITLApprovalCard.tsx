@@ -87,13 +87,13 @@ export default function HITLApprovalCard() {
             <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
               HITL Pending Approvals
             </h3>
-            <p className="ops-label mt-1 text-[#737373]">
+            <p className="ops-label mt-1 text-[#8a8a8a]">
               LangGraph interrupt — awaiting manager decision
             </p>
           </div>
         </div>
         {pending.length > 0 && (
-          <span className="rounded-sm border border-[#adc6ff]/40 bg-[#adc6ff]/10 px-2 py-1 font-mono text-[10px] text-[#adc6ff]">
+          <span className="rounded-sm border border-[#adc6ff]/40 bg-[#adc6ff]/10 px-2 py-1 font-mono text-[11px] text-[#adc6ff]">
             {pending.length} pending
           </span>
         )}
@@ -109,7 +109,7 @@ export default function HITLApprovalCard() {
                     {r.reasoning}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#737373]">
+                <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-[#8a8a8a]">
                   <span>
                     ID: <strong>{r.validation_id}</strong>
                   </span>
@@ -145,7 +145,7 @@ export default function HITLApprovalCard() {
           </div>
         ))}
         {requests.length === 0 && (
-          <div className="p-8 text-center text-sm text-[#737373]">
+          <div className="p-8 text-center text-sm text-[#8a8a8a]">
             No pending approvals
           </div>
         )}

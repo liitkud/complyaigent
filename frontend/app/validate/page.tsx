@@ -158,7 +158,7 @@ export default function ValidatePage() {
                 placeholder="Paste code or diff to evaluate against the rule (e.g. AWS access key, config setting, API middleware)…"
                 required
                 aria-required="true"
-                className="w-full rounded-sm border border-[#343434] bg-[#141718] px-3 py-2 font-mono text-xs text-[#f1f1f1] placeholder-[#737373] transition-colors focus:border-[#4d8eff] focus:outline-none focus:ring-1 focus:ring-[#4d8eff]"
+                className="w-full rounded-sm border border-[#343434] bg-[#141718] px-3 py-2 font-mono text-xs text-[#f1f1f1] placeholder-[#8a8a8a] transition-colors focus:border-[#4d8eff] focus:outline-none focus:ring-1 focus:ring-[#4d8eff]"
               />
             </div>
             <div>
@@ -166,7 +166,7 @@ export default function ValidatePage() {
                 htmlFor="context"
                 className="ops-label mb-1.5 block text-[#8e8e8e]"
               >
-                Context <span className="text-[#737373]">(optional)</span>
+                Context <span className="text-[#8a8a8a]">(optional)</span>
               </label>
               <input
                 id="context"
@@ -174,7 +174,7 @@ export default function ValidatePage() {
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
                 placeholder="e.g. repo: backend-api, file: config/database.py"
-                className="w-full rounded-sm border border-[#343434] bg-[#1b1e20] px-3 py-2 text-xs text-[#f1f1f1] placeholder-[#737373] transition-colors focus:border-[#4d8eff] focus:outline-none focus:ring-1 focus:ring-[#4d8eff]"
+                className="w-full rounded-sm border border-[#343434] bg-[#1b1e20] px-3 py-2 text-xs text-[#f1f1f1] placeholder-[#8a8a8a] transition-colors focus:border-[#4d8eff] focus:outline-none focus:ring-1 focus:ring-[#4d8eff]"
               />
             </div>
             <button
@@ -265,7 +265,7 @@ export default function ValidatePage() {
                   {result.reasoning}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-6 font-mono text-xs text-[#737373]">
+              <div className="flex flex-wrap gap-6 font-mono text-xs text-[#8a8a8a]">
                 <span>
                   Audit Sinks Logged: {result.activity_logged ? "✓ Yes (Loki)" : "✗ No (Local)"}
                 </span>

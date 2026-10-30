@@ -80,7 +80,7 @@ export default function IngestStatusPage() {
             <h1 className="mt-0.5 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
               Document Ingestion Progress
             </h1>
-            <p className="font-mono text-xs text-[#737373]">
+            <p className="font-mono text-xs text-[#8a8a8a]">
               Task ID: {id}
             </p>
           </div>
@@ -138,7 +138,7 @@ export default function IngestStatusPage() {
               />
             </div>
             {status.eta_seconds !== null && status.status !== "complete" && (
-              <p className="mt-2 font-mono text-xs text-[#737373]">
+              <p className="mt-2 font-mono text-xs text-[#8a8a8a]">
                 ~{status.eta_seconds}s remaining estimated
               </p>
             )}
@@ -175,7 +175,7 @@ export default function IngestStatusPage() {
                             ? "border-[#4edea3] bg-[#4edea3]/20 text-[#4edea3]"
                             : isCurrent
                               ? "border-[#4d8eff] bg-[#4d8eff]/20 text-[#adc6ff]"
-                              : "border-[#343434] bg-[#202020] text-[#737373]"
+                              : "border-[#343434] bg-[#202020] text-[#8a8a8a]"
                       }`}
                     >
                       {isFailedHere ? (
@@ -185,7 +185,7 @@ export default function IngestStatusPage() {
                       ) : isCurrent ? (
                         <Loader2 size={14} className="animate-spin" />
                       ) : (
-                        <span className="font-mono text-[10px] font-bold">
+                        <span className="font-mono text-[11px] font-bold">
                           {i + 1}
                         </span>
                       )}
@@ -208,7 +208,7 @@ export default function IngestStatusPage() {
                             ? "text-[#4edea3]"
                             : isCurrent
                               ? "text-[#adc6ff]"
-                              : "text-[#737373]"
+                              : "text-[#8a8a8a]"
                       }`}
                     >
                       {stageLabels[stage]}

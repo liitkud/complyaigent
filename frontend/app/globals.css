@@ -55,7 +55,7 @@ a:focus-visible {
 
 .ops-label {
   font-family: var(--font-mono), monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -63,6 +63,7 @@ a:focus-visible {
 @media (max-width: 767px) {
   .ops-sidebar {
     width: 100%;
+    max-width: 100vw;
     flex-direction: row;
     align-items: center;
     border-right: 0;
@@ -70,14 +71,30 @@ a:focus-visible {
   }
 
   .ops-sidebar .sidebar-brand {
+    flex-shrink: 0;
     border-bottom: 0;
   }
 
+  /* The wordmark/subtitle is the first thing to go under width pressure —
+     the "F" mark alone still identifies the product, and freeing this
+     text is what keeps the nav row from forcing the whole bar past the
+     viewport on a phone. */
+  .ops-sidebar .sidebar-brand-text {
+    display: none;
+  }
+
   .ops-sidebar .sidebar-nav {
+    flex: 1 1 auto;
+    min-width: 0;
     flex-direction: row;
     gap: 2px;
     overflow-x: auto;
     padding: 8px;
+  }
+
+  /* Analytics kicker only makes sense stacked above a vertical list. */
+  .ops-sidebar .sidebar-nav > p {
+    display: none;
   }
 
   .ops-sidebar .sidebar-actions,
