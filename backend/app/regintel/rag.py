@@ -1,26 +1,18 @@
-from functools import lru_cache
 from pathlib import Path
 
-import sqlalchemy
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.schema import NodeWithScore
 from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.postgres import PGVectorStore
-from openai import AsyncOpenAI
 
 from app.core.config import settings
+
+from ..core.lifespan import app_state
 
 # Detect project root (where .env lives)
 # rag.py is in backend/app/regintel/
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-
-
-@lru_cache
-def get_openai_client():
-    return AsyncOpenAI(
-        base_url=settings.LLM_ENDPOINT, api_key=settings.LLM_API_KEY or "missing-key"
-    )
 
 
 class VectorStoreConnection:
@@ -30,17 +22,9 @@ class VectorStoreConnection:
         self.should_reset = False
 
     @property
-    def vector_store(self):
-        url = sqlalchemy.make_url(settings.DATABASE_URL)
-        return PGVectorStore.from_params(
-            host=url.host,
-            port=str(url.port or 5432),
-            user=url.username,
-            password=url.password,
-            database=url.database,
-            table_name="regulations_vectors",
-            embed_dim=1024,
-        )
+    def vector_store(self) -> PGVectorStore:
+        assert app_state.vector_client is not None, "Vector client is not initialized"
+        return app_state.vector_client
 
     @property
     def embedding_model(self):
@@ -89,8 +73,8 @@ class VectorStoreConnection:
         {query}
         """
         print(user_prompt)
-
-        completion = await get_openai_client().chat.completions.create(
+        assert app_state.groq_client is not None, "Groq client is not initialized"
+        completion = await app_state.groq_client.chat.completions.create(
             model=settings.CHAT_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
