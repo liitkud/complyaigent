@@ -103,6 +103,51 @@ a:focus-visible {
   }
 }
 
+/* Hero document-extraction demo (landing page): each clause line and its
+   bucket tag cascade in, hold, then fade — animation-delay staggers which
+   clause is "being read" at any moment. Reduced-motion below pins every
+   line to its fully-labelled end state instead of freezing mid-fade. */
+@keyframes hero-extract-reveal {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.hero-extract-line {
+  opacity: 0;
+  animation: hero-extract-reveal 9.5s ease-in-out infinite;
+}
+
+.hero-extract-tag {
+  opacity: 0;
+  transform: scale(0.92);
+  animation:
+    hero-extract-reveal 9.5s ease-in-out infinite,
+    hero-extract-tag-pop 9.5s ease-in-out infinite;
+}
+
+@keyframes hero-extract-tag-pop {
+  0%,
+  6% {
+    transform: scale(0.92);
+  }
+  14% {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -111,6 +156,12 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .hero-extract-line,
+  .hero-extract-tag {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

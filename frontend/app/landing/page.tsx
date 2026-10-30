@@ -6,7 +6,6 @@ import {
   Code2,
   Cpu,
   FileText,
-  LockKeyhole,
   Server,
   Shield,
   ShieldCheck,
@@ -62,6 +61,37 @@ const buckets = [
     desc: "High-level constitutional guidelines and architectural principles designed for human engineering review and automated PR summarizers.",
     examples: ["Sanitize all internal stack traces in public error payloads", "Maintain separation of duties between billing and identity pipelines", "Require dual sign-off on breaking API contracts"],
     icon: FileText,
+  },
+];
+
+// Verbatim text of RA 10173 (Philippine Data Privacy Act of 2012), §20(c) — the
+// provision listing required organizational security measures. Bucket/color
+// assignments are illustrative of how FerretOPS's categorizer would route each
+// clause, not a claim about a specific compiled rule ID.
+const dpaClauses = [
+  {
+    id: "1",
+    text: "Safeguards to protect its computer network against accidental, unlawful or unauthorized usage or interference with or hindering of their functioning or availability.",
+    bucket: "B · Infra Metadata",
+    color: "#4edea3",
+  },
+  {
+    id: "2",
+    text: "A security policy with respect to the processing of personal information.",
+    bucket: "C · Semantic Guidance",
+    color: "#a78bc9",
+  },
+  {
+    id: "3",
+    text: "A process for identifying and accessing reasonably foreseeable vulnerabilities in its computer networks, and for taking preventive, corrective and mitigating action against security incidents that can lead to a security breach.",
+    bucket: "A2 · Actionable",
+    color: "#f0c674",
+  },
+  {
+    id: "4",
+    text: "Regular monitoring for security breaches and a process for taking preventive, corrective and mitigating action against security incidents that can lead to a security breach.",
+    bucket: "B · Infra Metadata",
+    color: "#4edea3",
   },
 ];
 
@@ -177,121 +207,121 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <main id="main-content" className="mx-auto max-w-7xl px-5 pb-24 pt-12 sm:px-8 sm:pt-16 lg:px-12 lg:pb-32">
-          <section
-            aria-labelledby="hero-title"
-            className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"
-          >
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#4edea3]/30 bg-[#4edea3]/10 px-3 py-1 text-xs text-[#4edea3]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
-                Continuous Compliance Gate & Policy Extraction Engine
-              </div>
-
-              <h1
-                id="hero-title"
-                className="mt-6 max-w-3xl font-[family-name:var(--font-geist-sans)] text-4xl font-bold leading-[1.05] tracking-[-0.04em] text-[#f1f1f1] sm:text-5xl lg:text-6xl"
-              >
-                Turn statutory policy into a{" "}
-                <span className="text-[#4edea3]">compile-time guardrail.</span>
-              </h1>
-
-              <p className="mt-6 max-w-xl text-base leading-7 text-[#a3a6a5] sm:text-lg">
-                FerretOPS bridges organizational governance and production code.
-                Upload statutory PDFs or constitutions, automatically compile them into
-                deterministic regex filters and review gates, and enforce compliance
-                directly on every developer <code className="rounded bg-[#202020] px-1.5 py-0.5 font-mono text-xs text-[#adc6ff]">git push</code>.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/policy"
-                  className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#adc6ff] px-6 py-3 text-sm font-semibold text-[#10151f] shadow-md shadow-[#adc6ff]/10 transition-colors hover:bg-white"
-                >
-                  <Upload size={16} /> Ingest a Policy <ArrowRight size={15} />
-                </Link>
-                <Link
-                  href="/validate"
-                  className="inline-flex items-center justify-center gap-2 rounded-sm border border-[#4b5255] px-6 py-3 text-sm font-semibold text-[#e7e7e7] transition-colors hover:border-[#adc6ff] hover:bg-[#1d2428]"
-                >
-                  <Terminal size={16} /> Try Validation Sandbox
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 rounded-sm border border-[#343434] bg-[#1a1a1a] px-5 py-3 text-sm font-medium text-[#8e8e8e] transition-colors hover:text-white"
-                >
-                  <ShieldCheck size={16} className="text-[#4edea3]" /> Console
-                </Link>
-              </div>
-
-              <div className="mt-6 flex items-center gap-4 text-xs text-[#687071]">
-                <span className="flex items-center gap-1.5 font-mono">
-                  <Check size={13} className="text-[#4edea3]" /> Pre-push Fail Closed
-                </span>
-                <span className="flex items-center gap-1.5 font-mono">
-                  <Check size={13} className="text-[#4edea3]" /> Presidio PII Shield
-                </span>
-                <span className="flex items-center gap-1.5 font-mono">
-                  <Check size={13} className="text-[#4edea3]" /> Loki Verdict Sinks
-                </span>
-              </div>
+          <section aria-labelledby="hero-title" className="max-w-3xl">
+            <div className="ops-label flex items-center gap-2 text-[#4edea3]">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
+              Republic Act No. 10173 · §20(c) · Live Extraction
             </div>
 
-            {/* Interactive Terminal / Live Preview Card */}
-            <div className="relative">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-6 -z-10 bg-[#4d8eff]/15 blur-3xl"
-              />
-              <div className="overflow-hidden rounded-md border border-[#343434] bg-[#141718] shadow-2xl shadow-black/60">
-                <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3">
+            <h1
+              id="hero-title"
+              className="mt-5 font-[family-name:var(--font-geist-sans)] text-4xl font-bold leading-[1.08] tracking-[-0.04em] text-[#f1f1f1] sm:text-5xl lg:text-[3.4rem]"
+            >
+              Statutory text,{" "}
+              <span className="text-[#4edea3]">compiled into a push gate.</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-base leading-7 text-[#a3a6a5] sm:text-lg">
+              Below is a real excerpt of the Philippine Data Privacy Act, being read the
+              way FerretOPS reads it — split, categorized, and routed into one of four
+              rule buckets before it ever becomes a regex.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/policy"
+                className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#adc6ff] px-6 py-3 text-sm font-semibold text-[#10151f] shadow-md shadow-[#adc6ff]/10 transition-colors hover:bg-white"
+              >
+                <Upload size={16} /> Ingest a Policy <ArrowRight size={15} />
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-[#4b5255] px-6 py-3 text-sm font-semibold text-[#e7e7e7] transition-colors hover:border-[#adc6ff] hover:bg-[#1d2428]"
+              >
+                <ShieldCheck size={16} className="text-[#4edea3]" /> Open the Console
+              </Link>
+            </div>
+          </section>
+
+          {/* Document → Manifest live extraction visualization */}
+          <section
+            aria-label="Live demonstration: a real Data Privacy Act excerpt being categorized into FerretOPS rule buckets"
+            className="mt-14 overflow-hidden rounded-md border border-[#343434] bg-[#141718] shadow-2xl shadow-black/60"
+          >
+            <div className="grid divide-y divide-[#282d2f] lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+              {/* Left: source document */}
+              <div>
+                <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3 sm:px-6">
                   <div className="flex items-center gap-2 font-mono text-xs text-[#8d9697]">
-                    <div className="flex gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f56]/80" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd2e]/80" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#27c93f]/80" />
-                    </div>
-                    <span className="ml-2 font-semibold text-[#f1f1f1]">
-                      pg scan --hook=pre-push
-                    </span>
+                    <FileText size={14} />
+                    <span className="font-semibold text-[#f1f1f1]">RA-10173.pdf</span>
                   </div>
-                  <span className="font-mono text-[11px] text-[#4edea3]">
-                    ● ACTIVE
+                  <span className="font-mono text-[11px] text-[#687071]">Source document</span>
+                </div>
+                <div className="p-5 font-mono text-[13px] leading-relaxed text-[#c3c7c6] sm:p-6">
+                  <p className="mb-4 text-[11px] uppercase tracking-[0.12em] text-[#687071]">
+                    Sec. 20(c) — Security of Personal Information
+                  </p>
+                  {dpaClauses.map((c) => (
+                    <p key={c.id} className="mb-3">
+                      <span className="text-[#687071]">({c.id})</span> {c.text}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: live-labelled manifest */}
+              <div>
+                <div className="flex items-center justify-between border-b border-[#282d2f] bg-[#1a1e20] px-4 py-3 sm:px-6">
+                  <div className="flex items-center gap-2 font-mono text-xs text-[#8d9697]">
+                    <Shield size={14} />
+                    <span className="font-semibold text-[#f1f1f1]">Governance Manifest</span>
+                  </div>
+                  <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#4edea3]">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
+                    Extracting
                   </span>
                 </div>
-
-                <div className="space-y-3 p-5 font-mono text-xs leading-relaxed sm:p-6 sm:text-[13px]">
-                  <div className="text-[#8e8e8e]">
-                    <span className="text-[#4edea3]">&gt;</span> Checking local diff against active Governance Manifest...
-                  </div>
-                  <div className="rounded bg-[#0d1011] p-3 text-xs border border-[#22282a]">
-                    <p className="text-[#8e8e8e]">{"// Bucket A1: Scannable Regex Inspection"}</p>
-                    <p className="text-[#4edea3]">✔ A1-001 No AWS Access Keys in Source (0.012s)</p>
-                    <p className="text-[#4edea3]">✔ A1-002 No Unencrypted RSA Private Keys (0.008s)</p>
-                    <p className="text-[#4edea3]">✔ A1-003 Presidio PII Shielding (0.019s)</p>
-                  </div>
-
-                  <div className="rounded bg-[#0d1011] p-3 text-xs border border-[#f0c674]/30">
-                    <p className="text-[#f0c674]">{"// Bucket A2: Contextual Review Dispatched"}</p>
-                    <p className="text-[#e7e7e7]">
-                      Rule: <span className="text-[#f0c674]">A2-001 Mandatory KMS Encryption at Rest</span>
+                <div className="p-5 font-mono text-[13px] leading-relaxed sm:p-6">
+                  {dpaClauses.map((c, i) => (
+                    <p
+                      key={c.id}
+                      className="hero-extract-line mb-3 text-[#c3c7c6]"
+                      style={{ animationDelay: `${i * 1.6}s` }}
+                    >
+                      <span className="text-[#687071]">({c.id})</span> {c.text}{" "}
+                      <span
+                        className="hero-extract-tag ml-1 inline-flex items-center rounded-sm border px-1.5 py-0.5 align-middle font-mono text-[11px] font-bold uppercase tracking-wide"
+                        style={{
+                          animationDelay: `${i * 1.6 + 0.9}s`,
+                          borderColor: `${c.color}66`,
+                          backgroundColor: `${c.color}1a`,
+                          color: c.color,
+                        }}
+                      >
+                        {c.bucket}
+                      </span>
                     </p>
-                    <p className="text-[#8e8e8e]">Action: Dispatching diff snippet to operator approval queue...</p>
-                    <p className="text-[#adc6ff] font-semibold mt-1">
-                      Verdict: 202 ACCEPTED → Poll /validate/val-9802 [Approved]
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 text-[11px] text-[#687071] border-t border-[#22282a]">
-                    <span>Policy Hash: <code className="text-[#adc6ff]">sha256:7f4a...e12d</code></span>
-                    <span className="text-[#4edea3]">Exit Code: 0 (Push Allowed)</span>
-                  </div>
+                  ))}
+                  <p className="hero-extract-line mt-4 border-t border-[#22282a] pt-3 text-[11px] text-[#687071]" style={{ animationDelay: `${dpaClauses.length * 1.6 + 0.6}s` }}>
+                    4 clauses routed · 0 discarded · compiled into active manifest
+                  </p>
                 </div>
               </div>
-
-              <div className="absolute -bottom-4 -right-2 flex items-center gap-2 border border-[#3a4548] bg-[#1c2325] px-3.5 py-1.5 font-mono text-[11px] text-[#a3a6a5] shadow-lg sm:-right-4">
-                <LockKeyhole size={14} className="text-[#4edea3]" /> Immutable Audit Lineage
-              </div>
             </div>
+          </section>
+
+          {/* Compliance frameworks, surfaced early */}
+          <section aria-label="Compliance frameworks FerretOPS compiles against" className="mt-8 flex flex-wrap items-center gap-2.5">
+            <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[#687071]">Compiles against</span>
+            {frameworks.map((f) => (
+              <span
+                key={f.name}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#343434] bg-[#1a1a1a] px-3 py-1 text-xs text-[#a3a6a5]"
+              >
+                <Check size={12} className="text-[#4edea3]" /> {f.name}
+              </span>
+            ))}
           </section>
 
           {/* Metric Bar */}
