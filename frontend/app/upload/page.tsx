@@ -10,6 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
@@ -52,7 +53,7 @@ export default function UploadPage() {
   );
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
           <p className="ops-label text-[#4d8eff]">FerretOPS / Pipeline</p>
@@ -100,7 +101,7 @@ export default function UploadPage() {
             <Upload
               size={40}
               className={
-                dragOver ? "text-[#adc6ff]" : "text-[#737373]"
+                dragOver ? "text-[#adc6ff]" : "text-[#8a8a8a]"
               }
             />
           )}
@@ -166,6 +167,7 @@ export default function UploadPage() {
           </div>
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }

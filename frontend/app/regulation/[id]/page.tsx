@@ -11,8 +11,10 @@ import {
   Server,
   BookOpen,
   Shield,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 /* Legacy preview fixture intentionally disabled in the production path.
 const mockManifest = (id: string): GovernanceManifest => ({
@@ -147,7 +149,7 @@ export default function RegulationDetailPage() {
   }, [id]);
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div className="flex items-center gap-3">
           <Link
@@ -162,7 +164,7 @@ export default function RegulationDetailPage() {
             <h1 className="mt-0.5 font-[family-name:var(--font-geist-sans)] text-lg font-bold text-[#f1f1f1]">
               Regulation Rule Detail
             </h1>
-            <p className="font-mono text-xs text-[#737373]">
+            <p className="font-mono text-xs text-[#8a8a8a]">
               ID: {id}
             </p>
           </div>
@@ -174,9 +176,24 @@ export default function RegulationDetailPage() {
           <div
             role="alert"
             aria-live="assertive"
-            className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4 text-sm text-[#ffb3ad]"
+            className="ops-panel border-[#ff5451]/40 bg-[#ff5451]/5 p-6 flex items-start gap-4"
           >
-            Backend unavailable. {error}
+            <XCircle size={24} className="mt-0.5 shrink-0 text-[#ff5451]" />
+            <div className="min-w-0 flex-1">
+              <p className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#ffb3ad]">
+                {error}
+              </p>
+              <p className="mt-1 text-xs text-[#8e8e8e]">
+                No regulation matches ID <span className="font-mono">{id}</span>. It may have
+                been removed, or the ID in the URL is incorrect.
+              </p>
+              <Link
+                href="/policy"
+                className="mt-3 inline-block rounded-sm bg-[#ff5451] px-4 py-2 text-xs font-bold text-[#08101f] transition-colors hover:bg-white"
+              >
+                Back to Policy Dashboard
+              </Link>
+            </div>
           </div>
         )}
 
@@ -206,7 +223,7 @@ export default function RegulationDetailPage() {
                     <h2 className="text-base font-bold text-[#f1f1f1]">
                       {manifest.meta.source_name}
                     </h2>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-[#737373]">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs text-[#8a8a8a]">
                       <StatusBadge
                         label={manifest.meta.source_type.replace(/_/g, " ")}
                         variant="info"
@@ -249,7 +266,7 @@ export default function RegulationDetailPage() {
                       {r.pattern}
                     </code>
                     <p className="text-xs text-[#8e8e8e]">{r.remediation}</p>
-                    <div className="flex flex-wrap gap-2 font-mono text-[10px] text-[#737373]">
+                    <div className="flex flex-wrap gap-2 font-mono text-[11px] text-[#8a8a8a]">
                       <span className="rounded-sm bg-[#4edea3]/10 px-1.5 py-0.5 text-[#4edea3] border border-[#4edea3]/30">
                         pass: {r.test_pass}
                       </span>
@@ -306,7 +323,7 @@ export default function RegulationDetailPage() {
                       <p className="text-sm font-medium text-[#f1f1f1]">
                         {r.rule_name}
                       </p>
-                      <p className="font-mono text-xs text-[#737373]">
+                      <p className="font-mono text-xs text-[#8a8a8a]">
                         {r.impact_radius.replace(/_/g, " ")}
                       </p>
                     </div>
@@ -314,7 +331,7 @@ export default function RegulationDetailPage() {
                       <code className="text-xs font-mono text-[#adc6ff]">
                         {r.key}
                       </code>
-                      <p className="font-mono text-[10px] text-[#737373]">
+                      <p className="font-mono text-[11px] text-[#8a8a8a]">
                         {JSON.stringify(r.value)}
                       </p>
                     </div>
@@ -341,7 +358,7 @@ export default function RegulationDetailPage() {
                     <p className="mt-1 text-xs leading-relaxed text-[#c5c5c5]">
                       {r.summary}
                     </p>
-                    <p className="mt-1 font-mono text-[10px] text-[#737373]">
+                    <p className="mt-1 font-mono text-[11px] text-[#8a8a8a]">
                       {r.impact_radius.replace(/_/g, " ")}
                     </p>
                   </div>
@@ -361,6 +378,7 @@ export default function RegulationDetailPage() {
           )
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }
@@ -391,19 +409,19 @@ function RuleSection({
   return (
     <div className="ops-panel overflow-hidden">
       <div className="flex items-center gap-2 border-b border-[#343434] bg-[#1a1e20] px-5 py-4">
-        <Icon size={16} className={iconColors[color] ?? "text-[#737373]"} />
+        <Icon size={16} className={iconColors[color] ?? "text-[#8a8a8a]"} />
         <div>
           <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             {title}
           </h3>
-          <p className="text-[10px] text-[#8e8e8e]">{subtitle}</p>
+          <p className="text-[11px] text-[#8e8e8e]">{subtitle}</p>
         </div>
         <span className="ml-auto rounded-sm border border-[#343434] bg-[#202020] px-2 py-0.5 font-mono text-xs font-bold text-[#f1f1f1]">
           {count}
         </span>
       </div>
       {count === 0 ? (
-        <p className="px-5 py-6 text-center text-xs text-[#737373]">
+        <p className="px-5 py-6 text-center text-xs text-[#8a8a8a]">
           No rules in this bucket
         </p>
       ) : (

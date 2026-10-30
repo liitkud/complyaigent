@@ -18,6 +18,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 export const dynamic = "force-dynamic";
 /* Legacy preview fixtures are intentionally disabled in the production path.
@@ -276,7 +277,7 @@ export default function PolicyDashboardPage() {
   const buckets = manifest?.buckets;
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
@@ -349,7 +350,7 @@ export default function PolicyDashboardPage() {
                       label={`C: ${buckets.C.length}`}
                       variant="processing"
                     />
-                    <span className="ml-auto font-mono text-xs text-[#737373]">
+                    <span className="ml-auto font-mono text-xs text-[#8a8a8a]">
                       Source: {manifest.meta.source_name} (v{manifest.meta.version})
                     </span>
                   </div>
@@ -435,7 +436,7 @@ export default function PolicyDashboardPage() {
                     <p className="text-sm font-medium text-[#c5c5c5]">
                       {reg.source_name}
                     </p>
-                    <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-[#737373]">
+                    <div className="mt-1 flex items-center gap-2 font-mono text-[11px] text-[#8a8a8a]">
                       <StatusBadge
                         label={reg.source_type.replace(/_/g, " ")}
                         variant={
@@ -455,7 +456,7 @@ export default function PolicyDashboardPage() {
                   </div>
                   <ArrowRight
                     size={14}
-                    className="text-[#737373] transition-transform group-hover:translate-x-0.5"
+                    className="text-[#8a8a8a] transition-transform group-hover:translate-x-0.5"
                   />
                 </Link>
               ))}
@@ -463,6 +464,7 @@ export default function PolicyDashboardPage() {
           </div>
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }
@@ -528,10 +530,10 @@ function BucketPanel({
           <h4 className="text-sm font-semibold text-[#f1f1f1]">
             {title}
           </h4>
-          <p className="text-[10px] text-[#8e8e8e]">{subtitle}</p>
+          <p className="text-[11px] text-[#8e8e8e]">{subtitle}</p>
         </div>
         <span
-          className={`ml-auto rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold ${c.badge}`}
+          className={`ml-auto rounded-sm px-2 py-0.5 font-mono text-[11px] font-bold ${c.badge}`}
         >
           {items.length}
         </span>
@@ -543,7 +545,7 @@ function BucketPanel({
         aria-label={`${title} rules list`}
       >
         {items.length === 0 ? (
-          <p className="px-4 py-6 text-center text-xs text-[#737373]">
+          <p className="px-4 py-6 text-center text-xs text-[#8a8a8a]">
             No rules in this bucket
           </p>
         ) : (
@@ -552,7 +554,7 @@ function BucketPanel({
               <p className="text-xs font-medium text-[#c5c5c5]">
                 {item.name}
               </p>
-              <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-[#737373]">
+              <div className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-[#8a8a8a]">
                 <span className="rounded bg-[#202020] px-1 py-0.5 text-[#adc6ff]">
                   {item.detail}
                 </span>

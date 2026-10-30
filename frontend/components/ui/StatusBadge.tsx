@@ -22,7 +22,7 @@ const dotStyles: Record<BadgeVariant, string> = {
   warning: "bg-[#adc6ff]",
   danger: "bg-[#ff5451]",
   info: "bg-[#4d8eff]",
-  neutral: "bg-[#737373]",
+  neutral: "bg-[#8a8a8a]",
   processing: "animate-pulse bg-[#4d8eff]",
 };
 
@@ -39,7 +39,7 @@ export default function StatusBadge({
 }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-medium ${styles[variant]}`}
+      className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-[11px] font-medium ${styles[variant]}`}
     >
       {dot && (
         <span className={`h-1.5 w-1.5 rounded-full ${dotStyles[variant]}`} />

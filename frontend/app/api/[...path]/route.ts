@@ -185,6 +185,13 @@ async function handleProxyOrFallback(
 
   if (endpoint.startsWith("regulation/")) {
     const id = endpoint.split("/")[1];
+    const known = mockRegulations.some((r) => r.id === id);
+    if (!known) {
+      return NextResponse.json(
+        { detail: "Regulation not found" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json({
       ...mockManifest,
       meta: { ...mockManifest.meta, source_uuid: id },
@@ -227,6 +234,18 @@ async function handleProxyOrFallback(
 
   if (endpoint.startsWith("ingest/")) {
     const id = endpoint.split("/")[1];
+    // Only IDs this same edge fallback actually issued (via the demo POST
+    // /ingest below) are "known" — anything else is a 404, same as the real
+    // backend would give for an unknown task UUID. Without this check, any
+    // arbitrary path (e.g. /ingest/999) silently reported a fabricated
+    // "100% complete" result instead of reflecting that no such task exists.
+    const isDemoTaskId = /^task-\d+$/.test(id);
+    if (!isDemoTaskId) {
+      return NextResponse.json(
+        { detail: "Task not found" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json({
       task_id: id,
       status: "complete",

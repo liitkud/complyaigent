@@ -57,8 +57,8 @@ const buckets = [
     id: "Bucket C",
     tag: "SEMANTIC_GUIDANCE",
     title: "Organizational Directives",
-    color: "border-[#c58fff]/40 bg-[#c58fff]/5 text-[#c58fff]",
-    badgeColor: "bg-[#c58fff]/20 text-[#c58fff] border-[#c58fff]/40",
+    color: "border-[#a78bc9]/40 bg-[#a78bc9]/5 text-[#a78bc9]",
+    badgeColor: "bg-[#a78bc9]/20 text-[#a78bc9] border-[#a78bc9]/40",
     desc: "High-level constitutional guidelines and architectural principles designed for human engineering review and automated PR summarizers.",
     examples: ["Sanitize all internal stack traces in public error payloads", "Maintain separation of duties between billing and identity pipelines", "Require dual sign-off on breaking API contracts"],
     icon: FileText,
@@ -125,7 +125,7 @@ export default function LandingPage() {
                 <span className="font-mono text-sm font-bold tracking-wide text-[#f1f1f1]">
                   FerretOPS
                 </span>
-                <span className="ml-2 hidden rounded border border-[#4edea3]/40 bg-[#4edea3]/10 px-1.5 py-0.5 font-mono text-[9px] text-[#4edea3] sm:inline">
+                <span className="ml-2 hidden rounded border border-[#4edea3]/40 bg-[#4edea3]/10 px-1.5 py-0.5 font-mono text-[11px] text-[#4edea3] sm:inline">
                   v1.0 MVP
                 </span>
               </div>
@@ -192,9 +192,7 @@ export default function LandingPage() {
                 className="mt-6 max-w-3xl font-[family-name:var(--font-geist-sans)] text-4xl font-bold leading-[1.05] tracking-[-0.04em] text-[#f1f1f1] sm:text-5xl lg:text-6xl"
               >
                 Turn statutory policy into a{" "}
-                <span className="bg-gradient-to-r from-[#adc6ff] via-[#70a1ff] to-[#4edea3] bg-clip-text text-transparent">
-                  compile-time guardrail.
-                </span>
+                <span className="text-[#4edea3]">compile-time guardrail.</span>
               </h1>
 
               <p className="mt-6 max-w-xl text-base leading-7 text-[#a3a6a5] sm:text-lg">
@@ -256,7 +254,7 @@ export default function LandingPage() {
                       pg scan --hook=pre-push
                     </span>
                   </div>
-                  <span className="font-mono text-[10px] text-[#4edea3]">
+                  <span className="font-mono text-[11px] text-[#4edea3]">
                     ● ACTIVE
                   </span>
                 </div>
@@ -365,7 +363,7 @@ export default function LandingPage() {
                   >
                     <div className="flex items-center justify-between">
                       <StepIcon size={22} className="text-[#adc6ff] transition-transform group-hover:scale-110" />
-                      <span className="font-mono text-[10px] font-semibold text-[#737373]">
+                      <span className="font-mono text-[11px] font-semibold text-[#8a8a8a]">
                         {s.step}
                       </span>
                     </div>
@@ -410,7 +408,7 @@ export default function LandingPage() {
                   >
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className={`rounded-sm border px-2 py-0.5 font-mono text-[10px] font-bold ${b.badgeColor}`}>
+                        <span className={`rounded-sm border px-2 py-0.5 font-mono text-[11px] font-bold ${b.badgeColor}`}>
                           {b.tag}
                         </span>
                         <BucketIcon size={20} />
@@ -423,7 +421,7 @@ export default function LandingPage() {
                       </p>
 
                       <div className="mt-6 space-y-2 border-t border-[#343434]/80 pt-4">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-[#737373]">
+                        <p className="font-mono text-[11px] uppercase tracking-wider text-[#8a8a8a]">
                           Enforced Examples:
                         </p>
                         {b.examples.map((ex) => (
@@ -510,12 +508,12 @@ export default function LandingPage() {
 
               {/* Terminal Code Snippet */}
               <div className="rounded-md border border-[#343434] bg-[#121415] p-5 font-mono text-xs leading-relaxed text-[#a3a6a5] shadow-xl">
-                <p className="text-[#737373]"># 1. Install CLI and register git pre-push hook</p>
+                <p className="text-[#8a8a8a]"># 1. Install CLI and register git pre-push hook</p>
                 <p className="text-[#4edea3]">$ pg init --repo=./my-service</p>
                 <p className="text-[#f1f1f1] mt-1">✔ Configured pre-push hook in .git/hooks/pre-push</p>
                 <p className="text-[#f1f1f1]">✔ Synced Governance Manifest (12 rules active)</p>
 
-                <p className="text-[#737373] mt-5"># 2. Trigger push with local diff</p>
+                <p className="text-[#8a8a8a] mt-5"># 2. Trigger push with local diff</p>
                 <p className="text-[#4edea3]">$ git push origin feat/payment-gateway</p>
                 <p className="text-[#8e8e8e] mt-1">[pg] Scanning 4 files in commit 7a8f9c...</p>
                 <p className="text-[#ff5451]">[FAIL] A1-001: AWS Access Key detected in config.yaml:14</p>

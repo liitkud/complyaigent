@@ -67,9 +67,9 @@ export default function ViolationsTable() {
           <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             Recent Violations
           </h3>
-          <p className="ops-label mt-1 text-[#737373]">Last 24 hours</p>
+          <p className="ops-label mt-1 text-[#8a8a8a]">Last 24 hours</p>
         </div>
-        <span className="rounded-sm border border-[#ff5451]/40 bg-[#ff5451]/10 px-2 py-1 font-mono text-[10px] text-[#ffb3ad]">
+        <span className="rounded-sm border border-[#ff5451]/40 bg-[#ff5451]/10 px-2 py-1 font-mono text-[11px] text-[#ffb3ad]">
           {violations.length} found
         </span>
       </div>
@@ -87,31 +87,31 @@ export default function ViolationsTable() {
             <tr>
               <th
                 scope="col"
-                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+                className="px-5 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-wider text-[#8a8a8a]"
               >
                 Time
               </th>
               <th
                 scope="col"
-                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+                className="px-5 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-wider text-[#8a8a8a]"
               >
                 Validation ID
               </th>
               <th
                 scope="col"
-                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+                className="px-5 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-wider text-[#8a8a8a]"
               >
                 Description / Reasoning
               </th>
               <th
                 scope="col"
-                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+                className="px-5 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-wider text-[#8a8a8a]"
               >
                 Verdict
               </th>
               <th
                 scope="col"
-                className="px-5 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-wider text-[#737373]"
+                className="px-5 py-3 text-left font-mono text-[11px] font-medium uppercase tracking-wider text-[#8a8a8a]"
               >
                 Logged
               </th>
@@ -130,7 +130,7 @@ export default function ViolationsTable() {
                   })}
                 </td>
                 <td className="whitespace-nowrap px-5 py-3 font-medium text-[#c5c5c5]">
-                  <code className="text-[10px]">{v.validation_id}</code>
+                  <code className="text-[11px]">{v.validation_id}</code>
                 </td>
                 <td className="max-w-xs truncate px-5 py-3 text-xs text-[#8e8e8e]">
                   {v.reasoning}

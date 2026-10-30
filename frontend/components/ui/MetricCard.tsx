@@ -37,7 +37,7 @@ export default function MetricCard({
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs text-[#737373]">
+            <p className="text-xs text-[#8a8a8a]">
               {subtitle}
             </p>
           )}
@@ -53,7 +53,7 @@ export default function MetricCard({
           >
             {trend.value >= 0 ? "↑" : "↓"} {Math.abs(trend.value)}%
           </span>
-          <span className="text-[#737373]">{trend.label}</span>
+          <span className="text-[#8a8a8a]">{trend.label}</span>
         </div>
       )}
     </div>

@@ -150,12 +150,12 @@ export default function PolicyDragAndDrop({
             <h3 className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
               Policy Repository
             </h3>
-            <p className="ops-label mt-1 text-[#737373]">
+            <p className="ops-label mt-1 text-[#8a8a8a]">
               Active regulations in manifest
             </p>
           </div>
         </div>
-        <span className="font-mono text-[10px] text-[#737373]">
+        <span className="font-mono text-[11px] text-[#8a8a8a]">
           {policies.length} sources
         </span>
       </div>
@@ -195,7 +195,7 @@ export default function PolicyDragAndDrop({
       >
         <Upload
           size={24}
-          className={`${dragOver ? "text-[#adc6ff]" : "text-[#737373]"}`}
+          className={`${dragOver ? "text-[#adc6ff]" : "text-[#8a8a8a]"}`}
         />
         <p className="text-sm text-[#8e8e8e]">
           {uploading
@@ -206,7 +206,7 @@ export default function PolicyDragAndDrop({
               ? `Processing: ${ingestStatus.current_stage}`
               : "Drag & drop policy files (PDF, Markdown)"}
         </p>
-        <p className="font-mono text-[10px] text-[#737373]">or click to browse</p>
+        <p className="font-mono text-[11px] text-[#8a8a8a]">or click to browse</p>
       </button>
 
       {/* Progress Stepper */}
@@ -304,7 +304,7 @@ export default function PolicyDragAndDrop({
                  <p className="text-sm font-medium text-[#c5c5c5]">
                   {p.source_name}
                 </p>
-                 <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#737373]">
+                 <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-[#8a8a8a]">
                   <span className="inline-flex items-center gap-1">
                     <Globe size={11} /> {p.source_type}
                   </span>

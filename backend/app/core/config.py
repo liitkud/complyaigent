@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Detect project root (where .env lives)
 # config.py is in backend/app/core/
-ROOT = Path(__file__).resolve().parent.parent.parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = ROOT / ".env"
 
 

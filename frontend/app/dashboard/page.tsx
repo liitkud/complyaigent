@@ -12,6 +12,7 @@ import ViolationsTable from "@/components/violations/ViolationsTable";
 import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
 import PolicyDragAndDrop from "@/components/policy/PolicyDragandDrop";
 import PipelineActivity from "@/components/pipeline/PipelineActivity";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 import {
   ScanSearch,
   ShieldCheck,
@@ -77,7 +78,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
@@ -91,7 +92,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           {!error && (
-            <span className="flex items-center gap-1.5 rounded-sm border border-[#4edea3]/40 bg-[#4edea3]/10 px-2 py-1 font-mono text-[10px] text-[#4edea3]">
+            <span className="flex items-center gap-1.5 rounded-sm border border-[#4edea3]/40 bg-[#4edea3]/10 px-2 py-1 font-mono text-[11px] text-[#4edea3]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4edea3]" />
               System Online
             </span>
@@ -180,6 +181,7 @@ export default function DashboardPage() {
         {/* Policy Repository */}
         <PolicyDragAndDrop onIngestStart={setActiveTaskId} />
       </main>
+      <ConsoleFooter />
     </div>
   );
 }
