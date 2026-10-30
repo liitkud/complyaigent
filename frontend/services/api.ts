@@ -216,9 +216,15 @@ export const apiFetch = async <T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> => {
-  console.log(`${API_BASE}${path}`);
   const res = await fetch(`${API_BASE}${path}`, init);
-  if (!res.ok) throw new Error(res.statusText);
+  if (!res.ok) {
+    const detail = await res
+      .clone()
+      .json()
+      .then((body) => body?.detail)
+      .catch(() => undefined);
+    throw new Error(detail || res.statusText || `Request failed (${res.status})`);
+  }
   return res.json();
 };
 

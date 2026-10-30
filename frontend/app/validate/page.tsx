@@ -12,6 +12,7 @@ import {
 } from "@/services/api";
 import { ShieldCheck, Loader2, Send } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 const verdictVariant: Record<string, "success" | "warning" | "danger"> = {
   LOW: "success",
@@ -97,7 +98,7 @@ export default function ValidatePage() {
   };
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
           <p className="ops-label text-[#4edea3]">FerretOPS / Sandbox</p>
@@ -285,6 +286,7 @@ export default function ValidatePage() {
           </div>
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }

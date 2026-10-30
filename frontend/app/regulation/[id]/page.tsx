@@ -11,8 +11,10 @@ import {
   Server,
   BookOpen,
   Shield,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 /* Legacy preview fixture intentionally disabled in the production path.
 const mockManifest = (id: string): GovernanceManifest => ({
@@ -147,7 +149,7 @@ export default function RegulationDetailPage() {
   }, [id]);
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div className="flex items-center gap-3">
           <Link
@@ -174,9 +176,24 @@ export default function RegulationDetailPage() {
           <div
             role="alert"
             aria-live="assertive"
-            className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4 text-sm text-[#ffb3ad]"
+            className="ops-panel border-[#ff5451]/40 bg-[#ff5451]/5 p-6 flex items-start gap-4"
           >
-            Backend unavailable. {error}
+            <XCircle size={24} className="mt-0.5 shrink-0 text-[#ff5451]" />
+            <div className="min-w-0 flex-1">
+              <p className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#ffb3ad]">
+                {error}
+              </p>
+              <p className="mt-1 text-xs text-[#8e8e8e]">
+                No regulation matches ID <span className="font-mono">{id}</span>. It may have
+                been removed, or the ID in the URL is incorrect.
+              </p>
+              <Link
+                href="/policy"
+                className="mt-3 inline-block rounded-sm bg-[#ff5451] px-4 py-2 text-xs font-bold text-[#08101f] transition-colors hover:bg-white"
+              >
+                Back to Policy Dashboard
+              </Link>
+            </div>
           </div>
         )}
 
@@ -361,6 +378,7 @@ export default function RegulationDetailPage() {
           )
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }

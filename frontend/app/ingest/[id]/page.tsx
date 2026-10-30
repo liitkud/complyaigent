@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { apiClient, type IngestStatus } from "@/services/api";
 import { Loader2, CheckCircle2, ArrowLeft, XCircle } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 const stageOrder = [
   "extracting",
@@ -64,7 +65,7 @@ export default function IngestStatusPage() {
   const isFailed = status?.status === "failed";
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       <header className="sticky top-0 z-10 border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div className="flex items-center gap-3">
           <Link
@@ -91,14 +92,29 @@ export default function IngestStatusPage() {
           <div
             role="alert"
             aria-live="assertive"
-            className="rounded-sm border border-[#ff5451]/50 bg-[#ff5451]/10 p-4 text-sm text-[#ffb3ad]"
+            className="ops-panel border-[#ff5451]/40 bg-[#ff5451]/5 p-6 flex items-start gap-4"
           >
-            {error}
+            <XCircle size={24} className="mt-0.5 shrink-0 text-[#ff5451]" />
+            <div className="min-w-0 flex-1">
+              <p className="font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#ffb3ad]">
+                {error}
+              </p>
+              <p className="mt-1 text-xs text-[#8e8e8e]">
+                No ingestion task matches ID <span className="font-mono">{id}</span>. It may
+                have expired, or the ID in the URL is incorrect.
+              </p>
+              <Link
+                href="/upload"
+                className="mt-3 inline-block rounded-sm bg-[#ff5451] px-4 py-2 text-xs font-bold text-[#08101f] transition-colors hover:bg-white"
+              >
+                Start a New Upload
+              </Link>
+            </div>
           </div>
         )}
 
         {/* Progress bar */}
-        {status && (
+        {!error && status && (
           <div
             role="progressbar"
             aria-valuenow={status.progress_pct}
@@ -130,6 +146,7 @@ export default function IngestStatusPage() {
         )}
 
         {/* Stepper */}
+        {!error && (
         <div className="ops-panel p-6 shadow-sm">
           <h3 className="mb-4 font-[family-name:var(--font-geist-sans)] text-sm font-semibold text-[#f1f1f1]">
             Pipeline Stages &amp; Extraction Nodes
@@ -137,8 +154,13 @@ export default function IngestStatusPage() {
           <div className="space-y-0">
             {stageOrder.map((stage, i) => {
               if (stage === "failed") return null;
-              const isDone = currentIdx > i && !isFailed;
-              const isCurrent = currentIdx === i && !isFailed;
+              // The terminal "complete" stage is its own destination, not a step
+              // in progress toward itself — once reached, render it as done
+              // (checkmark), never as current (spinner).
+              const isTerminalComplete =
+                stage === "complete" && status?.status === "complete";
+              const isDone = (currentIdx > i || isTerminalComplete) && !isFailed;
+              const isCurrent = currentIdx === i && !isFailed && !isTerminalComplete;
               const isFailedHere =
                 isFailed && stageLabels[stage] === status?.current_stage;
               return (
@@ -203,6 +225,7 @@ export default function IngestStatusPage() {
             })}
           </div>
         </div>
+        )}
 
         {/* Complete CTA */}
         {status?.status === "complete" && (
@@ -264,6 +287,7 @@ export default function IngestStatusPage() {
           </details>
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }

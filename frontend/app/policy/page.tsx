@@ -18,6 +18,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 
 export const dynamic = "force-dynamic";
 /* Legacy preview fixtures are intentionally disabled in the production path.
@@ -276,7 +277,7 @@ export default function PolicyDashboardPage() {
   const buckets = manifest?.buckets;
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
@@ -463,6 +464,7 @@ export default function PolicyDashboardPage() {
           </div>
         )}
       </main>
+      <ConsoleFooter />
     </div>
   );
 }

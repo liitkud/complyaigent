@@ -12,6 +12,7 @@ import ViolationsTable from "@/components/violations/ViolationsTable";
 import HITLApprovalCard from "@/components/hitl/HITLApprovalCard";
 import PolicyDragAndDrop from "@/components/policy/PolicyDragandDrop";
 import PipelineActivity from "@/components/pipeline/PipelineActivity";
+import ConsoleFooter from "@/components/ui/ConsoleFooter";
 import {
   ScanSearch,
   ShieldCheck,
@@ -77,7 +78,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-w-0 flex-1 overflow-y-auto bg-[#131313]">
+    <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-[#131313]">
       {/* Header */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#343434] bg-[#131313]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
         <div>
@@ -180,6 +181,7 @@ export default function DashboardPage() {
         {/* Policy Repository */}
         <PolicyDragAndDrop onIngestStart={setActiveTaskId} />
       </main>
+      <ConsoleFooter />
     </div>
   );
 }
